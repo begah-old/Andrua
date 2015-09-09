@@ -1,0 +1,25 @@
+Andrua cannot be compiled with the Visual Studio compiler as it uses C99
+
+Compiler : 
+	Add include path (-l) to GLFW3 include directory
+
+Linker : 
+
+Libraries needed to compile (-l) :
+	glfw3dll
+	glu32
+	opengl32
+	kernel32
+	user32
+	gdi32
+	winspool
+	shell32
+	ole32
+	oleaut32
+	uuid
+	comdlg32
+	advapi32
+
+Add GLFW's build to search path (-L)
+
+Use C99 (-std=c99)
