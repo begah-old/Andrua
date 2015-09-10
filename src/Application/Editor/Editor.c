@@ -29,7 +29,7 @@ static void Console_Update()
 	if(newLength > Log_ReadAt - 2)
 	{
 		fseek(Log, Log_ReadAt - 2, SEEK_SET);
-		char m[newLength - Log_ReadAt - 2];
+		char m[newLength - Log_ReadAt + 2];
 		fread(m, sizeof(char), newLength - Log_ReadAt, Log);
 		m[newLength - Log_ReadAt - 2] = '\0';
 

@@ -277,13 +277,15 @@ static void Image_Editor_Resize(struct Image_Editor *IE)
 	} else {
 		 Gui_Vertical_ScrollBar_Resize(IE->Image_Scroll, (float) IE->Editor_Dimensions.z / 10.0f * 8.5f + IE->Editor_Dimensions.x,
 				(float) IE->Editor_Dimensions.w / 10.0f * 5.5f + IE->Editor_Dimensions.y, IE->Editor_Dimensions.z / 20.0f, IE->Editor_Dimensions.w / 10.0f * 3.0f, 1, 100);
+
 		if(IE->Image_Tab_Index != -1)
 		{
-			struct Image_Tab *IT = ((struct Image_Tab *)IE->Image_Tab_List->size) + IE->Image_Tab_Index;
+			struct Image_Tab *IT = ((struct Image_Tab *)IE->Image_Tab_List->items) + IE->Image_Tab_Index;
 			float min = IT->Image_Edit->Width < IT->Image_Edit->Height ? IT->Image_Edit->Width : IT->Image_Edit->Height;
 			IE->Image_Scroll->BarValue = min / 100.0f;
 		}
 	}
+
 	return;
 	error:exit(1);
 }
@@ -372,6 +374,8 @@ struct Image_Editor *Image_Editor_Init(float x, float y, float width, float heig
 	IE->Editor_Dimensions.y = y;
 	IE->Editor_Dimensions.z = width;
 	IE->Editor_Dimensions.w = height;
+
+	IE->Image_Tab_Scroll = 0.0f;
 
 	IE->Image_Scroll = NULL;
 
@@ -532,10 +536,10 @@ static inline _Bool COMP_COLOR(struct Image_RawData *I, int x, int y, struct Vec
 }
 static inline void SET_COLOR(struct Image_RawData *I, int x, int y, struct Vector4f Col)
 {
-	I->Data[(x + y * I->Width) * 4] = Col.x;
-	I->Data[(x + y * I->Width) * 4 + 1] = Col.y;
-	I->Data[(x + y * I->Width) * 4 + 2] = Col.z;
-	I->Data[(x + y * I->Width) * 4 + 3] = Col.w;
+	I->Data[(x + y * I->Width) * 4] = (unsigned char)Col.x;
+	I->Data[(x + y * I->Width) * 4 + 1] = (unsigned char)Col.y;
+	I->Data[(x + y * I->Width) * 4 + 2] = (unsigned char)Col.z;
+	I->Data[(x + y * I->Width) * 4 + 3] = (unsigned char)Col.w;
 }
 
 static struct Image_RawData *BF_IT;
@@ -777,7 +781,7 @@ void Image_Editor_Header(struct Image_Editor *IE)
 
 	float FileTab_Width[IE->Image_Tab_List->size];
 	float AllWidth = 0;
-	float Next_FileTab = View_TranslateTo(IE->Image_Tab_Scroll, 640, Game_Width);
+	double Next_FileTab = View_TranslateTo(IE->Image_Tab_Scroll, 640, Game_Width);
 
 	for(int i = 0; i < IE->Image_Tab_List->size; i++)
 	{
@@ -800,7 +804,7 @@ void Image_Editor_Header(struct Image_Editor *IE)
 			IE->Image_Tab_Scroll = 0;
 		if(Next_FileTab + AllWidth < IE->Image_Tab.v3.x && IE->Image_Tab_Scroll < 0.0f)
 		{
-			float Temp = IE->Image_Tab.v3.x - (Next_FileTab + AllWidth);
+			double Temp = IE->Image_Tab.v3.x - (Next_FileTab + AllWidth);
 			IE->Image_Tab_Scroll += View_TranslateTo(Temp, Game_Width, 640);
 		}
 	}
@@ -891,7 +895,7 @@ static void Image_Render_OpenImage(struct Image_Editor *IE)
 				IE->Editor_Dimensions.y + IE->Editor_Dimensions.w / 20.0f * 10.0f, IE->Editor_Dimensions.z / 20.0f * 10.0f, IE->Editor_Dimensions.w / 20.0f, "Name : ", 15, 0, 0, IE->Editor_Dimensions.w / 20.0f, IE->Editor_Dimensions.z / 20.0f * 10.0f,
 				0.6f, 0.6f, 0.6f, 1.0f, 0.4f, 0.4f, 0.4f, 1.0f);
 		T->AcceptNumbers = T->AcceptLetters = T->AcceptDot = true;
-		T->Quad_takeMouse = Quad_Create(IE->Editor_Dimensions.x, IE->Editor_Dimensions.y, IE->Editor_Dimensions.x, IE->Editor_Dimensions.y + IE->Editor_Dimensions.w, IE->Editor_Dimensions.x + IE->Editor_Dimensions.z, IE->Editor_Dimensions.y + IE->Editor_Dimensions.w, IE->Editor_Dimensions.x + IE->Editor_Dimensions.z, IE->Editor_Dimensions.y);
+		T->Quad_takeMouse = Quad_Create(IE->Editor_Dimensions.x, IE->Keyboard_Show.v1.y, IE->Editor_Dimensions.x, IE->Editor_Dimensions.y + IE->Editor_Dimensions.w, IE->Editor_Dimensions.x + IE->Editor_Dimensions.z, IE->Editor_Dimensions.y + IE->Editor_Dimensions.w, IE->Editor_Dimensions.x + IE->Editor_Dimensions.z, IE->Keyboard_Show.v1.y);
 		vector_push_back(IE->TextBoxs, T);
 		free(T);
 	}
@@ -916,7 +920,7 @@ static void Image_Render_OpenImage(struct Image_Editor *IE)
 					IE->Editor_Dimensions.y + IE->Editor_Dimensions.w / 20.0f * 10.0f, IE->Editor_Dimensions.z / 20.0f * 10.0f, IE->Editor_Dimensions.w / 20.0f);
 			TextBox->TextMaxWidth = IE->Editor_Dimensions.z / 20.0f * 10.0f;
 			TextBox->TextHeight = IE->Editor_Dimensions.w / 20.0f;
-			TextBox->Quad_takeMouse = Quad_Create(IE->Editor_Dimensions.x, IE->Editor_Dimensions.y, IE->Editor_Dimensions.x, IE->Editor_Dimensions.y + IE->Editor_Dimensions.w, IE->Editor_Dimensions.x + IE->Editor_Dimensions.z, IE->Editor_Dimensions.y + IE->Editor_Dimensions.w, IE->Editor_Dimensions.x + IE->Editor_Dimensions.z, IE->Editor_Dimensions.y);
+			TextBox->Quad_takeMouse = Quad_Create(IE->Editor_Dimensions.x, IE->Keyboard_Show.v1.y, IE->Editor_Dimensions.x, IE->Editor_Dimensions.y + IE->Editor_Dimensions.w, IE->Editor_Dimensions.x + IE->Editor_Dimensions.z, IE->Editor_Dimensions.y + IE->Editor_Dimensions.w, IE->Editor_Dimensions.x + IE->Editor_Dimensions.z, IE->Keyboard_Show.v1.y);
 		}
 	}
 
@@ -1015,7 +1019,7 @@ static void Image_Render_NewImage(struct Image_Editor *IE)
 				IE->Editor_Dimensions.y + IE->Editor_Dimensions.w / 20.0f * 13.0f, IE->Editor_Dimensions.z / 20.0f * 10.0f, IE->Editor_Dimensions.w / 20.0f, "Name : ", 15, 0, 0, IE->Editor_Dimensions.w / 20.0f, IE->Editor_Dimensions.z / 20.0f * 10.0f,
 				0.6f, 0.6f, 0.6f, 1.0f, 0.4f, 0.4f, 0.4f, 1.0f);
 		T->AcceptNumbers = T->AcceptLetters = T->AcceptDot = true;
-		T->Quad_takeMouse = Quad_Create(IE->Editor_Dimensions.x, IE->Editor_Dimensions.y, IE->Editor_Dimensions.x, IE->Editor_Dimensions.y + IE->Editor_Dimensions.w, IE->Editor_Dimensions.x + IE->Editor_Dimensions.z, IE->Editor_Dimensions.y + IE->Editor_Dimensions.w, IE->Editor_Dimensions.x + IE->Editor_Dimensions.z, IE->Editor_Dimensions.y);
+		T->Quad_takeMouse = Quad_Create(IE->Editor_Dimensions.x, IE->Keyboard_Show.v1.y, IE->Editor_Dimensions.x, IE->Editor_Dimensions.y + IE->Editor_Dimensions.w, IE->Editor_Dimensions.x + IE->Editor_Dimensions.z, IE->Editor_Dimensions.y + IE->Editor_Dimensions.w, IE->Editor_Dimensions.x + IE->Editor_Dimensions.z, IE->Keyboard_Show.v1.y);
 		vector_push_back(IE->TextBoxs, T);
 		free(T);
 
@@ -1023,7 +1027,7 @@ static void Image_Render_NewImage(struct Image_Editor *IE)
 				IE->Editor_Dimensions.y + IE->Editor_Dimensions.w / 20.0f * 10.0f, IE->Editor_Dimensions.z / 20.0f * 8.0f, IE->Editor_Dimensions.w / 20.0f, "Width : ", 3, 0, 0, IE->Editor_Dimensions.w / 20.0f, IE->Editor_Dimensions.z / 20.0f * 8.0f,
 				0.6f, 0.6f, 0.6f, 1.0f, 0.4f, 0.4f, 0.4f, 1.0f);
 		T->AcceptNumbers = true;
-		T->Quad_takeMouse = Quad_Create(IE->Editor_Dimensions.x, IE->Editor_Dimensions.y, IE->Editor_Dimensions.x, IE->Editor_Dimensions.y + IE->Editor_Dimensions.w, IE->Editor_Dimensions.x + IE->Editor_Dimensions.z, IE->Editor_Dimensions.y + IE->Editor_Dimensions.w, IE->Editor_Dimensions.x + IE->Editor_Dimensions.z, IE->Editor_Dimensions.y);
+		T->Quad_takeMouse = Quad_Create(IE->Editor_Dimensions.x, IE->Keyboard_Show.v1.y, IE->Editor_Dimensions.x, IE->Editor_Dimensions.y + IE->Editor_Dimensions.w, IE->Editor_Dimensions.x + IE->Editor_Dimensions.z, IE->Editor_Dimensions.y + IE->Editor_Dimensions.w, IE->Editor_Dimensions.x + IE->Editor_Dimensions.z, IE->Keyboard_Show.v1.y);
 		vector_push_back(IE->TextBoxs, T);
 		free(T);
 
@@ -1031,7 +1035,7 @@ static void Image_Render_NewImage(struct Image_Editor *IE)
 				IE->Editor_Dimensions.y + IE->Editor_Dimensions.w / 20.0f * 10.0f, IE->Editor_Dimensions.z / 20.0f * 8.0f, IE->Editor_Dimensions.w / 20.0f, "Height : ", 3, 0, 0, IE->Editor_Dimensions.w / 20.0f, IE->Editor_Dimensions.z / 20.0f * 8.0f,
 				0.6f, 0.6f, 0.6f, 1.0f, 0.4f, 0.4f, 0.4f, 1.0f);
 		T->AcceptNumbers = true;
-		T->Quad_takeMouse = Quad_Create(IE->Editor_Dimensions.x, IE->Editor_Dimensions.y, IE->Editor_Dimensions.x, IE->Editor_Dimensions.y + IE->Editor_Dimensions.w, IE->Editor_Dimensions.x + IE->Editor_Dimensions.z, IE->Editor_Dimensions.y + IE->Editor_Dimensions.w, IE->Editor_Dimensions.x + IE->Editor_Dimensions.z, IE->Editor_Dimensions.y);
+		T->Quad_takeMouse = Quad_Create(IE->Editor_Dimensions.x, IE->Keyboard_Show.v1.y, IE->Editor_Dimensions.x, IE->Editor_Dimensions.y + IE->Editor_Dimensions.w, IE->Editor_Dimensions.x + IE->Editor_Dimensions.z, IE->Editor_Dimensions.y + IE->Editor_Dimensions.w, IE->Editor_Dimensions.x + IE->Editor_Dimensions.z, IE->Keyboard_Show.v1.y);
 		vector_push_back(IE->TextBoxs, T);
 		free(T);
 	}
@@ -1067,7 +1071,7 @@ static void Image_Render_NewImage(struct Image_Editor *IE)
 			TextBox[2].TextMaxWidth = IE->Editor_Dimensions.z / 20.0f * 8.0f;
 			TextBox[2].TextHeight = IE->Editor_Dimensions.w / 20.0f;
 
-			TextBox->Quad_takeMouse = TextBox[1].Quad_takeMouse = TextBox[2].Quad_takeMouse = Quad_Create(IE->Editor_Dimensions.x, IE->Editor_Dimensions.y, IE->Editor_Dimensions.x, IE->Editor_Dimensions.y + IE->Editor_Dimensions.w, IE->Editor_Dimensions.x + IE->Editor_Dimensions.z, IE->Editor_Dimensions.y + IE->Editor_Dimensions.w, IE->Editor_Dimensions.x + IE->Editor_Dimensions.z, IE->Editor_Dimensions.y);
+			TextBox->Quad_takeMouse = TextBox[1].Quad_takeMouse = TextBox[2].Quad_takeMouse = Quad_Create(IE->Editor_Dimensions.x, IE->Keyboard_Show.v1.y, IE->Editor_Dimensions.x, IE->Editor_Dimensions.y + IE->Editor_Dimensions.w, IE->Editor_Dimensions.x + IE->Editor_Dimensions.z, IE->Editor_Dimensions.y + IE->Editor_Dimensions.w, IE->Editor_Dimensions.x + IE->Editor_Dimensions.z, IE->Keyboard_Show.v1.y);
 		}
 	}
 

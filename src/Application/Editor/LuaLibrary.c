@@ -228,20 +228,21 @@ static int Lua_newButton(lua_State *L)
 
 	if(!Lua_Button_List)
 	{
-		Lua_Button_List = vector_new(sizeof(struct Gui_Button));
+		Lua_Button_List = vector_new(sizeof(struct Lua_Button));
 		Gui_Button_NextID = 0.0;
 	}
 
 	double x = lua_tonumber(L, -4), y = lua_tonumber(L, -3), width = lua_tonumber(L, -2), height = lua_tonumber(L, -1);
 	const char *str = lua_tostring(L, -5);
 
-	struct Lua_Button lg = { Gui_Button_NextID++, NULL };
+	struct Lua_Button lg = { Gui_Button_NextID, NULL };
 
 	lg.B = Gui_Button_Create(x + Lua_Window.x, y + Lua_Window.y, width, height, str, 0, 0, width, height, 0.6f, 0.6f, 0.6f, 1.0f, 0.4f, 0.4f, 0.4f, 1.0f);
 	lg.B->CenterText = true;
 	vector_push_back(Lua_Button_List, &lg);
 
 	lua_pushnumber(Lua_State, lg.ID);
+	Gui_Button_NextID++;
 	return 1;
 }
 
@@ -379,12 +380,6 @@ static int Lua_colorButtonText(lua_State *L)
 		return 0;
 	}
 
-	if(!Lua_Button_List)
-	{
-		Lua_Button_List = vector_new(sizeof(struct Gui_Button));
-		Gui_Button_NextID = 0.0;
-	}
-
 	double ID = lua_tonumber(L, -5);
 
 	if(ID < 0 || ID >= Gui_Button_NextID)
@@ -423,7 +418,6 @@ static int Lua_renderButton(lua_State *L)
 	if(!lua_isnumber(L, -1))
 	{
 		fprintf(Log, "Error rendering button, argument needs to be a number");
-		Lua_Close(NULL);
 		lua_pushboolean(Lua_State, false);
 		return 1;
 	}
@@ -433,7 +427,6 @@ static int Lua_renderButton(lua_State *L)
 	if(ID < 0 || ID >= Gui_Button_NextID)
 	{
 		fprintf(Log, "Error rendering button, argument needs to be a valid button");
-		Lua_Close(NULL);
 		lua_pushboolean(Lua_State, false);
 		return 1;
 	}
@@ -441,14 +434,15 @@ static int Lua_renderButton(lua_State *L)
 	struct Lua_Button *lb = Lua_Button_List->items;
 	struct Gui_Button *b = NULL;
 	for(int i = 0; i < Lua_Button_List->size; i++)
+	{
 		if(lb[i].ID == ID) {
 			b = lb[i].B;
 			break;
 		}
+	}
 	if(!b)
 	{
 		fprintf(Log, "Error rendering button, didn't find button");
-		Lua_Close(NULL);
 		lua_pushboolean(Lua_State, false);
 		return 1;
 	}
@@ -721,7 +715,7 @@ void Lua_closeLibrary()
 		struct Lua_Button *lb = Lua_Button_List->items;
 
 		for (int i = 0; i < Lua_Button_List->size; i++)
-			Gui_Button_Free(&lb[i].B);
+			Gui_Button_Free_Simple((lb + i)->B);
 
 		vector_delete(Lua_Button_List);
 		Lua_Button_List = NULL;

@@ -1,0 +1,41 @@
+COMPILING for Android using Android Studio 1.4 Preview 3
+
+put src files and Android/Lua_Editor.c to a new jni folder
+put Android/Java files under java folder
+replace the manifest by the Android/Manifesft
+copy all files under Assets/ to the folder assets/
+
+replace the Module:app build.gradle with : 
+
+apply plugin: 'com.android.model.application'
+
+model {
+    android {
+        compileSdkVersion = 19
+        buildToolsVersion = "23.0.0"
+
+        defaultConfig.with {
+            applicationId = "begah.editor.lua"
+            minSdkVersion.apiLevel = 10
+            targetSdkVersion.apiLevel = 19
+        }
+    }
+    /*
+     * native build settings
+     */
+    android.ndk {
+        CFlags += "-std=c99"
+        moduleName = "Lua_Editor"
+        ldLibs += "GLESv2"
+        ldLibs += "log"
+        ldLibs += "android"
+        ldLibs += "dl"
+        ldLibs += "z"
+    }
+    android.buildTypes {
+        release {
+            minifyEnabled = false
+            proguardFiles  += file('proguard-rules.txt')
+        }
+    }
+}
