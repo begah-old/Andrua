@@ -9,9 +9,10 @@
 
 #define STATE_MENU 0
 #define STATE_EDITOR 1
-#define STATE_PAINT 2
+#define STATE_SETTINGS 2
+#define STATE_PAINT 3
 
-_Bool Editor_Inited = false, Paint_Inited = false;
+_Bool Editor_Inited = false, Paint_Inited = false, Settings_Inited = false;
 
 /* Application State */
 int STATE = STATE_MENU;
@@ -48,15 +49,36 @@ void Application_Render()
 	static long SHOW_EXISTS_TIME = 0;
 
 	if(Mouse.justPressed)
+	{
+		Cancel_SwitchScreen = false;
 		Mouse_PressX = Mouse.x;
-	else if(Mouse.justReleased && Mouse.x - Mouse_PressX > Game_Width / 2.0f && STATE == STATE_EDITOR)
-	{
-		// Move to Image Editor
-		STATE = STATE_PAINT;
-	} else if(Mouse.justReleased && Mouse_PressX - Mouse.x > Game_Width / 2.0f && STATE == STATE_PAINT)
-	{
-		STATE = STATE_EDITOR;
 	}
+
+	// Switch between different screens
+	else if(Mouse.justReleased && Mouse.x - Mouse_PressX > Game_Width / 2.0f && !Cancel_SwitchScreen)
+	{
+		if(STATE == STATE_EDITOR)
+		{
+			// Move to Image Editor
+			STATE = STATE_SETTINGS;
+		} else if(STATE == STATE_SETTINGS)
+		{
+			// Move to Settings
+			STATE = STATE_PAINT;
+		}
+	} else if(Mouse.justReleased && Mouse_PressX - Mouse.x > Game_Width / 2.0f && !Cancel_SwitchScreen)
+	{
+		if(STATE == STATE_PAINT)
+		{
+			// Move to Settings
+			STATE = STATE_SETTINGS;
+		} else if(STATE == STATE_SETTINGS)
+		{
+			// Move to Code Editor
+			STATE = STATE_EDITOR;
+		}
+	}
+
 	if(STATE == STATE_MENU)
 	{
 		if(OnScreen_Keyboard && Button_New->Y == Game_Height / 10.0f * 4.0f)
@@ -110,6 +132,14 @@ void Application_Render()
 
 				/* Set state to Lua Editor */
 				STATE = STATE_EDITOR;
+
+				char *Path = FileExternal_GetFullPath("settings.le");
+				FILE *f = fopen(Path, "wb");
+				_Bool FFALSE = false;
+				fwrite(&FFALSE, sizeof(_Bool), 1, f); // false : Not chosen a file for permanent execution
+				fclose(f);
+				free(Path);
+				Project.Script_toExecute = NULL;
 			}
 		}
 
@@ -139,6 +169,31 @@ void Application_Render()
 				free(T);
 
 				STATE = STATE_EDITOR;
+
+				char *Path = FileExternal_GetFullPath("settings.le");
+				FILE *f = fopen(Path, "rb");
+				if(!f) {
+					f = fopen(Path, "wb");
+					_Bool FFALSE = false;
+					fwrite(&FFALSE, sizeof(_Bool), 1, f);
+					fclose(f);
+					f = fopen(Path, "rb");
+				}
+				_Bool FFALSE = false;
+				fread(&FFALSE, sizeof(_Bool), 1, f); // false : Not chosen a file for permanent execution
+
+				if(FFALSE)
+				{
+					int Length = 0;
+					fread(&Length, sizeof(int), 1, f);
+
+					Project.Script_toExecute = malloc(sizeof(char) * Length);
+					fread(Project.Script_toExecute, sizeof(char), Length, f);
+				} else
+					Project.Script_toExecute = NULL;
+
+				fclose(f);
+				free(Path);
 			}
 		}
 
@@ -192,7 +247,7 @@ void Application_Render()
 		Font_FixedRender(DefaultFontManager, "Keyboard", Keyboard_Show.v1.x, Keyboard_Show.v1.y, Keyboard_Show.v2.y - Keyboard_Show.v1.y, Keyboard_Show.v3.x - Keyboard_Show.v1.x, 1.0f, Vector4_Create(1.0f, 0.0f, 0.0f, 1.0f));
 	}
 	else if(STATE == STATE_EDITOR)
-	{
+	{ // Render Code Editor
 		if(!Editor_Inited)
 		{
 			Editor_Init();
@@ -200,8 +255,17 @@ void Application_Render()
 		}
 		Editor_Render();
 	}
+	else if(STATE == STATE_SETTINGS)
+	{ // Render Project Settings
+		if(!Settings_Inited)
+		{
+			Settings_Init();
+			Settings_Inited = true;
+		}
+		Settings_Render();
+	}
 	else if(STATE == STATE_PAINT)
-	{
+	{ // Render Image Editor
 		if(!Paint_Inited)
 		{
 			ImageEditor_Init();

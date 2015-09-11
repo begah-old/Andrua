@@ -849,6 +849,16 @@ void Image_Editor_Header(struct Image_Editor *IE)
 		Default_Shader.pushQuad(IE->Keyboard_Show, Vector4_Create(1.0f, 1.0f, 1.0f, 1.0f));
 
 	Font_FixedRender(DefaultFontManager, "Keyboard", IE->Keyboard_Show.v1.x, IE->Keyboard_Show.v1.y, IE->Keyboard_Show.v2.y - IE->Keyboard_Show.v1.y, IE->Keyboard_Show.v3.x - IE->Keyboard_Show.v1.x, 1.0f, Vector4_Create(1.0f, 0.0f, 0.0f, 1.0f));
+
+	/* On Mouse press, Application.c checks when mouse is released if it should change screen.
+	 * When user is drawing, we obviously don't want the screen to change.
+	 * So the user can only change screen when he pressed to the right of the painted image and then drag the mouse/finger to the left */
+	if(Mouse.justPressed && ((Mouse.x < IE->Image_Editor_View.v3.x )|( Mouse.y > IE->Image_Tab.v1.y))) {
+		if(IE->Image_Tab_Index == -1 && Mouse.y > IE->Image_Tab.v1.y)
+			Cancel_SwitchScreen = true; // Defined in Application.h
+		else if(IE->Image_Tab_Index != -1)
+			Cancel_SwitchScreen = true; // Defined in Application.h
+	}
 }
 
 static void Image_Render_OpenImage(struct Image_Editor *IE)

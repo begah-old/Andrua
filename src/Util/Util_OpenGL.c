@@ -7,7 +7,7 @@
 
 #include "Util.h"
 
-#define EXECUTABLE_NAME 10
+#define EXECUTABLE_NAME 6
 #define DEBUG 0
 
 #ifndef ANDROID

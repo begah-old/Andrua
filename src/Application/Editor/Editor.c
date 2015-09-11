@@ -22,6 +22,8 @@ _Bool Console_Minimized = false;
 _Bool Lua_hasInit = false, Lua_hasRender = false, Lua_hasClose = false, Lua_hasMouseInput = false;
 _Bool Lua_giveMouseX = false, Lua_giveMouseY = false, Lua_giveWidth = false, Lua_giveHeight = false;
 
+_Bool Lua_requestClose = false;
+
 static void Console_Update()
 {
 	int newLength = ftell(Log);
@@ -30,8 +32,8 @@ static void Console_Update()
 	{
 		fseek(Log, Log_ReadAt - 2, SEEK_SET);
 		char m[newLength - Log_ReadAt + 2];
-		fread(m, sizeof(char), newLength - Log_ReadAt, Log);
-		m[newLength - Log_ReadAt - 2] = '\0';
+		fread(m, sizeof(char), newLength - Log_ReadAt + 2, Log);
+		m[newLength - Log_ReadAt + 2] = '\0';
 
 		int Last = -1;
 		for (int i = 0; i < newLength - Log_ReadAt + 2; i++) {
@@ -61,6 +63,12 @@ int Lua_Close(lua_State *L)
 {
 	if(!Lua_State)
 		return 0;
+	if(L)
+	{
+		Lua_requestClose = true;
+		return 0;
+	}
+
 	App_UsingDisplay = false;
 
 	if(App_Force_FullScreen)
@@ -186,6 +194,8 @@ static void Lua_runScript(void *Data, const char *FileName)
 
     App_UsingDisplay = Lua_checkBooleanExistsAndTrue("useDisplay");
     App_Force_FullScreen = Lua_checkBooleanExistsAndTrue("useFullScreen");
+
+    Lua_requestClose = false;
 
     if(App_Force_FullScreen)
     {
@@ -326,6 +336,12 @@ void Editor_Render()
 				Lua_Close(NULL);
 				return;
 			}
+		}
+
+		if(Lua_requestClose)
+		{
+			Lua_Close(NULL);
+			goto Render_Code_Editor;
 		}
 
 		_Bool UseDisplay = App_UsingDisplay, FullScreen = App_Force_FullScreen;

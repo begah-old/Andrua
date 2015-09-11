@@ -15,16 +15,17 @@
 
 #define FILE_TAB_MAXWIDTH (LCE->Width / 4.0f)
 
+/* A structure define opened file you can edit */
 struct File_Tab_File
 {
-	char *FileName_Edit, *FileName_Orig;
+	char *FileName_Edit, *FileName_Orig; /* Two names, so you can edit the name of the file */
 
-	struct Lua_Code *Original, *Editing;
-	struct Vector2f Cursor_Pos;
+	struct Lua_Code *Original, *Editing; /* Used to check if a file has been changed, it is the original's backup ( when saving, Original is overwritten ) */
+	struct Vector2f Cursor_Pos; /* The position of the cursor x = character on in the line, y = line on */
 
-	GLfloat ScrollValue;
-	_Bool isTextSelected;
-	struct Vector4f Selecting_Data;
+	GLfloat ScrollValue; /* The vertical scroll of a file, it is file specific */
+	_Bool isTextSelected; /* Selected text is remembered even when switching to different files */
+	struct Vector4f Selecting_Data; /* The position of the selected text, x and z are the character on and y and w are the lines numbers */
 };
 
 static void Header_Button_Resize(struct Lua_Code_Editor *LCE)
@@ -32,16 +33,18 @@ static void Header_Button_Resize(struct Lua_Code_Editor *LCE)
 	LCE->Ligne_Num = Quad_Create(LCE->X, LCE->Y + LCE->Height / 20.0f, LCE->X,
 								 LCE->Y + LCE->Height / 10.0f * 9.0f, LCE->X + (LCE->Width / 10.0f),
 								 LCE->Y + LCE->Height / 10.0f * 9.0f, LCE->X + (LCE->Width / 10.0f),
-								 LCE->Y + LCE->Height / 20.0f);
+								 LCE->Y + LCE->Height / 20.0f); /* The space where the line numbers are displayed */
 	LCE->Ligne_Text = Quad_Create(LCE->X + (LCE->Width / 10.0f),
 								  LCE->Y + LCE->Height / 20.0f, LCE->X + (LCE->Width / 10.0f),
 								  LCE->Y + LCE->Height / 10.0f * 9.0f, LCE->X + (LCE->Width / 20.0f * 19.0f),
 								  LCE->Y + LCE->Height / 10.0f * 9.0f, LCE->X + (LCE->Width / 20.0f * 19.0f),
-								  LCE->Y + LCE->Height / 20.0f);
+								  LCE->Y + LCE->Height / 20.0f); /* The space where the text of the file is displayed */
 
+	/* File_Tab is the space where all the files are shown by name */
 	LCE->File_Tab = Quad_Create(LCE->X, LCE->Y + LCE->Height - (LCE->Height / 20.0f) * 2.0f, LCE->X, LCE->Y + LCE->Height - (LCE->Height / 20.0f),
 			LCE->X + LCE->Width, LCE->Y + LCE->Height - (LCE->Height / 20.0f), LCE->X + LCE->Width, LCE->Y + LCE->Height - (LCE->Height / 20.0f) * 2.0f);
 
+	/* Confirm closes and saves the current file */
 	LCE->Confirm = Quad_Create(LCE->X,
 							   LCE->File_Tab.v2.y, LCE->X,
 							   LCE->Y + LCE->Height, LCE->X + (LCE->Width / 10.0f),
@@ -88,11 +91,14 @@ static void Header_Button_Resize(struct Lua_Code_Editor *LCE)
 							 LCE->X + LCE->Width, LCE->Y + LCE->Height, LCE->X + LCE->Width,
 							 LCE->File_Tab.v2.y);
 
+	/* The space where the "Keyboard" button is */
 	LCE->Keyboard_Show = Quad_Create(LCE->X, LCE->Y, LCE->X, LCE->Ligne_Num.v1.y, LCE->Ligne_Num.v3.x, LCE->Ligne_Num.v1.y, LCE->Ligne_Num.v3.x, LCE->Y);
 
+	/* Height of a line in a file */
 	LCE->Ligne_Height = (LCE->Ligne_Text.v2.y - LCE->Ligne_Text.v1.y)
 						/ (float) LCE->LignesInWindow;
 
+	/* Height of a line in a file when Game_Height is 480 */
 	LCE->Default_Ligne_Height = ((LCE->Height / (float)Game_Height * 480.0f) / 20.0f * 17.0f) / (float) LCE->LignesInWindow;
 
 	char *MaxStringLength = malloc(sizeof(char) * (CODE_MAX_LENGTH + 1));
@@ -100,10 +106,12 @@ static void Header_Button_Resize(struct Lua_Code_Editor *LCE)
 		MaxStringLength[i] = 'W';
 	MaxStringLength[CODE_MAX_LENGTH] = '\0';
 
+	/* Max width of a line for Game_Height = 480 */
 	LCE->Ligne_Default_Width = Font_HeightLength(DefaultFontManager,
 												 MaxStringLength, LCE->Ligne_Height, 1.0f);
 	free(MaxStringLength);
 
+	/* Horizontal scroll bar used to show different parts of a line */
 	if(!LCE->ScrollBar)
 		LCE->ScrollBar = Gui_Horizontal_ScrollBar_Create(
 				LCE->Ligne_Text.v1.x, LCE->Y, LCE->X + (LCE->Width / 10.0f) * 9,
@@ -117,6 +125,7 @@ static void Header_Button_Resize(struct Lua_Code_Editor *LCE)
 										LCE->Height / 20, LCE->X + (LCE->Width / 20.0f) * 17.0f, LCE->Ligne_Default_Width + (LCE->Ligne_Text.v3.x - LCE->Ligne_Text.v1.x) / 35.0f);
 	}
 
+	/* Vertical scroll bar used to change the lines displayed */
 	if(!LCE->VScrollBar)
 	{
 		LCE->VScrollBar = Gui_Vertical_ScrollBar_Create(
@@ -136,6 +145,8 @@ static void Header_Button_Resize(struct Lua_Code_Editor *LCE)
 			Gui_Vertical_ScrollBar_Resize(LCE->VScrollBar, LCE->Ligne_Text.v3.x, LCE->Ligne_Text.v1.y, LCE->Width - LCE->Ligne_Text.v3.x,
 				LCE->Ligne_Text.v2.y - LCE->Ligne_Text.v1.y, LCE->Default_Ligne_Height * LCE->LignesInWindow, LCE->Default_Ligne_Height * LCE->LignesInWindow);
 	}
+
+	/* These structures are only allocated when the user is opening or creating a new file */
 	if(LCE->Button_Confirm)
 	{
 		Gui_Button_Resize(LCE->Button_Confirm, LCE->X + LCE->Width / 10.0f * 2.0f, LCE->Y + LCE->Height / 10.0f * 4.0f, LCE->Width / 10.0f * 2.0f, LCE->Height / 20.0f);
@@ -154,6 +165,7 @@ static void Header_Button_Resize(struct Lua_Code_Editor *LCE)
 		LCE->TextBox->TextMaxWidth = LCE->Width / 10.0f * 4.0f; LCE->TextBox->TextHeight = LCE->Height / 20.0f;
 	}
 
+	/* The Textbox where the user can change the file's name */
 	if(!LCE->TextBox_Name)
 	{
 		LCE->TextBox_Name = Gui_TextBox_Create(LCE->Width / 10.0f * 4.5f + LCE->X, LCE->Height / 20.0f * 19.0f + LCE->Y,
@@ -824,11 +836,17 @@ static _Bool Header_Render(struct Lua_Code_Editor *LCE)
 			LCE->STATE = STATE_CONFIRMCLOSEFILE;
 		}
 	}
-	else if (Mouse.justReleased && LCE->Launch_Hover && LCE->File_Tab_Index != -1)
+	else if (Mouse.justReleased && LCE->Launch_Hover)
 	{
-		struct File_Tab_File *FTF = ((struct File_Tab_File *)LCE->File_Tab_List->items) + LCE->File_Tab_Index;
-		if (LCE->Launch_Game)
-			LCE->Launch_Game(LCE->Data, FTF->FileName_Orig);
+		if(Project.Script_toExecute)
+		{
+			if(LCE->Launch_Game)
+				LCE->Launch_Game(LCE->Data, Project.Script_toExecute);
+		} else if(LCE->File_Tab_Index != -1) {
+			struct File_Tab_File *FTF = ((struct File_Tab_File *)LCE->File_Tab_List->items) + LCE->File_Tab_Index;
+			if (LCE->Launch_Game)
+				LCE->Launch_Game(LCE->Data, FTF->FileName_Orig);
+		}
 	}
 	else if (Mouse.justPressed && LCE->New_Hover)
 	{
@@ -1002,6 +1020,16 @@ static _Bool Header_Render(struct Lua_Code_Editor *LCE)
 		Default_Shader.pushQuad(LCE->Keyboard_Show, Vector4_Create(1.0f, 1.0f, 1.0f, 1.0f));
 
 	Font_FixedRender(DefaultFontManager, "Keyboard", LCE->Keyboard_Show.v1.x, LCE->Keyboard_Show.v1.y, LCE->Keyboard_Show.v2.y - LCE->Keyboard_Show.v1.y, LCE->Keyboard_Show.v3.x - LCE->Keyboard_Show.v1.x, 1.0f, Vector4_Create(1.0f, 0.0f, 0.0f, 1.0f));
+
+	/* When the user pressed mouse or touches screen, Application.c track the movement on release to see if the user wants to change screen.
+	 * To change screen in the Code Editor you need to press in the Ligne_Num space and drag, else the user doesn't want to change screen.
+	 * If user isn't currently displaying any file, he can switch screen also by pressing on the Ligne_Text space */
+	if(Mouse.justPressed && !Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), LCE->Ligne_Num)) {
+		if(LCE->File_Tab_Index == -1 && !Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), LCE->Ligne_Text))
+			Cancel_SwitchScreen = true; // Defined in Application.h
+		else if(LCE->File_Tab_Index != -1)
+			Cancel_SwitchScreen = true; // Defined in Application.h
+	}
 
 	return false;
 }

@@ -1,10 +1,10 @@
 /*
  ============================================================================
- Name        : Lua.c
+ Name        : Andrua.c
  Author      : 
  Version     :
  Copyright   : Your copyright notice
- Description : Hello World in C, Ansi-style
+ Description : Andrua, is a lua code editor and image editor with an integrated lua interpreter. Andrua is fully cross platform with Desktop and Android
  ============================================================================
  */
 
@@ -27,7 +27,7 @@ double Current_TimeFrame = 0;
 int main(void)
 {
 	struct Window *Window = NULL;
-	Window_Create("Lua Editor", 640, 480, 0, &Window);
+	Window_Create("Andrua", 640, 480, 0, &Window);
 
 	Util_Init(Window, error_callback, key_callback, character_callback,
 			mouse_position_callback, mouse_button_callback,
