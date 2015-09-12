@@ -30,7 +30,7 @@ void String_Add(char *String1, char *String2)
 	}
 }
 
-void String_Copy(char *String1, char *String2)
+void String_Copy(char *String1, const char *String2)
 {
 	int i = 0;
 	while (1)

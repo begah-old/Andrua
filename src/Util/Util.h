@@ -285,7 +285,7 @@ struct Gui_TextBox
 	float TextOffSetX, TextOffSetY, TextMaxWidth, TextHeight;
 	_Bool NotCentered;
 	GLint Original_Width, Original_Height;
-	struct Vector4f Color, HoverColor;
+	struct Vector4f Color, HoverColor, Font_Color;
 	char *Text, *Value; // Text is for use only by the textbox, Value is the text entered by the user ( it is overlapping with Text but only contains the text entered )
 
 	int ValueLength;
@@ -511,7 +511,7 @@ float Font_HeightLength_SLength(struct FontManager *Manager, int Length,
 
 /* Gui's functions */
 struct Gui_TextBox *Gui_TextBox_Create(float X, float Y, float Width,
-									   float Height, char *Name, GLint MaxTextLength, float TextOffsetX,
+									   float Height, const char *Name, GLint MaxTextLength, float TextOffsetX,
 									   float TextOffsetY, float TextHeight, float MaxTextWidth, float ColorR, float ColorG,
 									   float ColorB, float ColorA, float HoverColorR, float HoverColorG,
 									   float HoverColorB, float HoverColorA);
@@ -566,7 +566,7 @@ void Gui_Vertical_ScrollBar_Resize(struct Gui_Vertical_ScrollBar *ScrollBar, flo
 void Gui_Vertical_ScrollBar_Free(struct Gui_Vertical_ScrollBar **ScrollTab);
 
 void String_Add(char *String1, char *String2); // Concatenates two strings together, the first string must have space for the second
-void String_Copy(char *String1, char *String2); // Copy String2 to another String1
+void String_Copy(char *String1, const char *String2); // Copy String2 to another String1
 void String_Remove(char *String1, char *String2); // Remove String2 from String1
 
 int String_fulllength(char *String); // Full length counts \t as double

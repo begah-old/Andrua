@@ -9,8 +9,6 @@
 
 struct Lua_Code_Editor *Code_Editor;
 
-_Bool App_Force_FullScreen = false;
-
 FILE *Log, *Input;
 int Log_ReadAt = 2;
 
@@ -20,7 +18,7 @@ _Bool Console_Show = false;
 _Bool Console_Minimized = false;
 
 _Bool Lua_hasInit = false, Lua_hasRender = false, Lua_hasClose = false, Lua_hasMouseInput = false;
-_Bool Lua_giveMouseX = false, Lua_giveMouseY = false, Lua_giveWidth = false, Lua_giveHeight = false;
+_Bool Lua_giveMouseX = false, Lua_giveMouseY = false;
 
 _Bool Lua_requestClose = false;
 
@@ -71,9 +69,9 @@ int Lua_Close(lua_State *L)
 
 	App_UsingDisplay = false;
 
-	if(App_Force_FullScreen)
+	if(App_UseFullScreen)
 	{
-		App_Force_FullScreen = false;
+		App_UseFullScreen = false;
 		Console_Show = true;
 	}
 
@@ -185,6 +183,7 @@ static void Lua_runScript(void *Data, const char *FileName)
     Lua_hasRender = Lua_checkFunctionExists("render");
     Lua_hasClose = Lua_checkFunctionExists("close");
     Lua_hasMouseInput = Lua_checkFunctionExists("mouse_action");
+    Lua_hasResize = Lua_checkFunctionExists("resize");
 
     Lua_giveMouseX = Lua_checkNumberExists("mouse_x");
     Lua_giveMouseY = Lua_checkNumberExists("mouse_y");
@@ -193,11 +192,11 @@ static void Lua_runScript(void *Data, const char *FileName)
     Lua_giveHeight = Lua_checkNumberExists("Screen_Height");
 
     App_UsingDisplay = Lua_checkBooleanExistsAndTrue("useDisplay");
-    App_Force_FullScreen = Lua_checkBooleanExistsAndTrue("useFullScreen");
+    App_UseFullScreen = Lua_checkBooleanExistsAndTrue("useFullScreen");
 
     Lua_requestClose = false;
 
-    if(App_Force_FullScreen)
+    if(App_UseFullScreen)
     {
     	Lua_Window = Vector4_Create(0, 0, Game_Width, Game_Height);
     	Console_Show = false;
@@ -235,7 +234,7 @@ static void Lua_runScript(void *Data, const char *FileName)
 	if(OnScreen_Keyboard)
 		Engine_closeKeyboard();
 
-	if(!App_Force_FullScreen)
+	if(!App_UseFullScreen)
 	{
 		Console_Show = true;
 	}
@@ -304,6 +303,44 @@ void Editor_Render()
 			goto Render_Code_Editor;
 		}
 
+		_Bool Resize = false;
+		if(App_UseFullScreen)
+		{
+			if(OnScreen_Keyboard && !Lua_Window.y)
+			{
+				Lua_Window.x = 0;
+				Lua_Window.y = Game_Height / 20.0f * 9.0f;
+				Lua_Window.z = Game_Width;
+				Lua_Window.w = Game_Height / 20.0f * 11.0f;
+				Resize = true;
+			} else if(!OnScreen_Keyboard && Lua_Window.y)
+			{
+				Lua_Window.x = 0;
+				Lua_Window.y = 0;
+				Lua_Window.z = Game_Width;
+				Lua_Window.w = Game_Height;
+				Resize = true;
+			}
+		}
+		if(App_UsingDisplay)
+		{
+			if((((App_UseFullScreen)&&(OnScreen_Keyboard))|(!App_UseFullScreen)) && ((Lua_Window.z != Game_Width )|( Lua_Window.w != Game_Height / 20.0f * 11.0f)))
+			{
+				Lua_Window.x = 0;
+				Lua_Window.y = Game_Height / 20.0f * 9.0f;
+				Lua_Window.z = Game_Width;
+				Lua_Window.w = Game_Height / 20.0f * 11.0f;
+				Resize = true;
+			} else if(App_UseFullScreen && !OnScreen_Keyboard && ((Lua_Window.z != Game_Width)|(Lua_Window.w != Game_Height)))
+			{
+				Lua_Window.x = 0;
+				Lua_Window.y = 0;
+				Lua_Window.z = Game_Width;
+				Lua_Window.w = Game_Height;
+				Resize = true;
+			}
+		}
+
 		if (Lua_giveWidth) {
 			lua_pushnumber(Lua_State, Lua_Window.z);
 			lua_setglobal(Lua_State, "Screen_Width");
@@ -312,6 +349,18 @@ void Editor_Render()
 		if (Lua_giveHeight) {
 			lua_pushnumber(Lua_State, Lua_Window.w);
 			lua_setglobal(Lua_State, "Screen_Height");
+		}
+
+		if(Resize && Lua_hasResize)
+		{
+			lua_getglobal(Lua_State, "resize");
+
+			if (lua_pcall(Lua_State, 0, 0, 0) != 0) {
+				const char *Error = lua_tostring(Lua_State, -1);
+				fprintf(Log, "Error resize : %s", Error);
+				Lua_Close(NULL);
+				return;
+			}
 		}
 
 		if (Mouse.x >= Lua_Window.x && Mouse.x <= Lua_Window.x + Lua_Window.z
@@ -344,7 +393,7 @@ void Editor_Render()
 			goto Render_Code_Editor;
 		}
 
-		_Bool UseDisplay = App_UsingDisplay, FullScreen = App_Force_FullScreen;
+		_Bool UseDisplay = App_UsingDisplay, FullScreen = App_UseFullScreen;
 
 		if (FullScreen)
 			return;

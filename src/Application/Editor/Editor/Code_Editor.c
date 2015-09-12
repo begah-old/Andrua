@@ -1891,6 +1891,8 @@ static void Code_keyboardCopy(struct Lua_Code_Editor *LCE)
 
 	int Ligne_Num = EndY - StartY + 1;
 	char *String = malloc(sizeof(char) * (Ligne_Num * (CODE_MAX_LENGTH + 1)));
+	for(int i = 0; i < Ligne_Num * (CODE_MAX_LENGTH + 1); i++)
+		String[i] = '\0';
 
 	int String_On = 0;
 

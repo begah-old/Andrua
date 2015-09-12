@@ -8,7 +8,7 @@
 #include "Util.h"
 
 struct Gui_TextBox *Gui_TextBox_Create(float X, float Y, float Width,
-									   float Height, char *Name, GLint MaxTextLength, float TextOffsetX,
+									   float Height, const char *Name, GLint MaxTextLength, float TextOffsetX,
 									   float TextOffsetY, float TextHeight, float MaxTextWidth,
 									   float ColorR, float ColorG,
 									   float ColorB, float ColorA, float HoverColorR, float HoverColorG,
@@ -54,6 +54,8 @@ struct Gui_TextBox *Gui_TextBox_Create(float X, float Y, float Width,
 	TB->AcceptDot = TB->AcceptLetters = TB->AcceptNumbers = TB->AcceptSymbols =
 			false;
 
+	TB->Font_Color = COLOR_WHITE;
+
 	TB->Quad_takeMouse = Quad_Create(0, 0, 0, Game_Height, Game_Width, Game_Height, Game_Width, 0);
 
 	return TB;
@@ -91,14 +93,14 @@ void Gui_TextBox_Render(struct Gui_TextBox *TB) {
 						* Game_Height,
 				TB->TextHeight / (float) TB->Original_Height * Game_Height,
 				TB->TextMaxWidth / (float) TB->Original_Width * Game_Width,
-				1.0f, COLOR_WHITE);
+				1.0f, TB->Font_Color);
 	else
 		Font_HeightMaxRenderCA(DefaultFontManager, TB->Text, TB->X + TB->Width / 2.0f,
 				(TB->Y + TB->TextOffSetY) / (float) TB->Original_Height
 						* Game_Height,
 				TB->TextHeight / (float) TB->Original_Height * Game_Height,
 				TB->TextMaxWidth / (float) TB->Original_Width * Game_Width,
-				1.0f, COLOR_WHITE);
+				1.0f, TB->Font_Color);
 
 	Gui_TextBox_Check_Key(TB);
 }
