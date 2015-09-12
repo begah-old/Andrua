@@ -1,4 +1,4 @@
-package begah.editor.lua;
+package com.andrua;
 
 import android.content.ClipData;
 import android.content.Context;
@@ -15,7 +15,7 @@ import java.io.File;
  * Created by root on 8/5/15.
  */
 public class Native {
-    private static Lua_Editor Activity;
+    private static Andrua Activity;
     private static AssetManager AssetManager;
     public static Context Context;
 
@@ -27,7 +27,7 @@ public class Native {
     private static boolean JustScrolled, JustPressed, JustReleased, longPressed, backKey, releasedbackKey;
     private static float Scrolled_X, Scrolled_Y;
 
-    public static void SetActivity(Lua_Editor Activity2)
+    public static void SetActivity(Andrua Activity2)
     {
         Activity = Activity2;
         AssetManager = Activity.getResources().getAssets();
@@ -91,14 +91,14 @@ public class Native {
             System.exit(1);
         }
 
-        docsFolder = new File(Environment.getExternalStorageDirectory() + "/Documents/Lua Editor");
+        docsFolder = new File(Environment.getExternalStorageDirectory() + "/Documents/Andrua");
         if(!docsFolder.exists()) {
-            Log.d("Error", "Creating Lua Editor folder");
+            Log.d("Error", "Creating Andrua folder");
             isPresent = docsFolder.mkdir();
         }
         if(!isPresent)
         {
-            Log.d("Error", "Couldn't create Lua Editor folder");
+            Log.d("Error", "Couldn't create Andrua folder");
             System.exit(1);
         }
 
@@ -110,7 +110,7 @@ public class Native {
             Log.d("Java", "Normal error on app resumed : " + e.toString());
         }
 
-        NSetUp(W, H, AssetManager, Environment.getExternalStorageDirectory() + "/Documents/Lua Editor");
+        NSetUp(W, H, AssetManager, Environment.getExternalStorageDirectory() + "/Documents/Andrua");
     }
 
     public static void Render() {
@@ -198,7 +198,7 @@ public class Native {
         } else {
             try {
                 android.content.ClipboardManager clipboard = (android.content.ClipboardManager) Activity.getSystemService(Context.CLIPBOARD_SERVICE);
-                android.content.ClipData clip = android.content.ClipData.newPlainText("Lua Editor", string);
+                android.content.ClipData clip = android.content.ClipData.newPlainText("Andrua", string);
                 clipboard.setPrimaryClip(clip);
             } catch (Exception e)
             {
@@ -208,6 +208,6 @@ public class Native {
     }
 
     static {
-        System.loadLibrary("Lua_Editor");
+        System.loadLibrary("Andrua");
     }
 }

@@ -157,7 +157,7 @@ int Console_Render()
 
 		if(yy < Console->Ligne_Height)
 			continue;
-		if(y > Console->Height - Console->Ligne_Height)
+		if(y > Console->Height)
 			continue;
 		if(yy > Console->Height - Console->Ligne_Height)
 			yy = Console->Height - Console->Ligne_Height;
@@ -183,34 +183,28 @@ void Console_addLigne(char *Data)
 {
 	if(!Console)
 		return;
-	char *OData = Data;
-	for(int i = 0; i < String_length(Data); i++)
-		Data[i] = Character_isValid(Data[i]) ? Data[i] : '\0';
 
-	while(*Data)
-	{
+	int Num = 0;
+
+	struct String_Struct *SS = String_Split(Data, '\n', &Num);
+
+	int i = 0;
+	if(SS[0].String[0] == '\0') i = 1;
+	for(; i < Num; i++) {
+
 		Console->MaxWidth_Index++;
 
-		while(*Data && *Data != '\n')
-			Data++;
+		struct String_Struct SSS;
 
-		int TempLength = Data - OData;
-		if(!TempLength)
-			return;
+		SSS.String = SS[i].String;
 
-		struct String_Struct SS;
-		SS.String = malloc(sizeof(char) * (TempLength + 1));
-		for(int i = 0; i < TempLength; i++)
-		{
-			SS.String[i] = OData[i];
-		}
-		SS.String[TempLength] = '\0';
-
-		float WIDTH = Font_HeightLength(DefaultFontManager, SS.String, Console->Ligne_Height, 1.0f);
-		if(Console->ScrollBar->TotalValue < WIDTH)
-		{
-			Console->ScrollBar->TotalValue = WIDTH;
-			Console->MaxWidth_Index = 0;
+		if(SSS.String[0] != '\0') {
+			float WIDTH = Font_HeightLength(DefaultFontManager, SSS.String, Console->Ligne_Height, 1.0f);
+			if(Console->ScrollBar->TotalValue < WIDTH)
+			{
+				Console->ScrollBar->TotalValue = WIDTH;
+				Console->MaxWidth_Index = 0;
+			}
 		}
 
 		float HEIGHT = Console->Default_Ligne_Height * (Console->Lignes->size + 1);
@@ -219,38 +213,14 @@ void Console_addLigne(char *Data)
 
 		if(Console->Lignes->size == 200)
 		{
-			struct String_Struct *SSS = ((struct String_Struct *)Console->Lignes->items) + 200;
-			free(SSS->String);
+			struct String_Struct *SSSS = ((struct String_Struct *)Console->Lignes->items) + 199;
+			free(SSSS->String);
 			vector_erase(Console->Lignes, 199);
 		}
-		vector_insert(Console->Lignes, 0, &SS);
 
-		if(*Data)
-		{
-			Data++;
-			while(*Data == '\n')
-			{
-				Data++;
-
-				struct String_Struct SS;
-				SS.String = malloc(sizeof(char) * 1);
-				SS.String[0] = '\0';
-				vector_insert(Console->Lignes, 0, &SS);
-
-				float HEIGHT = Console->Default_Ligne_Height * (Console->Lignes->size + 1);
-				if(Console->VSrollBar->TotalValue < HEIGHT)
-					Console->VSrollBar->TotalValue = HEIGHT;
-
-				if(Console->Lignes->size == 200)
-				{
-					struct String_Struct *SSS = ((struct String_Struct *)Console->Lignes->items) + 200;
-					free(SSS->String);
-					vector_erase(Console->Lignes, 199);
-				}
-			}
-		}
-		OData = Data;
+		vector_insert(Console->Lignes, 0, &SSS);
 	}
+	free(SS);
 
 	if(Console->MaxWidth_Index >= 200)
 		Console->MaxWidth_Index = -1;

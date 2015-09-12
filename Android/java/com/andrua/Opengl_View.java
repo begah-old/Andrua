@@ -1,4 +1,4 @@
-package begah.editor.lua;
+package com.andrua;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;

@@ -1,19 +1,20 @@
-package begah.editor.lua;
+package com.andrua;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
-/**
- * Created by root on 8/5/15.
- */
-public class Lua_Editor extends Activity implements GestureDetector.OnGestureListener,
-        GestureDetector.OnDoubleTapListener {
+import com.andrua.Native;
+import com.andrua.Opengl_View;
 
+/**
+ * Created by root on 9/12/15.
+ */
+public class Andrua extends Activity implements GestureDetector.OnGestureListener,
+        GestureDetector.OnDoubleTapListener {
     private static final String DEBUG_TAG = "Gestures";
 
     private Opengl_View GL_View;

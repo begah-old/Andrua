@@ -28,7 +28,7 @@ static void Console_Update()
 {
 	int newLength = ftell(Log);
 
-	if(newLength > Log_ReadAt - 2)
+	if(newLength > Log_ReadAt - 1)
 	{
 		fseek(Log, Log_ReadAt - 2, SEEK_SET);
 		char m[newLength - Log_ReadAt + 2];

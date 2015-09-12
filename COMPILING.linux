@@ -1,0 +1,21 @@
+COMPILING for Linux ( Tested under Linux Mint )
+
+if GLFW3 hasn't been yet download and install it from : http://www.glfw.org/
+
+Andrua uses C99, enable it.
+Link with (-l) :
+	glfw3
+	rt
+	m
+	X11
+	pthread
+	Xrandr
+	Xinerama
+	Xxf86vm
+	Xcursor
+	GL
+	GLU
+	dl
+
+And add library search path (-L) :
+	"${workspace_loc:/${ProjName}}"

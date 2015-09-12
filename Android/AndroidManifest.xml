@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="begah.editor.lua"
+      package="com.andrua"
       android:versionCode="1"
       android:versionName="1.0">
 
@@ -14,8 +14,8 @@
 
         <uses-feature android:glEsVersion="0x00020000" android:required="true" />
 
-        <activity android:name=".Lua_Editor"
-            android:label="Lua Editor"
+        <activity android:name=".Andrua"
+            android:label="Andrua"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen">
             <intent-filter>

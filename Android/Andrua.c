@@ -11,7 +11,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     return JNI_VERSION_1_6;
 }
 
-void Java_begah_editor_lua_Native_NSetUp(JNIEnv* env, jobject thiz, jint Width, jint Height, jobject assetManager, jstring DocumentPath)
+void Java_com_andrua_Native_NSetUp(JNIEnv* env, jobject thiz, jint Width, jint Height, jobject assetManager, jstring DocumentPath)
 {
     Game_Width = (int)Width;
     Game_Height = (int)Height;
@@ -36,7 +36,7 @@ void Java_begah_editor_lua_Native_NSetUp(JNIEnv* env, jobject thiz, jint Width, 
     Application_Init();
 }
 
-void Java_begah_editor_lua_Native_NRender(JNIEnv* env, jobject thiz, jint FPS)
+void Java_com_andrua_Native_NRender(JNIEnv* env, jobject thiz, jint FPS)
 {
     Game_FPS = FPS;
     double DistanceX = Mouse.x - Mouse.prevX, DistanceY = Mouse.y - Mouse.prevY;
@@ -87,13 +87,13 @@ void Java_begah_editor_lua_Native_NRender(JNIEnv* env, jobject thiz, jint FPS)
     Mouse.prevY = Mouse.y;
 }
 
-void Java_begah_editor_lua_Native_Close(JNIEnv* env, jobject thiz)
+void Java_com_andrua_Native_Close(JNIEnv* env, jobject thiz)
 {
     Application_Free();
     Util_Free(&Window);
 }
 
-void Java_begah_editor_lua_Native_justScrolled(JNIEnv* env, jobject thiz, float x, float y)
+void Java_com_andrua_Native_justScrolled(JNIEnv* env, jobject thiz, float x, float y)
 {
     Mouse.justScrolled = true;
     Mouse.scrollX = x;
@@ -101,14 +101,14 @@ void Java_begah_editor_lua_Native_justScrolled(JNIEnv* env, jobject thiz, float 
     __android_log_print(ANDROID_LOG_ERROR, "Native", "Just Scrolled");
 }
 
-void Java_begah_editor_lua_Native_justPressed(JNIEnv* env, jobject thiz)
+void Java_com_andrua_Native_justPressed(JNIEnv* env, jobject thiz)
 {
     Mouse.justPressed = true;
     Mouse.isPressed = true;
     __android_log_print(ANDROID_LOG_ERROR, "Native", "Just Pressed");
 }
 
-void Java_begah_editor_lua_Native_justReleased(JNIEnv* env, jobject thiz)
+void Java_com_andrua_Native_justReleased(JNIEnv* env, jobject thiz)
 {
     if(Mouse.isLongedPressed) Mouse.justLongPressedReleased = true;
     Mouse.isLongedPressed = false;
@@ -134,7 +134,7 @@ void Java_begah_editor_lua_Native_justReleased(JNIEnv* env, jobject thiz)
     __android_log_print(ANDROID_LOG_ERROR, "Native", "Just released : %i", Mouse.justLongPressedReleased);
 }
 
-void Java_begah_editor_lua_Native_longPress(JNIEnv* env, jobject thiz)
+void Java_com_andrua_Native_longPress(JNIEnv* env, jobject thiz)
 {
     Mouse.isLongedPressed = true;
     Mouse.isPressed = true;
@@ -142,7 +142,7 @@ void Java_begah_editor_lua_Native_longPress(JNIEnv* env, jobject thiz)
     __android_log_print(ANDROID_LOG_ERROR, "Native", "Just long Pressed");
 }
 
-void Java_begah_editor_lua_Native_backKeyPress(JNIEnv* env, jobject thiz)
+void Java_com_andrua_Native_backKeyPress(JNIEnv* env, jobject thiz)
 {
     Keyboard.justPressed = true;
     Keyboard.Key.key = GLFW_KEY_ESCAPE;
@@ -151,7 +151,7 @@ void Java_begah_editor_lua_Native_backKeyPress(JNIEnv* env, jobject thiz)
     __android_log_print(ANDROID_LOG_ERROR, "Native", "back key Pressed");
 }
 
-void Java_begah_editor_lua_Native_backKeyReleased(JNIEnv* env, jobject thiz)
+void Java_com_andrua_Native_backKeyReleased(JNIEnv* env, jobject thiz)
 {
     Keyboard.justReleased = true;
     Keyboard.Key.key = GLFW_KEY_ESCAPE;
@@ -160,7 +160,7 @@ void Java_begah_editor_lua_Native_backKeyReleased(JNIEnv* env, jobject thiz)
     __android_log_print(ANDROID_LOG_ERROR, "Native", "back key Released");
 }
 
-void Java_begah_editor_lua_Native_updateFinger(JNIEnv* env, jobject thiz, float x, float y)
+void Java_com_andrua_Native_updateFinger(JNIEnv* env, jobject thiz, float x, float y)
 {
     Mouse.prevX = Mouse.x;
     Mouse.prevY = Mouse.y;
