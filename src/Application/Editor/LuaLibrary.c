@@ -1122,6 +1122,58 @@ static int Lua_getTextTextBox(lua_State *L)
 	return 1;
 }
 
+static int Lua_setTextTextBox(lua_State *L)
+{
+	if(!Lua_TextBox_List)
+	{
+		lua_pushstring(Lua_State, "0");
+		return 1;
+	}
+
+	if(!lua_isnumber(L, -2))
+	{
+		fprintf(Log, "Error textbox.set, argument 1 needs to be a number");
+		lua_pushstring(Lua_State, "0");
+		return 1;
+	}
+	if(!lua_isstring(L, -1))
+	{
+		fprintf(Log, "Error textbox.set, argument 2 needs to be a string");
+		lua_pushstring(Lua_State, "0");
+		return 1;
+	}
+
+	double ID = lua_tonumber(L, -2);
+
+	if(ID < 0 || ID >= Gui_TextBox_NextID)
+	{
+		fprintf(Log, "Error textbox.set, argument 1 needs to be a valid button");
+		lua_pushstring(Lua_State, "0");
+		return 1;
+	}
+
+	struct Lua_TextBox *lb = Lua_TextBox_List->items;
+	struct Gui_TextBox *b = NULL;
+	for(int i = 0; i < Lua_TextBox_List->size; i++)
+	{
+		if(lb[i].ID == ID) {
+			b = lb[i].B;
+			break;
+		}
+	}
+	if(!b)
+	{
+		fprintf(Log, "Error textbox.set, didn't find button");
+		lua_pushstring(Lua_State, "0");
+		return 1;
+	}
+
+	const char *Value = lua_tostring(L, -1);
+	memcpy(b->Value, Value, sizeof(char) * String_length(Value));
+
+	return 1;
+}
+
 static int Lua_freeTextBox(lua_State *L)
 {
 	if(!Lua_Texture_List) return 0;
@@ -1363,6 +1415,7 @@ void Lua_LoadLibrary(FILE *F)
 			{"render", Lua_renderTextBox},
 			{"resize", Lua_resizeTextBox},
 			{"text", Lua_getTextTextBox},
+			{"set", Lua_setTextTextBox},
 			{"free", Lua_freeTextBox},
 			{"letters", Lua_LettersTextBox},
 			{"numbers", Lua_NumbersTextBox},
