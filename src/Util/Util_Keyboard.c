@@ -70,8 +70,8 @@ void Engine_requestKeyboard(float X, float Y, float Width, float Height)
     char *Primary_L1 = "qwertyuiop", *Secondary_L1 = "1234567890";
     char *Primary_L11 = "1234567890", *Secondary_L11 = "!@#$%^&*()";
 
-    char *Primary_L2 = "asdfghjkl", *Secondary_L2 = "+*/_{}|\".";
-    char *Primary_L22 = "+-*/{}\\\"\'";
+    char *Primary_L2 = "asdfghjkl", *Secondary_L2 = "+*_[]{}\".";
+    char *Primary_L22 = "+-*/{}\\\"\'", *Secondary_L22 = "[].;?!^/|";
 
     char *Primary_L3 = "zxcvbnm", *Secondary_L3 = "<>:|\\&*";
     char *Primary_L33 = ",=<>;:`";
@@ -106,7 +106,7 @@ void Engine_requestKeyboard(float X, float Y, float Width, float Height)
 
     for(int i = 0; i < Length2; i++)
     {
-    	OnScreen_Keyboard->Keyboard_Keys[Length1 + i] = Keyboard_Key_Create(Track_X, SECOND_LINE_Y, Key_Width, Key_Height, Primary_L2[i], Secondary_L2[i], Primary_L22[i], -1);
+    	OnScreen_Keyboard->Keyboard_Keys[Length1 + i] = Keyboard_Key_Create(Track_X, SECOND_LINE_Y, Key_Width, Key_Height, Primary_L2[i], Secondary_L2[i], Primary_L22[i], Secondary_L22[i]);
         Track_X += Key_Width;
     }
 

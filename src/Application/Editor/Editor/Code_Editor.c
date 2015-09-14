@@ -2259,6 +2259,40 @@ static struct Vector2f Lua_Code_Addtext(struct Lua_Code_Editor *LCE,
 	return Vector2_Create(File->Cursor_Pos.x, File->Cursor_Pos.y);
 }
 
+static void Code_Editor_CenterCursor(struct Lua_Code_Editor *LCE, struct File_Tab_File *File)
+{
+	struct Lua_Code_Ligne *Code =
+			(struct Lua_Code_Ligne *) File->Editing->Code->items;
+	float Line_DefaultStart = LCE->Ligne_Text.v2.x + (LCE->Ligne_Text.v3.x - LCE->Ligne_Text.v1.x) / 35.0f - LCE->ScrollBar->BarX;
+	float Scroll =  File->ScrollValue / 480.0f * (float)Game_Height;
+
+	float X = Font_HeightMaxCharacterPosition(
+				DefaultFontManager, Code[(int)File->Cursor_Pos.y].Ligne,
+				Line_DefaultStart, LCE->Ligne_Height, LCE->Ligne_Default_Width,
+				(int)File->Cursor_Pos.x);
+	float Low_Y = LCE->Ligne_Text.v2.y - LCE->Ligne_Height - LCE->Ligne_Height * (int)File->Cursor_Pos.y
+			   - Scroll;
+	float High_Y = Low_Y + LCE->Ligne_Height;
+
+	/* If cursor is out of window, move the window to it */
+	if(X < LCE->Ligne_Text.v1.x)
+		LCE->ScrollBar->BarX -= LCE->Ligne_Text.v1.x - X;
+	if(X > LCE->Ligne_Text.v3.x)
+		LCE->ScrollBar->BarX += X - LCE->Ligne_Text.v3.x;
+
+	if (Low_Y < LCE->Ligne_Text.v1.y)
+	{
+		float delta = LCE->Ligne_Text.v1.y - Low_Y;
+		delta = delta / LCE->Height * 480.0f;
+		LCE->VScrollBar->BarY -= delta;
+	} else if(High_Y > LCE->Ligne_Text.v2.y)
+	{
+		float delta = High_Y - LCE->Ligne_Text.v2.y;
+		delta = delta / LCE->Height * 480.0f;
+		LCE->VScrollBar->BarY += delta;
+	}
+}
+
 static void Check_KeyPressed(struct Lua_Code_Editor *LCE)
 {
 	if (!Keyboard.justPressed || !LCE->WritingCode)
@@ -2306,6 +2340,7 @@ static void Check_KeyPressed(struct Lua_Code_Editor *LCE)
 			File->Cursor_Pos.x = Length;
 		else if (File->Cursor_Pos.x < 0)
 			File->Cursor_Pos.x = 0;
+		Code_Editor_CenterCursor(LCE, File);
 	}
 	else if (Keyboard.Key.key == GLFW_KEY_UP) // Up
 	{
@@ -2334,6 +2369,7 @@ static void Check_KeyPressed(struct Lua_Code_Editor *LCE)
 			File->Cursor_Pos.x = Length;
 		else if (File->Cursor_Pos.x < 0)
 			File->Cursor_Pos.x = 0;
+		Code_Editor_CenterCursor(LCE, File);
 	}
 	else if (Keyboard.Key.key == GLFW_KEY_RIGHT)
 	{ // Right
@@ -2344,9 +2380,7 @@ static void Check_KeyPressed(struct Lua_Code_Editor *LCE)
 
 		char *Text =
 				((struct Lua_Code_Ligne *) File->Editing->Code->items)[(int) File->Cursor_Pos.y].Ligne;
-		int TextLength = 0;
-		while (Text[TextLength])
-			TextLength++;
+		int TextLength = String_length(Text);
 
 		if (File->Cursor_Pos.x > TextLength)
 		{
@@ -2358,6 +2392,7 @@ static void Check_KeyPressed(struct Lua_Code_Editor *LCE)
 			else
 				File->Cursor_Pos.x--;
 		}
+		Code_Editor_CenterCursor(LCE, File);
 	}
 	else if (Keyboard.Key.key == GLFW_KEY_LEFT) // Left
 	{
@@ -2383,6 +2418,7 @@ static void Check_KeyPressed(struct Lua_Code_Editor *LCE)
 				File->Cursor_Pos.x = TextLength;
 			}
 		}
+		Code_Editor_CenterCursor(LCE, File);
 	}
 
 	else if (Keyboard.Key.key == GLFW_KEY_BACKSPACE)
