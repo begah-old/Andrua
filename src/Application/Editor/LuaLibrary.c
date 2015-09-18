@@ -45,7 +45,7 @@ static int Lua_CloseKeyboard(lua_State *L)
 
 // Texture Management
 double Texture_NextID = 0.0; // Keep track of available ID's
-struct Lua_Texture { double ID; GLuint TextID; }; // Structure to match a texture to and ID
+struct Lua_Texture { double ID; struct Image *TextID; }; // Structure to match a texture to and ID
 struct vector_t *Lua_Texture_List = NULL; // List of textures
 
 // Loads an image and add it to the lua list
@@ -66,7 +66,7 @@ static int Lua_loadImage(lua_State *L)
 	// If list isn't created, create it
 	if(!Lua_Texture_List) Lua_Texture_List = vector_new(sizeof(struct Lua_Texture));
 
-	GLuint Image = Image_LoadExternal(lua_tostring(L, -1));
+	struct Image *Image = Image_LoadExternal(lua_tostring(L, -1));
 	struct Lua_Texture tt = { Texture_NextID++, Image };
 	vector_push_back( Lua_Texture_List,  &tt);
 
@@ -108,7 +108,7 @@ static int Lua_drawImage(lua_State *L)
 	}
 
 	double TextureID = lua_tonumber(L, -1);
-	GLuint Texture = 0;
+	struct Image *Texture = NULL;
 
 	// Check if TextureID is in range
 	if(TextureID < 0.0 || TextureID > Texture_NextID)
@@ -158,7 +158,7 @@ static int Lua_drawImage(lua_State *L)
 		height -= delta;
 	}
 
-	Image_Shader.pushQuad(Quad_Create(x, y, x, y + height, x + width, y + height, x + width, y), Quad_Create(0, 0, 0, 1, 1, 1, 1, 0), Texture, Vector4_Create(0.0, 0.0, 0.0, 0.0));
+	Image_Shader.pushQuad(Quad_Create(x, y, x, y + height, x + width, y + height, x + width, y), Quad_Create(Texture->x, Texture->y, Texture->x, Texture->y2, Texture->x2, Texture->y2, Texture->x2, Texture->y), Texture->Image, Vector4_Create(0.0, 0.0, 0.0, 0.0));
 
 	return 0;
 }

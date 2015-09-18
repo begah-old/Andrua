@@ -7,7 +7,8 @@
 
 #include "Util.h"
 
-static int PackingAltas_Maxint(int a, int b)
+// Old, without remotion but faster
+/*static int PackingAltas_Maxint(int a, int b)
 {
 	return a > b ? a : b;
 }
@@ -202,4 +203,93 @@ int PackAtlas_Add(struct PackAtlas* atlas, int rw, int rh, int* rx, int* ry)
 	*ry = besty;
 
 	return 1;
+}*/
+
+static inline _Bool CheckPosition(struct PackAtlas *PA, int x, int y)
+{
+	return PA->Atlas[x + y * PA->width];
 }
+
+static _Bool CheckRectangle(struct PackAtlas *PA, int x, int y, int w, int h)
+{
+	for(int xx = 0; xx < w; xx++)
+		for(int yy = 0; yy < h; yy++)
+			if(CheckPosition(PA, xx + x, yy + y))
+				return false;
+	return true;
+}
+
+struct PackAtlas *PackAtlas_Init(int w, int h)
+{
+	struct PackAtlas *PA = malloc(sizeof(struct PackAtlas));
+
+	PA->width = w;
+	PA->height = h;
+
+	PA->Atlas = malloc(sizeof(_Bool) * w * h);
+	for(int i = 0; i < w * h; i++)
+		PA->Atlas[i] = false;
+
+	PA->startX = PA->startY = 0;
+	return PA;
+}
+
+int PackAtlas_Add(struct PackAtlas *PA, int w, int h, int *x, int *y)
+{
+	if (w > PA->width || h > PA->height)
+		return 0;
+
+	for(int xx = PA->startX; xx < PA->width - w; xx++)
+	{
+		for(int yy = PA->startY; yy < PA->height - h; yy++)
+		{
+			if(CheckRectangle(PA, xx, yy, w, h))
+			{
+				*x = xx;
+				*y = yy;
+				PA->startX = xx;
+				PA->startY = yy;
+				for(; yy < *y + h; yy++)
+					for(int xxx = 0; xxx < w; xxx++)
+						PA->Atlas[xx + xxx + yy * PA->width] = true;
+				return 1;
+			}
+		}
+	}
+	for(int xx = 0; xx < PA->startX - w; xx++)
+	{
+		for(int yy = 0; yy < PA->startY - h; yy++)
+		{
+			if(CheckRectangle(PA, xx, yy, w, h))
+			{
+				*x = xx;
+				*y = yy;
+				PA->startX = xx;
+				PA->startY = yy;
+				for(; yy < *y + h; yy++)
+					for(int xxx = 0; xxx < w; xxx++)
+						PA->Atlas[xx + xxx + yy * PA->width] = true;
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
+void PackAtlas_Remove(struct PackAtlas *PA, int x, int y, int w, int h)
+{
+	for(int xx = 0; xx < w; xx++)
+	{
+		for(int yy = 0; yy < h; yy++)
+		{
+			PA->Atlas[xx + x + (yy + y) * PA->width] = false;
+		}
+	}
+}
+
+void PackAtlas_Free(struct PackAtlas *Free)
+{
+	free(Free->Atlas);
+	free(Free);
+}
+

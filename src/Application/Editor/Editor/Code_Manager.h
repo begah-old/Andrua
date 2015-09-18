@@ -47,7 +47,7 @@ struct Lua_Code_Editor
 	struct Vector4f Hover_addColor;
 	struct Vector4f Color_ReservedWords, Color_Comments, Color_Text, Color_Constants; // Constants are either numbers of false/true
 
-	GLuint Confirm_Text, Save_Text, Close_Text, Launch_Text, New_Text, CopyPaste_Text, Load_Text, Delete_Text;
+	struct Image *Confirm_Text, *Save_Text, *Close_Text, *Launch_Text, *New_Text, *CopyPaste_Text, *Load_Text, *Delete_Text;
 	struct Quad Confirm, Save, Close, Launch, New, Load, Delete;
 	_Bool Confirm_Hover, Save_Hover, Close_Hover, Launch_Hover, New_Hover, Load_Hover, Delete_Hover;
 

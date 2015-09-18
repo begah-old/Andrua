@@ -36,18 +36,18 @@ struct Image_Editor
 
 	struct Quad Change_Confirm, Close, Delete, New;
 	_Bool Change_Confirm_Hover, Close_Hover, Delete_Hover, New_Hover;
-	GLuint Change_Confirm_Texture, Close_Texture, Delete_Texture, New_Texture;
+	struct Image *Change_Confirm_Texture, *Close_Texture, *Delete_Texture, *New_Texture;
 
 	struct Quad Image_Tab;
 
 	struct Quad Button_Pencil, Button_PickColor, Button_Fill, Button_PanView, Keyboard_Show;
-	GLuint Button_PencilTexture, Button_PickColorTexture, Button_FillTexture, Button_PanViewTexture;
+	struct Image *Button_PencilTexture, *Button_PickColorTexture, *Button_FillTexture, *Button_PanViewTexture;
 	_Bool Button_PencilHover, Button_PickColorHover, Button_PencilOn, Button_PickColorOn, Button_FillHover, Button_FillOn, Button_PanViewHover, Button_PanViewOn;
 	_Bool PanningView;
 	float PanningView_OX, PanningView_OY;
 
 	struct Quad Button_Save, Button_Load;
-	GLuint Button_SaveTexture, Button_LoadTexture;
+	struct Image *Button_SaveTexture, *Button_LoadTexture;
 	_Bool Button_SaveHover, Button_LoadHover;
 
 	struct Quad Image_Editor_View;

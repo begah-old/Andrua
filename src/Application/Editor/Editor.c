@@ -24,6 +24,8 @@ _Bool Lua_requestClose = false;
 
 static void Console_Update()
 {
+	if(!Console)
+		return;
 	int newLength = ftell(Log);
 
 	if(newLength > Log_ReadAt - 1)
@@ -92,6 +94,7 @@ int Lua_Close(lua_State *L)
     Lua_State = NULL;
 
     Console_Update();
+
     fclose(Log);
     fclose(Input);
 
@@ -283,7 +286,7 @@ void Editor_Render()
 	int Console_Message = 0;
 	if (Console_Show && !OnScreen_Keyboard) {
 		Console_Message = Console_Render();
-		if (Console_Message == 1) {\
+		if (Console_Message == 1) {
 			Console_Minimized = false;
 			Console_Show = false;
 			Lua_Close(NULL);

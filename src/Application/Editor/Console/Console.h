@@ -22,7 +22,7 @@ struct Lua_Console
 	struct Gui_Horizontal_ScrollBar *ScrollBar;
 	struct Gui_Vertical_ScrollBar *VSrollBar;
 
-	GLuint Close_Text;
+	struct Image *Close_Text;
 	struct Quad Close;
 
 	_Bool Minimized;

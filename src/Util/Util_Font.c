@@ -55,7 +55,7 @@ static void Font_AddTextureAtlas(struct Font *Font, FT_Face face, GLuint Width,
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	struct PackAtlas *Atlas = PackAtlas_Init(Width, Heigth, 256);
+	struct PackAtlas *Atlas = PackAtlas_Init(Width, Heigth);
 
 	for (GLubyte c = 0; c < 128; c++)
 	{
@@ -72,7 +72,7 @@ static void Font_AddTextureAtlas(struct Font *Font, FT_Face face, GLuint Width,
 			if (!PackAtlas_Add(Atlas, face->glyph->bitmap.width + 2,
 					face->glyph->bitmap.rows + 2, &x, &y))
 			{
-				Image_Free(Font->Texture);
+				Texture_Free(Font->Texture);
 				PackAtlas_Free(Atlas);
 				if (Width == 512 && Heigth == 512)
 					Font_AddTextureAtlas(Font, face, 1024, 512);
@@ -683,7 +683,7 @@ void Font_Free(struct FontManager *Manager, GLint ID)
 		return;
 	struct Font *Font = Manager->Fonts->items + Num;
 
-	Image_Free(Font->Texture);
+	Texture_Free(Font->Texture);
 
 	vector_erase(Manager->Fonts, Num);
 }
@@ -694,7 +694,7 @@ void Font_End(struct FontManager **Manager)
 		return;
 	struct Font *Font = (*Manager)->Fonts->items;
 	for (int Num = 0; Num < (*Manager)->Fonts->size; Num++)
-		Image_Free(Font[Num].Texture);
+		Texture_Free(Font[Num].Texture);
 
 	vector_delete((*Manager)->Fonts);
 

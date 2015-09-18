@@ -223,17 +223,18 @@ struct Quad
 };
 
 /* Packaging structure for the Packaging algorithm defined in Util_Atlas.c */
-struct PackAtlas_Node
-{
-	short x, y, width;
-};
-
 struct PackAtlas
 {
 	int width, height;
-	struct PackAtlas_Node* nodes;
-	int nnodes;
-	int cnodes;
+	int startX, startY;
+	_Bool *Atlas;
+};
+
+struct Image
+{
+	GLuint Image;
+	float x, y, x2, y2;
+	int pX, pY, pW, pH;
 };
 
 /* Simple structure to hold a string, used with vector_t */
@@ -441,10 +442,13 @@ GLuint Shader_loadCustom(char *VS, char *FS);
 GLuint Shader_LoadDefault();
 GLuint Shader_LoadImage();
 
+void Texture_Free(GLuint Image);
+
 /* platform independent way to load images */
-GLuint Image_LoadExternal(const char *Path); // Load Images using the Executable_Path
-GLuint Image_Load(const char *Path); // Load Images using Asset_Path
-void Image_Free(GLuint Image);
+GLuint ImageEngine_GetAtlas();
+struct Image *Image_LoadExternal(const char *Path); // Load Images using the Executable_Path
+struct Image *Image_Load(const char *Path); // Load Images using Asset_Path
+void Image_Free(struct Image *Image);
 
 /* Use if engine runs into an error, like unable to link shader */
 void Application__Error(const char *FunctionName);
@@ -453,11 +457,10 @@ void Application__Error(const char *FunctionName);
 #define Application_Error() Application__Error(__FUNCTION__)
 
 /* Packaging algorithm functions used in Util_Font.c to pack characters glyphs */
-struct PackAtlas* PackAtlas_Init(int w, int h, int nnodes);
+struct PackAtlas* PackAtlas_Init(int w, int h);
 void PackAtlas_Free(struct PackAtlas* atlas);
-void PackAtlas_Expand(struct PackAtlas* atlas, int w, int h);
-void PackAtlas_Reset(struct PackAtlas* atlas, int w, int h);
 int PackAtlas_Add(struct PackAtlas* atlas, int rw, int rh, int* rx, int* ry);
+void PackAtlas_Remove(struct PackAtlas *PA, int x, int y, int w, int h);
 
 /* Font engine specific functions */
 struct FontManager *Font_Init();
@@ -613,6 +616,9 @@ long int Time_elapsed(struct timeval Start, struct timeval End);
 
 void Dir_Create(char *name);
 _Bool Dir_Exists(char *name);
+
+int ImageEngine_Width();
+int ImageEngine_Height();
 
 /* Platform dependent implementation to access the platform's clipboard */
 void Clipboard_setWindow(struct Window *Windo);

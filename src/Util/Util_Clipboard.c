@@ -46,7 +46,7 @@ char *Clipboard_get()
 		isAttached = 1;
 	}
 
-	jclass clazz = (*env)->FindClass(env, "begah/editor/lua/Native");
+	jclass clazz = (*env)->FindClass(env, "com/andrua/Native");
 	jmethodID mid = (*env)->GetStaticMethodID(env, clazz, "getClipboard", "()Ljava/lang/String;");
 	jstring s = (jstring)(*env)->CallStaticObjectMethod(env, clazz, mid);
 
@@ -74,7 +74,7 @@ void Clipboard_set(const char *String)
 		isAttached = 1;
 	}
 
-	jclass clazz = (*env)->FindClass(env, "begah/editor/lua/Native");
+	jclass clazz = (*env)->FindClass(env, "com/andrua/Native");
 	jmethodID mid = (*env)->GetStaticMethodID(env, clazz, "setClipboard", "(Ljava/lang/String;)V");
 
 	jstring s = (*env)->NewStringUTF(env, String);

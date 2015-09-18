@@ -90,9 +90,9 @@ int Console_Render()
 		}
 
 		if(Close_Hover)
-			Image_Shader.pushQuad(Close2, Quad_Create(0, 0, 0, 1, 1, 1, 1, 0), Console->Close_Text, Vector4_Create(-0.3f, -0.3f, -0.3f, 0));
+			Image_Shader.pushQuad(Close2, Quad_Create(Console->Close_Text->x, Console->Close_Text->y2, Console->Close_Text->x, Console->Close_Text->y, Console->Close_Text->x2, Console->Close_Text->y, Console->Close_Text->x2, Console->Close_Text->y2), Console->Close_Text->Image, Vector4_Create(-0.3f, -0.3f, -0.3f, 0));
 		else
-			Image_Shader.pushQuad(Close2, Quad_Create(0, 0, 0, 1, 1, 1, 1, 0), Console->Close_Text, Vector4_Create(0, 0, 0, 0));
+			Image_Shader.pushQuad(Close2, Quad_Create(Console->Close_Text->x, Console->Close_Text->y2, Console->Close_Text->x, Console->Close_Text->y, Console->Close_Text->x2, Console->Close_Text->y, Console->Close_Text->x2, Console->Close_Text->y2), Console->Close_Text->Image, Vector4_Create(0, 0, 0, 0));
 
 		if(Minimize_Hover)
 			Default_Shader.pushQuad(Minimize_Render2, Vector4_Create(0.7f, 0, 0, 1));
@@ -112,9 +112,9 @@ int Console_Render()
 	}
 
 	if(Close_Hover)
-		Image_Shader.pushQuad(Console->Close, Quad_Create(0, 0, 0, 1, 1, 1, 1, 0), Console->Close_Text, Vector4_Create(-0.3f, -0.3f, -0.3f, 0));
+		Image_Shader.pushQuad(Console->Close, Quad_Create(Console->Close_Text->x, Console->Close_Text->y2, Console->Close_Text->x, Console->Close_Text->y, Console->Close_Text->x2, Console->Close_Text->y, Console->Close_Text->x2, Console->Close_Text->y2), Console->Close_Text->Image, Vector4_Create(-0.3f, -0.3f, -0.3f, 0));
 	else
-		Image_Shader.pushQuad(Console->Close, Quad_Create(0, 0, 0, 1, 1, 1, 1, 0), Console->Close_Text, Vector4_Create(0, 0, 0, 0));
+		Image_Shader.pushQuad(Console->Close, Quad_Create(Console->Close_Text->x, Console->Close_Text->y2, Console->Close_Text->x, Console->Close_Text->y, Console->Close_Text->x2, Console->Close_Text->y, Console->Close_Text->x2, Console->Close_Text->y2), Console->Close_Text->Image, Vector4_Create(0, 0, 0, 0));
 
 	if(Minimize_Hover)
 		Default_Shader.pushQuad(Console->Minimize_Render, Vector4_Create(0.7f, 0, 0, 1));

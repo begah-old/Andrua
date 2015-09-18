@@ -10,6 +10,8 @@
 #define EXECUTABLE_NAME 6
 #define DEBUG 0
 
+static void ImageEngine_SetUp();
+
 #ifndef ANDROID
 
 #ifndef _WIN32
@@ -118,6 +120,7 @@ void Util_Init(struct Window *Window,
 
 	Font_Use(DefaultFontManager, HighDefaultFont);
 
+	ImageEngine_SetUp();
 	Renderer_SetUp();
 
 	log_info("Done initializing util library");
@@ -158,6 +161,7 @@ void Util_Init(struct Window *Window)
 
 	Font_Use(DefaultFontManager, HighDefaultFont);
 
+	ImageEngine_SetUp();
 	Renderer_SetUp();
 
 	log_info("Done initializing util library");
@@ -319,13 +323,56 @@ void Window_Free(struct Window **Window)
 }
 #endif
 
-void Image_Free(GLuint Image)
+int ImageAtlas_Width = 4096, ImageAtlas_Height = 4096;
+struct PackAtlas *Image_Atlas = NULL;
+GLuint Image_OpenglID = 0;
+
+int ImageEngine_Width()
+{
+	return ImageAtlas_Width;
+}
+
+int ImageEngine_Height()
+{
+	return ImageAtlas_Height;
+}
+
+GLuint ImageEngine_GetAtlas()
+{
+	return Image_OpenglID;
+}
+
+static void ImageEngine_SetUp()
+{
+	Image_Atlas = PackAtlas_Init(ImageAtlas_Width, ImageAtlas_Height);
+
+	glGenTextures(1, &Image_OpenglID);
+	glBindTexture(GL_TEXTURE_2D, Image_OpenglID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ImageAtlas_Width, ImageAtlas_Height, 0, GL_RGBA,
+	GL_UNSIGNED_BYTE, NULL);
+
+	// Set texture options
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+}
+
+void Texture_Free(GLuint Image)
 {
 	glDeleteTextures(1, &Image);
 }
 
-GLuint Image_LoadExternal(const char *Path)
+void Image_Free(struct Image *Image)
 {
+	PackAtlas_Remove(Image_Atlas, Image->pX, Image->pY, Image->pW, Image->pH);
+
+	free(Image);
+}
+
+struct Image *Image_LoadExternal(const char *Path)
+{
+	struct Image *Image = malloc(sizeof(struct Image));
 
 	struct F_FileExternal *file = FileExternal_Open(Path);
 
@@ -334,23 +381,34 @@ GLuint Image_LoadExternal(const char *Path)
 	FileExternal_Read(buffer, sizeof(char), Length, file);
 	FileExternal_Close(file);
 
-	GLuint Texture = SOIL_load_OGL_texture_from_memory(buffer, Length, SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
-													   SOIL_FLAG_INVERT_Y | SOIL_FLAG_POWER_OF_TWO | SOIL_FLAG_MIPMAPS
-													   | SOIL_FLAG_GL_MIPMAPS | SOIL_FLAG_DDS_LOAD_DIRECT
-													   | SOIL_FLAG_PVR_LOAD_DIRECT | SOIL_FLAG_ETC1_LOAD_DIRECT
-													   | SOIL_FLAG_COMPRESS_TO_DXT);
-	if (Texture == 0)
+	int Channels;
+	unsigned char *Buffer = SOIL_load_image_from_memory(buffer, Length, &Image->pW, &Image->pH, &Channels, SOIL_LOAD_RGBA);
+	if (Buffer == NULL)
 	{
 		log_err("Error : %s failed to load in function Image_Load", Path);
 		Application_Error();
 	}
 
 	free(buffer);
-	return Texture;
+
+	PackAtlas_Add(Image_Atlas, Image->pW, Image->pH, &Image->pX, &Image->pY);
+
+	Image->x = Image->pX / (float)ImageAtlas_Width;
+	Image->y = Image->pY / (float)ImageAtlas_Height;
+	Image->x2 = Image->x + Image->pW / (float)ImageAtlas_Width;
+	Image->y2 = Image->y + Image->pH / (float)ImageAtlas_Height;
+	Image->Image = Image_OpenglID;
+
+	glBindTexture(GL_TEXTURE_2D, Image_OpenglID);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, Image->pX, Image->pY, Image->pW, Image->pH, GL_RGBA, GL_UNSIGNED_BYTE,
+			Buffer);
+	free(Buffer);
+	return Image;
 }
 
-GLuint Image_Load(const char *Path)
+struct Image *Image_Load(const char *Path)
 {
+	struct Image *Image = malloc(sizeof(struct Image));
 
 	struct F_FileInternal *file = FileInternal_Open(Path);
 
@@ -359,19 +417,30 @@ GLuint Image_Load(const char *Path)
 	FileInternal_Read(buffer, sizeof(char), Length, file);
 	FileInternal_Close(file);
 
-	GLuint Texture = SOIL_load_OGL_texture_from_memory(buffer, Length, SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID,
-													   SOIL_FLAG_INVERT_Y | SOIL_FLAG_POWER_OF_TWO | SOIL_FLAG_MIPMAPS
-													   | SOIL_FLAG_GL_MIPMAPS | SOIL_FLAG_DDS_LOAD_DIRECT
-													   | SOIL_FLAG_PVR_LOAD_DIRECT | SOIL_FLAG_ETC1_LOAD_DIRECT
-													   | SOIL_FLAG_COMPRESS_TO_DXT);
-	if (Texture == 0)
+	int Channels;
+	unsigned char *Buffer = SOIL_load_image_from_memory(buffer, Length, &Image->pW, &Image->pH, &Channels, SOIL_LOAD_RGBA);
+	if (Buffer == NULL)
 	{
 		log_err("Error : %s failed to load in function Image_Load", Path);
 		Application_Error();
 	}
 
 	free(buffer);
-	return Texture;
+
+	PackAtlas_Add(Image_Atlas, Image->pW, Image->pH, &Image->pX, &Image->pY);
+
+
+	Image->x = Image->pX / (float)ImageAtlas_Width;
+	Image->y = Image->pY / (float)ImageAtlas_Height;
+	Image->x2 = Image->x + Image->pW / (float)ImageAtlas_Width;
+	Image->y2 = Image->y + Image->pH / (float)ImageAtlas_Height;
+	Image->Image = Image_OpenglID;
+
+	glBindTexture(GL_TEXTURE_2D, Image_OpenglID);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, Image->pX, Image->pY, Image->pW, Image->pH, GL_RGBA, GL_UNSIGNED_BYTE,
+			Buffer);
+	free(Buffer);
+	return Image;
 }
 
 void Application__Error(const char *FunctionName)

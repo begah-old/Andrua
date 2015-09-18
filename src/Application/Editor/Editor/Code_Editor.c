@@ -874,53 +874,53 @@ static _Bool Header_Render(struct Lua_Code_Editor *LCE)
 	}
 
 	if (LCE->Confirm_Hover)
-		Image_Shader.pushQuad(LCE->Confirm, Quad_Create(0, 0, 0, 1, 1, 1, 1, 0),
-							  LCE->Confirm_Text, LCE->Hover_addColor);
+		Image_Shader.pushQuad(LCE->Confirm, Quad_Create(LCE->Confirm_Text->x, LCE->Confirm_Text->y2, LCE->Confirm_Text->x, LCE->Confirm_Text->y, LCE->Confirm_Text->x2, LCE->Confirm_Text->y, LCE->Confirm_Text->x2, LCE->Confirm_Text->y2),
+							  LCE->Confirm_Text->Image, LCE->Hover_addColor);
 	else
-		Image_Shader.pushQuad(LCE->Confirm, Quad_Create(0, 0, 0, 1, 1, 1, 1, 0),
-							  LCE->Confirm_Text, Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
+		Image_Shader.pushQuad(LCE->Confirm, Quad_Create(LCE->Confirm_Text->x, LCE->Confirm_Text->y2, LCE->Confirm_Text->x, LCE->Confirm_Text->y, LCE->Confirm_Text->x2, LCE->Confirm_Text->y, LCE->Confirm_Text->x2, LCE->Confirm_Text->y2),
+							  LCE->Confirm_Text->Image, Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
 
 	if (LCE->Save_Hover)
-		Image_Shader.pushQuad(LCE->Save, Quad_Create(0, 0, 0, 1, 1, 1, 1, 0),
-							  LCE->Save_Text, LCE->Hover_addColor);
+		Image_Shader.pushQuad(LCE->Save, Quad_Create(LCE->Save_Text->x, LCE->Save_Text->y2, LCE->Save_Text->x, LCE->Save_Text->y, LCE->Save_Text->x2, LCE->Save_Text->y, LCE->Save_Text->x2, LCE->Save_Text->y2),
+							  LCE->Save_Text->Image, LCE->Hover_addColor);
 	else
-		Image_Shader.pushQuad(LCE->Save, Quad_Create(0, 0, 0, 1, 1, 1, 1, 0),
-							  LCE->Save_Text, Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
+		Image_Shader.pushQuad(LCE->Save, Quad_Create(LCE->Save_Text->x, LCE->Save_Text->y2, LCE->Save_Text->x, LCE->Save_Text->y, LCE->Save_Text->x2, LCE->Save_Text->y, LCE->Save_Text->x2, LCE->Save_Text->y2),
+							  LCE->Save_Text->Image, Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
 
 	if (LCE->Close_Hover)
-		Image_Shader.pushQuad(LCE->Close, Quad_Create(0, 0, 0, 1, 1, 1, 1, 0),
-							  LCE->Close_Text, LCE->Hover_addColor);
+		Image_Shader.pushQuad(LCE->Close, Quad_Create(LCE->Close_Text->x, LCE->Close_Text->y2, LCE->Close_Text->x, LCE->Close_Text->y, LCE->Close_Text->x2, LCE->Close_Text->y, LCE->Close_Text->x2, LCE->Close_Text->y2),
+							  LCE->Close_Text->Image, LCE->Hover_addColor);
 	else
-		Image_Shader.pushQuad(LCE->Close, Quad_Create(0, 0, 0, 1, 1, 1, 1, 0),
-							  LCE->Close_Text, Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
+		Image_Shader.pushQuad(LCE->Close, Quad_Create(LCE->Close_Text->x, LCE->Close_Text->y2, LCE->Close_Text->x, LCE->Close_Text->y, LCE->Close_Text->x2, LCE->Close_Text->y, LCE->Close_Text->x2, LCE->Close_Text->y2),
+							  LCE->Close_Text->Image, Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
 
 	if (LCE->Launch_Hover)
-		Image_Shader.pushQuad(LCE->Launch, Quad_Create(0, 0, 0, 1, 1, 1, 1, 0),
-							  LCE->Launch_Text, LCE->Hover_addColor);
+		Image_Shader.pushQuad(LCE->Launch, Quad_Create(LCE->Launch_Text->x, LCE->Launch_Text->y2, LCE->Launch_Text->x, LCE->Launch_Text->y, LCE->Launch_Text->x2, LCE->Launch_Text->y, LCE->Launch_Text->x2, LCE->Launch_Text->y2),
+							  LCE->Launch_Text->Image, LCE->Hover_addColor);
 	else
-		Image_Shader.pushQuad(LCE->Launch, Quad_Create(0, 0, 0, 1, 1, 1, 1, 0),
-							  LCE->Launch_Text, Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
+		Image_Shader.pushQuad(LCE->Launch, Quad_Create(LCE->Launch_Text->x, LCE->Launch_Text->y2, LCE->Launch_Text->x, LCE->Launch_Text->y, LCE->Launch_Text->x2, LCE->Launch_Text->y, LCE->Launch_Text->x2, LCE->Launch_Text->y2),
+							  LCE->Launch_Text->Image, Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
 
 	if (LCE->New_Hover)
-		Image_Shader.pushQuad(LCE->New, Quad_Create(0, 0, 0, 1, 1, 1, 1, 0),
-							  LCE->New_Text, LCE->Hover_addColor);
+		Image_Shader.pushQuad(LCE->New, Quad_Create(LCE->New_Text->x, LCE->New_Text->y2, LCE->New_Text->x, LCE->New_Text->y, LCE->New_Text->x2, LCE->New_Text->y, LCE->New_Text->x2, LCE->New_Text->y2),
+							  LCE->New_Text->Image, LCE->Hover_addColor);
 	else
-		Image_Shader.pushQuad(LCE->New, Quad_Create(0, 0, 0, 1, 1, 1, 1, 0),
-							  LCE->New_Text, Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
+		Image_Shader.pushQuad(LCE->New, Quad_Create(LCE->New_Text->x, LCE->New_Text->y2, LCE->New_Text->x, LCE->New_Text->y, LCE->New_Text->x2, LCE->New_Text->y, LCE->New_Text->x2, LCE->New_Text->y2),
+							  LCE->New_Text->Image, Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
 
 	if(LCE->Delete_Hover)
-		Image_Shader.pushQuad(LCE->Delete, Quad_Create(0, 0, 0, 1, 1, 1, 1, 0),
-							  LCE->Delete_Text, LCE->Hover_addColor);
+		Image_Shader.pushQuad(LCE->Delete, Quad_Create(LCE->Delete_Text->x, LCE->Delete_Text->y2, LCE->Delete_Text->x, LCE->Delete_Text->y, LCE->Delete_Text->x2, LCE->Delete_Text->y, LCE->Delete_Text->x2, LCE->Delete_Text->y2),
+							  LCE->Delete_Text->Image, LCE->Hover_addColor);
 	else
-		Image_Shader.pushQuad(LCE->Delete, Quad_Create(0, 0, 0, 1, 1, 1, 1, 0),
-							  LCE->Delete_Text, Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
+		Image_Shader.pushQuad(LCE->Delete, Quad_Create(LCE->Delete_Text->x, LCE->Delete_Text->y2, LCE->Delete_Text->x, LCE->Delete_Text->y, LCE->Delete_Text->x2, LCE->Delete_Text->y, LCE->Delete_Text->x2, LCE->Delete_Text->y2),
+							  LCE->Delete_Text->Image, Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
 
 	if(LCE->Load_Hover)
-		Image_Shader.pushQuad(LCE->Load, Quad_Create(0, 0, 0, 1, 1, 1, 1, 0),
-							  LCE->Load_Text, LCE->Hover_addColor);
+		Image_Shader.pushQuad(LCE->Load, Quad_Create(LCE->Load_Text->x, LCE->Load_Text->y2, LCE->Load_Text->x, LCE->Load_Text->y, LCE->Load_Text->x2, LCE->Load_Text->y, LCE->Load_Text->x2, LCE->Load_Text->y2),
+							  LCE->Load_Text->Image, LCE->Hover_addColor);
 	else
-		Image_Shader.pushQuad(LCE->Load, Quad_Create(0, 0, 0, 1, 1, 1, 1, 0),
-							  LCE->Load_Text, Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
+		Image_Shader.pushQuad(LCE->Load, Quad_Create(LCE->Load_Text->x, LCE->Load_Text->y2, LCE->Load_Text->x, LCE->Load_Text->y, LCE->Load_Text->x2, LCE->Load_Text->y, LCE->Load_Text->x2, LCE->Load_Text->y2),
+							  LCE->Load_Text->Image, Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
 
 	Default_Shader.pushQuad(LCE->File_Tab, LCE->File_Tab_Color);
 
@@ -1451,14 +1451,14 @@ static void Lignes_Render(struct Lua_Code_Editor *LCE)
 		}
 
 		if(Copy_Hover)
-			Image_Shader.pushQuad(Quad_Create(Cursor_PositionX, Cursor_PositionY, Cursor_PositionX, Cursor_PositionY + LCE->Ligne_Height, Cursor_PositionX + Game_Width / 10.0f / 2.0f, Cursor_PositionY + LCE->Ligne_Height, Cursor_PositionX + Game_Width / 10.0f / 2.0f, Cursor_PositionY), Quad_Create(0, 0, 0, 1, 0.5, 1, 0.5, 0), LCE->CopyPaste_Text, Vector4_Create(-0.2f, -0.2f, -0.2f, 1));
+			Image_Shader.pushQuad(Quad_Create(Cursor_PositionX, Cursor_PositionY, Cursor_PositionX, Cursor_PositionY + LCE->Ligne_Height, Cursor_PositionX + Game_Width / 10.0f / 2.0f, Cursor_PositionY + LCE->Ligne_Height, Cursor_PositionX + Game_Width / 10.0f / 2.0f, Cursor_PositionY), Quad_Create(LCE->CopyPaste_Text->x, LCE->CopyPaste_Text->y2, LCE->CopyPaste_Text->x, LCE->CopyPaste_Text->y2, LCE->CopyPaste_Text->x + (LCE->CopyPaste_Text->x2 - LCE->CopyPaste_Text->x)/2.0f, LCE->CopyPaste_Text->y, LCE->CopyPaste_Text->x + (LCE->CopyPaste_Text->x2 - LCE->CopyPaste_Text->x)/2.0f, LCE->CopyPaste_Text->y2), LCE->CopyPaste_Text->Image, Vector4_Create(-0.2f, -0.2f, -0.2f, 1));
 		else
-			Image_Shader.pushQuad(Quad_Create(Cursor_PositionX, Cursor_PositionY, Cursor_PositionX, Cursor_PositionY + LCE->Ligne_Height, Cursor_PositionX + Game_Width / 10.0f / 2.0f, Cursor_PositionY + LCE->Ligne_Height, Cursor_PositionX + Game_Width / 10.0f / 2.0f, Cursor_PositionY), Quad_Create(0, 0, 0, 1, 0.5, 1, 0.5, 0), LCE->CopyPaste_Text, Vector4_Create(0.0f, 0.0f, 0.0f, 1));
+			Image_Shader.pushQuad(Quad_Create(Cursor_PositionX, Cursor_PositionY, Cursor_PositionX, Cursor_PositionY + LCE->Ligne_Height, Cursor_PositionX + Game_Width / 10.0f / 2.0f, Cursor_PositionY + LCE->Ligne_Height, Cursor_PositionX + Game_Width / 10.0f / 2.0f, Cursor_PositionY), Quad_Create(LCE->CopyPaste_Text->x, LCE->CopyPaste_Text->y2, LCE->CopyPaste_Text->x, LCE->CopyPaste_Text->y2, LCE->CopyPaste_Text->x + (LCE->CopyPaste_Text->x2 - LCE->CopyPaste_Text->x)/2.0f, LCE->CopyPaste_Text->y, LCE->CopyPaste_Text->x + (LCE->CopyPaste_Text->x2 - LCE->CopyPaste_Text->x)/2.0f, LCE->CopyPaste_Text->y2), LCE->CopyPaste_Text->Image, Vector4_Create(0.0f, 0.0f, 0.0f, 1));
 
 		if(Paste_Hover)
-			Image_Shader.pushQuad(Quad_Create(Cursor_PositionX + Game_Width / 10.0f / 2.0f, Cursor_PositionY, Cursor_PositionX + Game_Width / 10.0f / 2.0f, Cursor_PositionY + LCE->Ligne_Height, Cursor_PositionX + Game_Width / 10.0f, Cursor_PositionY + LCE->Ligne_Height, Cursor_PositionX + Game_Width / 10.0f, Cursor_PositionY), Quad_Create(0.5, 0, 0.5, 1, 1, 1, 1, 0), LCE->CopyPaste_Text, Vector4_Create(-0.2f, -0.2f, -0.2f, 1));
+			Image_Shader.pushQuad(Quad_Create(Cursor_PositionX + Game_Width / 10.0f / 2.0f, Cursor_PositionY, Cursor_PositionX + Game_Width / 10.0f / 2.0f, Cursor_PositionY + LCE->Ligne_Height, Cursor_PositionX + Game_Width / 10.0f, Cursor_PositionY + LCE->Ligne_Height, Cursor_PositionX + Game_Width / 10.0f, Cursor_PositionY), Quad_Create(LCE->CopyPaste_Text->x + (LCE->CopyPaste_Text->x2 - LCE->CopyPaste_Text->x)/2.0f, LCE->CopyPaste_Text->y2, LCE->CopyPaste_Text->x + (LCE->CopyPaste_Text->x2 - LCE->CopyPaste_Text->x)/2.0f, LCE->CopyPaste_Text->y2, LCE->CopyPaste_Text->x2, LCE->CopyPaste_Text->y, LCE->CopyPaste_Text->x2, LCE->CopyPaste_Text->y2), LCE->CopyPaste_Text->Image, Vector4_Create(-0.2f, -0.2f, -0.2f, 1));
 		else
-			Image_Shader.pushQuad(Quad_Create(Cursor_PositionX + Game_Width / 10.0f / 2.0f, Cursor_PositionY, Cursor_PositionX + Game_Width / 10.0f / 2.0f, Cursor_PositionY + LCE->Ligne_Height, Cursor_PositionX + Game_Width / 10.0f, Cursor_PositionY + LCE->Ligne_Height, Cursor_PositionX + Game_Width / 10.0f, Cursor_PositionY), Quad_Create(0.5, 0, 0.5, 1, 1, 1, 1, 0), LCE->CopyPaste_Text, Vector4_Create(0.0f, 0.0f, 0.0f, 1));
+			Image_Shader.pushQuad(Quad_Create(Cursor_PositionX + Game_Width / 10.0f / 2.0f, Cursor_PositionY, Cursor_PositionX + Game_Width / 10.0f / 2.0f, Cursor_PositionY + LCE->Ligne_Height, Cursor_PositionX + Game_Width / 10.0f, Cursor_PositionY + LCE->Ligne_Height, Cursor_PositionX + Game_Width / 10.0f, Cursor_PositionY), Quad_Create(LCE->CopyPaste_Text->x + (LCE->CopyPaste_Text->x2 - LCE->CopyPaste_Text->x)/2.0f, LCE->CopyPaste_Text->y2, LCE->CopyPaste_Text->x + (LCE->CopyPaste_Text->x2 - LCE->CopyPaste_Text->x)/2.0f, LCE->CopyPaste_Text->y2, LCE->CopyPaste_Text->x2, LCE->CopyPaste_Text->y, LCE->CopyPaste_Text->x2, LCE->CopyPaste_Text->y2), LCE->CopyPaste_Text->Image, Vector4_Create(0.0f, 0.0f, 0.0f, 1));
 
 		if(Mouse.justReleased)
 		{
