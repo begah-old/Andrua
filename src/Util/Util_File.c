@@ -25,6 +25,7 @@ void Dir_Create(char *name)
 	FullPath[PathLength] = '\0';
 	FullPath -= ExecutableLength;
 
+	log_info("Creating folder : %s", FullPath);
 	if (stat(FullPath, &st) == -1) {
 	    mkdir(FullPath, 0700);
 	}
@@ -51,7 +52,7 @@ _Bool Dir_Exists(char *name)
 	    return false;
 	}
 	free(FullPath);
-	return true;
+	return st.st_mode & S_IFDIR;
 }
 
 struct F_FileExternal *FileExternal_Open(const char *FilePath)
@@ -189,6 +190,14 @@ struct F_FileInternal *FileInternal_Open(const char *FilePath)
 	struct F_FileInternal *file = malloc(sizeof(struct F_FileInternal));
 	file->File = fopen(FullPath, "rb");
 	free(FullPath);
+
+	if(!file->File)
+    {
+        log_info("File not found %s", FilePath);
+        free(file);
+        return NULL;
+    }
+
 	return file;
 }
 
@@ -198,6 +207,23 @@ long int FileInternal_Length(struct F_FileInternal *file)
 	long int sz = ftell(file->File);
 	fseek(file->File, 0L, SEEK_SET);
 	return sz;
+}
+
+_Bool FileInternal_Exists(const char *FilePath)
+{
+	int PathLength = String_length(FilePath), ExecutableLength = String_length(Asset_Path);
+	char *FullPath = malloc(sizeof(char) * (PathLength + ExecutableLength + 1));
+	FullPath = memcpy(FullPath, Asset_Path,
+						  sizeof(char) * ExecutableLength);
+	FullPath += ExecutableLength;
+	FullPath = memcpy(FullPath, FilePath, sizeof(char) * PathLength);
+	FullPath[PathLength] = '\0';
+	FullPath -= ExecutableLength;
+
+    struct stat st;
+    int result = stat(FullPath, &st);
+    free(FullPath);
+    return result == 0;
 }
 
 int FileInternal_Read(void *ptr, size_t Unit_size, int Unit_number, struct F_FileInternal *file)
@@ -233,8 +259,8 @@ struct F_FileInternal *FileInternal_Open(const char *FilePath)
 
 	if(!asset)
 	{
-		printf("_ASSET_NOT_FOUND_ : %s\n", FilePath);
-		exit(1);
+		log_info("File not found %s", FilePath);
+		return NULL;
 	}
 
 	struct F_FileInternal *file = malloc(sizeof(struct F_FileInternal));
@@ -244,6 +270,28 @@ struct F_FileInternal *FileInternal_Open(const char *FilePath)
 	file->isAttached = isAttached;
 
 	return file;
+}
+
+_Bool FileExternal_Exists(const char *FilePath)
+{
+	JNIEnv *env;
+	int isAttached = 0, status;
+	if ((status = (*Java_VM)->GetEnv(Java_VM, (void**)&env, JNI_VERSION_1_6)) < 0) {
+		if ((status = (*Java_VM)->AttachCurrentThread(Java_VM, &env, NULL)) < 0) {
+			struct F_FileInternal file;
+			file.env = NULL;
+		}
+		isAttached = 1;
+	}
+
+	AAssetManager* mgr = AAssetManager_fromJava(env, Java_AssetManager);
+	AAsset* asset = AAssetManager_open(mgr,FilePath,AASSET_MODE_BUFFER);
+
+	_Bool Result = asset != NULL;
+	AAsset_close(asset);
+	if (isAttached) (*Java_VM)->DetachCurrentThread(Java_VM);
+
+	return Result;
 }
 
 long int FileInternal_Length(struct F_FileInternal *file)

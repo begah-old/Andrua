@@ -7,7 +7,7 @@
 
 #include "Util.h"
 
-void String_Add(char *String1, char *String2)
+void String_Add(char *String1, const char *String2)
 {
 	int Index1 = 0, I = 0;
 	while (1)

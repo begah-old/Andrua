@@ -10,13 +10,22 @@
 
 #include "../Image_Editor.h"
 
-struct Image_Tab
+struct Image_Frame
 {
 	struct Image_RawData *Image_Edit, *Image_Original;
+	GLuint Texture;
+};
+
+struct Image_Tab
+{
+	struct Image_Frame *Frames;
 	char *Name_Edit, *Name_Original;
 
 	float BarY, BarValue;
 	float X, Y;
+	int Frames_Num, Frames_On;
+	int Frame_Selected;
+	int OldSize;
 };
 
 struct Image_Editor
@@ -36,7 +45,7 @@ struct Image_Editor
 
 	struct Quad Change_Confirm, Close, Delete, New;
 	_Bool Change_Confirm_Hover, Close_Hover, Delete_Hover, New_Hover;
-	struct Image *Change_Confirm_Texture, *Close_Texture, *Delete_Texture, *New_Texture;
+	struct Image *Change_Confirm_Texture, *Close_Texture, *Delete_Texture, *New_Texture, *Add_Texture;
 
 	struct Quad Image_Tab;
 
@@ -45,6 +54,8 @@ struct Image_Editor
 	_Bool Button_PencilHover, Button_PickColorHover, Button_PencilOn, Button_PickColorOn, Button_FillHover, Button_FillOn, Button_PanViewHover, Button_PanViewOn;
 	_Bool PanningView;
 	float PanningView_OX, PanningView_OY;
+
+	struct Quad Button_FrameConfirm, Button_FrameCancel;
 
 	struct Quad Button_Save, Button_Load;
 	struct Image *Button_SaveTexture, *Button_LoadTexture;

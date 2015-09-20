@@ -20,6 +20,7 @@ lua_State *Lua_State;
 struct Vector4f Lua_Window;
 _Bool App_UsingDisplay, App_UseFullScreen, Lua_hasResize;
 _Bool Lua_giveWidth, Lua_giveHeight;
+_Bool Lua_requestClose;
 
 void Lua_LoadLibrary(FILE *F);
 void Lua_closeLibrary();

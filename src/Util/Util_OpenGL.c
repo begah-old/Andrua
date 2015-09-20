@@ -9,6 +9,7 @@
 
 #define EXECUTABLE_NAME 6
 #define DEBUG 0
+#define CODE_BLOCKS
 
 static void ImageEngine_SetUp();
 
@@ -66,12 +67,19 @@ void Util_Init(struct Window *Window,
 	for(int Index = 0; Index < Length; Index++)
 	Executable_Path[Index] = Path[Index];
 	Executable_Path[Length] = '\0';
-#else
+#elseif !defined(CODE_BLOCKS)
 	Length -= 6;
 	Executable_Path = malloc(sizeof(char) * (Length + 1));
 	for (int Index = 0; Index < Length; Index++)
 	Executable_Path[Index] = Path[Index];
 	Executable_Path[Length] = '\0';
+#else
+	Length -= 10;
+	Executable_Path = malloc(sizeof(char) * (Length + 1));
+	for (int Index = 0; Index < Length; Index++)
+	Executable_Path[Index] = Path[Index];
+	Executable_Path[Length] = '\0';
+    printf("%s\n", Executable_Path);
 #endif
 #else
 	char Path[101] =
@@ -365,9 +373,14 @@ void Texture_Free(GLuint Image)
 
 void Image_Free(struct Image *Image)
 {
-	PackAtlas_Remove(Image_Atlas, Image->pX, Image->pY, Image->pW, Image->pH);
+	PackAtlas_Remove(Image_Atlas, Image->pX, Image->pY, Image->pW + 1, Image->pH + 1);
 
 	free(Image);
+}
+
+void Image_FreeSimple(struct Image *Image)
+{
+	PackAtlas_Remove(Image_Atlas, Image->pX, Image->pY, Image->pW + 1, Image->pH + 1);
 }
 
 struct Image *Image_LoadExternal(const char *Path)
@@ -391,7 +404,7 @@ struct Image *Image_LoadExternal(const char *Path)
 
 	free(buffer);
 
-	PackAtlas_Add(Image_Atlas, Image->pW, Image->pH, &Image->pX, &Image->pY);
+	PackAtlas_Add(Image_Atlas, Image->pW + 1, Image->pH + 1, &Image->pX, &Image->pY);
 
 	Image->x = Image->pX / (float)ImageAtlas_Width;
 	Image->y = Image->pY / (float)ImageAtlas_Height;
@@ -412,6 +425,12 @@ struct Image *Image_Load(const char *Path)
 
 	struct F_FileInternal *file = FileInternal_Open(Path);
 
+	if(!file)
+    {
+        log_info("Couldn't load internal image : %s", Path);
+        return NULL;
+    }
+
 	int Length = FileInternal_Length(file);
 	unsigned char *buffer = malloc(Length);
 	FileInternal_Read(buffer, sizeof(char), Length, file);
@@ -427,7 +446,7 @@ struct Image *Image_Load(const char *Path)
 
 	free(buffer);
 
-	PackAtlas_Add(Image_Atlas, Image->pW, Image->pH, &Image->pX, &Image->pY);
+	PackAtlas_Add(Image_Atlas, Image->pW + 1, Image->pH + 1, &Image->pX, &Image->pY);
 
 
 	Image->x = Image->pX / (float)ImageAtlas_Width;

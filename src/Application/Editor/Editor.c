@@ -20,11 +20,9 @@ _Bool Console_Minimized = false;
 _Bool Lua_hasInit = false, Lua_hasRender = false, Lua_hasClose = false, Lua_hasMouseInput = false;
 _Bool Lua_giveMouseX = false, Lua_giveMouseY = false;
 
-_Bool Lua_requestClose = false;
-
 static void Console_Update()
 {
-	if(!Console)
+	if(!Console || !Log)
 		return;
 	int newLength = ftell(Log);
 
@@ -69,6 +67,8 @@ int Lua_Close(lua_State *L)
 		return 0;
 	}
 
+	log_info("Closing Lua");
+
 	App_UsingDisplay = false;
 
 	if(App_UseFullScreen)
@@ -93,12 +93,16 @@ int Lua_Close(lua_State *L)
     lua_close(Lua_State);
     Lua_State = NULL;
 
+    log_info("Lua closed");
+
     Console_Update();
 
     fclose(Log);
     fclose(Input);
+    Log = Input = NULL;
 
     Log_ReadAt = 2;
+    log_info("Done closing Lua");
 	return 0;
 }
 
@@ -132,6 +136,7 @@ static _Bool Lua_checkBooleanExistsAndTrue(char *Name)
 
 static void Lua_Init()
 {
+    log_info("Loading IO streams");
 	char *Path = malloc(sizeof(char) * (String_length(Executable_Path) - String_length(Project_Name) + String_length("Input.txt")));
 	memcpy(Path, Executable_Path, sizeof(char) * (String_length(Executable_Path) - String_length(Project_Name)));
 	Path[String_length(Executable_Path) - String_length(Project_Name)] = '\0';
@@ -150,11 +155,16 @@ static void Lua_Init()
 		Input = fopen(Path, "rb");
 	}
 
+    log_info("Loading Lua");
     Lua_State = luaL_newstate(Log, Input);   /* opens Lua */
 
     luaL_openlibs(Lua_State);
 
+    log_info("Loading Andrua's libs");
     Lua_LoadLibrary(Log);
+    log_info("Finished Loading in Lua");
+
+    Lua_requestClose = false;
 }
 
 static void Lua_runScript(void *Data, const char *FileName)
@@ -162,15 +172,19 @@ static void Lua_runScript(void *Data, const char *FileName)
 	if(Lua_State)
 		Lua_Close(NULL);
 
+    log_info("Loading Lua script");
 	Lua_Init();
 
+    log_info("Loading console");
 	Console_Init();
+	log_info("Console loaded");
 
 	if(luaL_loadfile(Lua_State, FileName))
 	{
 		const char *Error = lua_tostring(Lua_State, -1);
 		fprintf(Log, "Error loading file : %s\n", Error);
 	}
+	log_info("Done loading in script");
 
 	if(lua_pcall(Lua_State, 0, 0, 0) != 0)
 	{
@@ -181,6 +195,7 @@ static void Lua_runScript(void *Data, const char *FileName)
     	Lua_Close(NULL);
     	return;
 	}
+	log_info("Done initializing script");
 
     Lua_hasInit = Lua_checkFunctionExists("init");
     Lua_hasRender = Lua_checkFunctionExists("render");
@@ -208,6 +223,7 @@ static void Lua_runScript(void *Data, const char *FileName)
     	Lua_Window = Vector4_Create(0, Game_Height / 20.0f * 9.0f, Game_Width, Game_Height / 20.0f * 11.0f);
     }
 
+    log_info("Calling init if script has one");
     if(Lua_hasInit)
     {
 		if(Lua_giveWidth)
@@ -233,6 +249,7 @@ static void Lua_runScript(void *Data, const char *FileName)
         	return;
         }
     }
+    log_info("Done calling init");
 
 	if(OnScreen_Keyboard)
 		Engine_closeKeyboard();
@@ -241,6 +258,7 @@ static void Lua_runScript(void *Data, const char *FileName)
 	{
 		Console_Show = true;
 	}
+	log_info("Done loading script");
 }
 
 void Editor_Init()
@@ -289,6 +307,7 @@ void Editor_Render()
 		if (Console_Message == 1) {
 			Console_Minimized = false;
 			Console_Show = false;
+
 			Lua_Close(NULL);
 		} else if (Console_Message == 2)
 			Console_Minimized = true;
@@ -393,7 +412,7 @@ void Editor_Render()
 		if(Lua_requestClose)
 		{
 			Lua_Close(NULL);
-			goto Render_Code_Editor;
+			return;
 		}
 
 		_Bool UseDisplay = App_UsingDisplay, FullScreen = App_UseFullScreen;
@@ -426,7 +445,7 @@ void Editor_Render()
 				Code_Editor->X = 0;
 				Code_Editor->Y = Game_Height / 20.0f * 9.0f;
 			} else {
-				Code_Editor->Width = Game_Width;
+			    Code_Editor->Width = Game_Width;
 				Code_Editor->Height = Game_Height - Console->Ligne_Height;
 				Code_Editor->X = 0;
 				Code_Editor->Y = Console->Ligne_Height;

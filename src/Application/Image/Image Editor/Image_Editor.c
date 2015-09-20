@@ -24,31 +24,140 @@ struct Image_Tab *Image_Tab_Load(const char *Name)
 	Image->Name_Edit = memcpy(Image->Name_Edit, Name, sizeof(char) * (String_length(Name) + 1));
 	Image->Name_Original = memcpy(Image->Name_Original, Name, sizeof(char) * (String_length(Name) + 1));
 
-	Image->Image_Original = Image_loadPNG(Name);
+	Image->Frames = malloc(sizeof(struct Image_Frame));
+	Image->Frames->Image_Original = Image_loadPNG(Name);
 
-	Image->Image_Edit = malloc(sizeof(struct Image_RawData));
-	Image->Image_Edit->Data = malloc(sizeof(unsigned char) * Image->Image_Original->Width * Image->Image_Original->Height * 4);
-	Image->Image_Edit->Data = memcpy(Image->Image_Edit->Data, Image->Image_Original->Data, sizeof(unsigned char) * Image->Image_Original->Width * Image->Image_Original->Height * 4);
-	Image->Image_Edit->Width = Image->Image_Original->Width;
-	Image->Image_Edit->Height = Image->Image_Original->Height;
+	Image->Frames->Image_Edit = malloc(sizeof(struct Image_RawData));
+	Image->Frames->Image_Edit->Data = malloc(
+			sizeof(unsigned char) * Image->Frames->Image_Original->Width
+					* Image->Frames->Image_Original->Height * 4);
+	Image->Frames->Image_Edit->Data = memcpy(Image->Frames->Image_Edit->Data,
+			Image->Frames->Image_Original->Data,
+			sizeof(unsigned char) * Image->Frames->Image_Original->Width
+					* Image->Frames->Image_Original->Height * 4);
+	Image->Frames->Image_Edit->Width = Image->Frames->Image_Original->Width;
+	Image->Frames->Image_Edit->Height = Image->Frames->Image_Original->Height;
+
+	Image->BarValue =
+			MIN(Image->Frames->Image_Edit->Width,
+					Image->Frames->Image_Edit->Height)
+					/ 100.0f;
+	Image->Frames_Num = 1;
+	Image->Frames_On = 0;
+	Image->OldSize = -1;
 
 	Image->BarY = 0;
-	Image->BarValue = MIN(Image->Image_Edit->Width, Image->Image_Edit->Height) / 100.0f;
 	Image->X = Image->Y = 0;
-	/*Image->View.x = Image->View.y = 0;
-	Image->View.z = Image->Image_Original->Width;
-	Image->View.w = Image->Image_Original->Height;*/
+
+	return Image;
+}
+
+struct Image_Tab *Image_Tab_LoadAnimation(const char *Name)
+{
+	struct Image_Tab *Image = malloc(sizeof(struct Image_Tab));
+	Image->Name_Edit = malloc(sizeof(char) * (String_length(Name) + 1));
+	Image->Name_Original = malloc(sizeof(char) * (String_length(Name) + 1));
+
+	Image->Name_Edit = memcpy(Image->Name_Edit, Name, sizeof(char) * (String_length(Name) + 1));
+	Image->Name_Original = memcpy(Image->Name_Original, Name, sizeof(char) * (String_length(Name) + 1));
+	int Frames = 0;
+
+	int Names2Length = String_length(Name);
+	char Names2[Names2Length + 1 + 4 + String_length(".png")];
+	memcpy(Names2, Name, sizeof(char) * Names2Length);
+
+#ifndef _WIN32
+	Names2[Names2Length++] = '/';
+#else
+	Names2[Names2Length++] = '\\';
+#endif
+
+	while(1)
+	{
+		char *T = Integer_toString(Frames);
+		memcpy(Names2 + Names2Length, T, sizeof(char) * (String_length(T) + 1));
+		String_Add(Names2, ".png");
+
+		free(T);
+		if(FileExternal_Exists(Names2))
+			Frames++;
+		else
+			break;
+	}
+
+	Image->Frames_Num = Frames;
+	Image->Frames_On = -1;
+
+	Image->Frames = malloc(sizeof(struct Image_Frame) * Image->Frames_Num);
+
+	for(int i = 0; i < Image->Frames_Num; i++)
+	{
+		char *T = Integer_toString(i);
+		memcpy(Names2 + Names2Length, T, sizeof(char) * (String_length(T) + 1));
+		String_Add(Names2, ".png");
+
+		free(T);
+
+		Image->Frames[i].Image_Original = Image_loadPNG(Names2);
+
+		Image->Frames[i].Image_Edit = malloc(sizeof(struct Image_RawData));
+		Image->Frames[i].Image_Edit->Data = malloc(
+				sizeof(unsigned char) * Image->Frames[i].Image_Original->Width
+						* Image->Frames[i].Image_Original->Height * 4);
+
+		Image->Frames[i].Image_Edit->Data = memcpy(Image->Frames[i].Image_Edit->Data,
+				Image->Frames[i].Image_Original->Data,
+				sizeof(unsigned char) * Image->Frames[i].Image_Original->Width
+						* Image->Frames[i].Image_Original->Height * 4);
+
+		Image->Frames[i].Image_Edit->Width = Image->Frames[i].Image_Original->Width;
+		Image->Frames[i].Image_Edit->Height = Image->Frames[i].Image_Original->Height;
+	}
+	Image->BarValue =
+			MIN(Image->Frames->Image_Edit->Width,
+					Image->Frames->Image_Edit->Height)
+					/ 100.0f;
+
+	Image->OldSize = Image->Frames_Num;
+	Image->BarY = 0;
+	Image->X = Image->Y = 0;
 
 	return Image;
 }
 
 void Image_Tab_Save(struct Image_Tab *ITL)
 {
-	if(strcmp(ITL->Name_Edit, ITL->Name_Original))
+	if(strcmp(ITL->Name_Edit, ITL->Name_Original) || ITL->Frames_Num != ITL->OldSize)
 	{
 		// Renamed file
+
 		char *C = FileExternal_GetFullPath(ITL->Name_Original);
-		remove(C);
+		if(ITL->Frames_Num == 1 || (FileExternal_Exists(ITL->Name_Original) && !Dir_Exists(ITL->Name_Original)))
+			remove(C);
+		else {
+			int Names2Length = String_length(C);
+			char Names2[Names2Length + 1 + 4 + String_length(".png")];
+			memcpy(Names2, C, sizeof(char) * Names2Length);
+
+#ifndef _WIN32
+			Names2[Names2Length++] = '/';
+#else
+			Names2[Names2Length++] = '\\';
+#endif
+
+			for(int i = 0; i < MAX(ITL->Frames_Num, ITL->OldSize); i++)
+			{
+				char *T = Integer_toString(i);
+				memcpy(Names2 + Names2Length, T, sizeof(char) * (String_length(T) + 1));
+				String_Add(Names2, ".png");
+
+				free(T);
+
+				remove(Names2);
+			}
+			_rmdir(C);
+			ITL->OldSize = ITL->Frames_Num;
+		}
 		free(C);
 		free(ITL->Name_Original);
 		ITL->Name_Original = malloc(sizeof(char) * (String_length(ITL->Name_Edit) + 1));
@@ -57,18 +166,60 @@ void Image_Tab_Save(struct Image_Tab *ITL)
 
 	char *c = FileExternal_GetFullPath(ITL->Name_Edit);
 
-	SOIL_save_image(c, SOIL_SAVE_TYPE_PNG, ITL->Image_Edit->Width,
-						ITL->Image_Edit->Height, SOIL_LOAD_RGBA,
-						ITL->Image_Edit->Data);
-	free(c);
-	free(ITL->Image_Original->Data);
-	free(ITL->Image_Original);
+	if(ITL->Frames_Num == 1)
+	{
+		SOIL_save_image(c, SOIL_SAVE_TYPE_PNG, ITL->Frames->Image_Edit->Width,
+							ITL->Frames->Image_Edit->Height, SOIL_LOAD_RGBA,
+							ITL->Frames->Image_Edit->Data);
+		free(c);
+		free(ITL->Frames->Image_Original->Data);
+		free(ITL->Frames->Image_Original);
 
-	ITL->Image_Original = malloc(sizeof(struct Image_RawData));
-	ITL->Image_Original->Data = malloc(sizeof(unsigned char) * ITL->Image_Edit->Width * ITL->Image_Edit->Height * 4);
-	ITL->Image_Original->Data = memcpy(ITL->Image_Original->Data, ITL->Image_Edit->Data, sizeof(unsigned char) * ITL->Image_Edit->Width * ITL->Image_Edit->Height * 4);
-	ITL->Image_Original->Width = ITL->Image_Edit->Width;
-	ITL->Image_Original->Height = ITL->Image_Edit->Height;
+		ITL->Frames->Image_Original = malloc(sizeof(struct Image_RawData));
+		ITL->Frames->Image_Original->Data = malloc(sizeof(unsigned char) * ITL->Frames->Image_Edit->Width * ITL->Frames->Image_Edit->Height * 4);
+		ITL->Frames->Image_Original->Data = memcpy(ITL->Frames->Image_Original->Data, ITL->Frames->Image_Edit->Data, sizeof(unsigned char) * ITL->Frames->Image_Edit->Width * ITL->Frames->Image_Edit->Height * 4);
+		ITL->Frames->Image_Original->Width = ITL->Frames->Image_Edit->Width;
+		ITL->Frames->Image_Original->Height = ITL->Frames->Image_Edit->Height;
+	} else {
+		int Length = String_length(c);
+		c = realloc(c, Length + 2 + 3 + String_length(".png"));
+
+#ifndef _WIN32
+		c[Length++] = '/';
+#else
+		c[Length++] = '\\';
+#endif
+		c[Length] = '\0';
+
+		int FOLDER_LENGTH = String_length(ITL->Name_Edit);
+		char FOLDER[FOLDER_LENGTH + 2];
+		memcpy(FOLDER, ITL->Name_Edit, sizeof(char) * (FOLDER_LENGTH));
+#ifndef _WIN32
+		FOLDER[FOLDER_LENGTH] = '/';
+#else
+		FOLDER[FOLDER_LENGTH] = '\\';
+#endif
+		FOLDER[FOLDER_LENGTH + 1] = '\0';
+
+		if(!Dir_Exists(FOLDER))
+		{
+			Dir_Create(FOLDER);
+		}
+
+		for(int i = 0; i < ITL->Frames_Num; i++)
+		{
+			char *T = Integer_toString(i);
+			memcpy(c + Length, T, sizeof(char) * (String_length(T) + 1));
+			String_Add(c, ".png");
+
+			free(T);
+
+			SOIL_save_image(c, SOIL_SAVE_TYPE_PNG, ITL->Frames[i].Image_Edit->Width,
+					ITL->Frames[i].Image_Edit->Height, SOIL_LOAD_RGBA,
+					ITL->Frames[i].Image_Edit->Data);
+		}
+		free(c);
+	}
 }
 
 _Bool Image_Tab_isDirty(struct Image_Tab *ITL)
@@ -77,15 +228,17 @@ _Bool Image_Tab_isDirty(struct Image_Tab *ITL)
 	if(cmp)
 		return true;
 
-	if(ITL->Image_Edit->Height != ITL->Image_Original->Height)
-		return true;
-	if(ITL->Image_Edit->Width != ITL->Image_Original->Width)
-		return true;
-
-	for(int i = 0; i < ITL->Image_Edit->Width * ITL->Image_Edit->Height * 4; i++)
-		if(ITL->Image_Edit->Data[i] != ITL->Image_Original->Data[i])
+	for(int i = 0; i < ITL->Frames_Num; i++)
+	{
+		if(ITL->Frames[i].Image_Edit->Height != ITL->Frames[i].Image_Original->Height)
+			return true;
+		if(ITL->Frames[i].Image_Edit->Width != ITL->Frames[i].Image_Original->Width)
 			return true;
 
+		for(int j = 0; j < ITL->Frames[i].Image_Edit->Width * ITL->Frames[i].Image_Edit->Height * 4; j++)
+			if(ITL->Frames[i].Image_Edit->Data[j] != ITL->Frames[i].Image_Original->Data[j])
+				return true;
+	}
 	return false;
 }
 
@@ -93,10 +246,15 @@ void Image_Tab_Close(struct Image_Tab *ITL)
 {
 	free(ITL->Name_Edit);
 	free(ITL->Name_Original);
-	free(ITL->Image_Edit->Data);
-	free(ITL->Image_Original->Data);
-	free(ITL->Image_Edit);
-	free(ITL->Image_Original);
+
+	for(int i = 0; i < ITL->Frames_Num; i++)
+	{
+		free(ITL->Frames[i].Image_Edit->Data);
+		free(ITL->Frames[i].Image_Original->Data);
+		free(ITL->Frames[i].Image_Edit);
+		free(ITL->Frames[i].Image_Original);
+	}
+	free(ITL->Frames);
 }
 
 static void Image_ScrollBar_Scrolling(void *Data, float Y)
@@ -109,14 +267,14 @@ static void Image_ScrollBar_Scrolling(void *Data, float Y)
 	if (Y < 0)
 	{
 		Y = -Y;
-		float oWidth = (IT->Image_Edit->Width / 100.0f) * IT->BarY, oHeight = (IT->Image_Edit->Height / 100.0f) * IT->BarY;
-		float nWidth = (IT->Image_Edit->Width / 100.0f) * (IT->BarY - Y), nHeight = (IT->Image_Edit->Height / 100.0f) * (IT->BarY - Y);
+		float oWidth = (IT->Frames->Image_Edit->Width / 100.0f) * IT->BarY, oHeight = (IT->Frames->Image_Edit->Height / 100.0f) * IT->BarY;
+		float nWidth = (IT->Frames->Image_Edit->Width / 100.0f) * (IT->BarY - Y), nHeight = (IT->Frames->Image_Edit->Height / 100.0f) * (IT->BarY - Y);
 
 		IT->X += (oWidth - nWidth) / 2.0f;
 		IT->Y += (oHeight - nHeight) / 2.0f;
 	} else if (Y > 0) {
-		float oWidth = (IT->Image_Edit->Width / 100.0f) * IT->BarY, oHeight = (IT->Image_Edit->Height / 100.0f) * IT->BarY;
-		float nWidth = (IT->Image_Edit->Width / 100.0f) * (IT->BarY + Y), nHeight = (IT->Image_Edit->Height / 100.0f) * (IT->BarY + Y);
+		float oWidth = (IT->Frames->Image_Edit->Width / 100.0f) * IT->BarY, oHeight = (IT->Frames->Image_Edit->Height / 100.0f) * IT->BarY;
+		float nWidth = (IT->Frames->Image_Edit->Width / 100.0f) * (IT->BarY + Y), nHeight = (IT->Frames->Image_Edit->Height / 100.0f) * (IT->BarY + Y);
 
 		IT->X += (oWidth - nWidth) / 2.0f;
 		IT->Y += (oHeight - nHeight) / 2.0f;
@@ -129,9 +287,9 @@ static void Image_Editor_Resize(struct Image_Editor *IE)
 			IE->Editor_Dimensions.z / 10 + IE->Editor_Dimensions.x,
 			IE->Editor_Dimensions.y,
 			IE->Editor_Dimensions.z / 10 + IE->Editor_Dimensions.x,
-			IE->Editor_Dimensions.w / 10 * 9 + IE->Editor_Dimensions.y,
+			IE->Editor_Dimensions.w / 10 * 8 + IE->Editor_Dimensions.y,
 			IE->Editor_Dimensions.z / 10 * 8 + IE->Editor_Dimensions.x,
-			IE->Editor_Dimensions.w / 10 * 9 + IE->Editor_Dimensions.y,
+			IE->Editor_Dimensions.w / 10 * 8 + IE->Editor_Dimensions.y,
 			IE->Editor_Dimensions.z / 10 * 8 + IE->Editor_Dimensions.x,
 			IE->Editor_Dimensions.y);
 
@@ -237,6 +395,25 @@ static void Image_Editor_Resize(struct Image_Editor *IE)
 			(float) IE->Editor_Dimensions.z / 10 + IE->Editor_Dimensions.x,
 			(float) IE->Editor_Dimensions.w / 10 * 3 + IE->Editor_Dimensions.y);
 
+	IE->Button_FrameConfirm = Quad_Create(IE->Editor_Dimensions.z / 10.0f * 0.0f + IE->Editor_Dimensions.x,
+			IE->Editor_Dimensions.w / 20.0f * 17.0f + IE->Editor_Dimensions.y,
+			IE->Editor_Dimensions.z / 10.0f * 0.0f + IE->Editor_Dimensions.x,
+			IE->Editor_Dimensions.w / 20.0f * 18.0f + IE->Editor_Dimensions.y,
+			IE->Editor_Dimensions.z / 10.0f * 1.0f + IE->Editor_Dimensions.x,
+			IE->Editor_Dimensions.w / 20.0f * 18.0 + IE->Editor_Dimensions.y,
+			IE->Editor_Dimensions.z / 10.0f * 1.0f + IE->Editor_Dimensions.x,
+			IE->Editor_Dimensions.w / 20.0f * 17.0f + IE->Editor_Dimensions.y);
+
+	IE->Button_FrameCancel = Quad_Create(
+			IE->Editor_Dimensions.z / 10 * 9 + IE->Editor_Dimensions.x,
+			IE->Editor_Dimensions.w / 20.0f * 17.0f + IE->Editor_Dimensions.y,
+			IE->Editor_Dimensions.z / 10 * 9 + IE->Editor_Dimensions.x,
+			IE->Editor_Dimensions.w / 20.0f * 18.0 + IE->Editor_Dimensions.y,
+			IE->Editor_Dimensions.z + IE->Editor_Dimensions.x,
+			IE->Editor_Dimensions.w / 20.0f * 18.0 + IE->Editor_Dimensions.y,
+			IE->Editor_Dimensions.z + IE->Editor_Dimensions.x,
+			IE->Editor_Dimensions.w / 20.0f * 17.0f + IE->Editor_Dimensions.y);
+
 	Gui_TextBox_Resize(IE->Color_Red, (float) IE->Editor_Dimensions.z / 10 * 8 + IE->Editor_Dimensions.x,
 				(float) IE->Editor_Dimensions.w / 10 * 4 + IE->Editor_Dimensions.y, (float) IE->Editor_Dimensions.z / 10 * 2,
 				(float) IE->Editor_Dimensions.w / 10.0f);
@@ -281,13 +458,27 @@ static void Image_Editor_Resize(struct Image_Editor *IE)
 		if(IE->Image_Tab_Index != -1)
 		{
 			struct Image_Tab *IT = ((struct Image_Tab *)IE->Image_Tab_List->items) + IE->Image_Tab_Index;
-			float min = IT->Image_Edit->Width < IT->Image_Edit->Height ? IT->Image_Edit->Width : IT->Image_Edit->Height;
+			float min = IT->Frames->Image_Edit->Width < IT->Frames->Image_Edit->Height ? IT->Frames->Image_Edit->Width : IT->Frames->Image_Edit->Height;
 			IE->Image_Scroll->BarValue = min / 100.0f;
 		}
 	}
 
 	return;
 	error:exit(1);
+}
+
+static void Image_SetTexture(struct Image_Editor *IE, struct Image_Tab *IT)
+{
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glGenTextures(1, &IE->Image_Texture);
+	glBindTexture(GL_TEXTURE_2D, IE->Image_Texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, IT->Frames[IT->Frames_On].Image_Edit->Width,
+			IT->Frames[IT->Frames_On].Image_Edit->Height, 0, GL_RGBA,
+			GL_UNSIGNED_BYTE, IT->Frames[IT->Frames_On].Image_Edit->Data);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 static void Image_Set(struct Image_Editor *IE, int INDEX)
@@ -301,6 +492,10 @@ static void Image_Set(struct Image_Editor *IE, int INDEX)
 		free(IT->Name_Edit);
 		IT->Name_Edit = malloc(sizeof(char) * (String_length(IE->Name->Value) + 1));
 		IT->Name_Edit = memcpy(IT->Name_Edit, IE->Name->Value, sizeof(char) * (String_length(IE->Name->Value) + 1));
+		Texture_Free(IE->Image_Texture);
+
+		for(int i = 0; i < IT->Frames_Num; i++)
+			Texture_Free(IT->Frames[i].Texture);
 	}
 
 	IE->Image_Tab_Index = INDEX;
@@ -313,22 +508,29 @@ static void Image_Set(struct Image_Editor *IE, int INDEX)
 			IE->Name->Value[i] = '\0';
 		memcpy(IE->Name->Value, IT->Name_Edit, sizeof(char) * String_length(IT->Name_Edit));
 
-		Texture_Free(IE->Image_Texture);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		glGenTextures(1, &IE->Image_Texture);
-		glBindTexture(GL_TEXTURE_2D, IE->Image_Texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, IT->Image_Edit->Width,
-				IT->Image_Edit->Height, 0, GL_RGBA,
-				GL_UNSIGNED_BYTE, IT->Image_Edit->Data);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		for(int i = 0; i < IT->Frames_Num; i++)
+		{
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			glGenTextures(1, &IT->Frames[i].Texture);
+			glBindTexture(GL_TEXTURE_2D, IT->Frames[i].Texture);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, IT->Frames[i].Image_Edit->Width,
+					IT->Frames[i].Image_Edit->Height, 0, GL_RGBA,
+					GL_UNSIGNED_BYTE, IT->Frames[i].Image_Edit->Data);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		}
+
+		IT->Frame_Selected = -1;
+
+		if(IT->Frames_On >= 0)
+			Image_SetTexture(IE, IT);
 
 		/*IT->View.x = IT->View.y = 0;
 		IT->View.z = IT->Image_Edit->Width;
 		IT->View.w = IT->Image_Edit->Height;*/
-		IE->Image_Scroll->BarY = -IT->BarY;
+		IE->Image_Scroll->BarY = IT->BarY;
 		IE->Image_Scroll->BarValue = IT->BarValue;
 		IE->Image_Scroll->TotalValue = 100.0f + IE->Image_Scroll->BarValue;
 	}
@@ -410,6 +612,9 @@ struct Image_Editor *Image_Editor_Init(float x, float y, float width, float heig
 
 	IE->New_Texture = Image_Load("Image_Editor/NewFile.png");
 	check(IE->New_Texture->Image != -1, "Couldn't load NewFileTexture");
+
+	IE->Add_Texture = Image_Load("Image_Editor/Add.png");
+	check(IE->Add_Texture->Image != -1, "Couldn't load AddTexture");
 
 	IE->State = STATE_DEFAULT;
 
@@ -529,7 +734,7 @@ struct Image_Editor *Image_Editor_Init(float x, float y, float width, float heig
 	return NULL;
 }
 
-// Bucket Fill algirutgn
+// Bucket Fill algorithm
 static inline _Bool COMP_COLOR(struct Image_RawData *I, int x, int y, struct Vector4f Col)
 {
 	return I->Data[(x + y * I->Width) * 4] == Col.x && I->Data[(x + y * I->Width) * 4 + 1] == Col.y && I->Data[(x + y * I->Width) * 4 + 2] == Col.z && I->Data[(x + y * I->Width) * 4 + 3] == Col.w;
@@ -954,12 +1159,8 @@ static void Image_Render_OpenImage(struct Image_Editor *IE)
 			struct Gui_TextBox *TB =
 							((struct Gui_TextBox *) IE->TextBoxs->items);
 
-			char *Path = FileExternal_GetFullPath(TB->Value);
-			FILE *f = fopen(Path, "rb");
-
-			if(f)
+			if(FileExternal_Exists(TB->Value) && !Dir_Exists(TB->Value))
 			{
-				fclose(f);
 				struct Image_Tab *Image = Image_Tab_Load(TB->Value);
 				vector_push_back(IE->Image_Tab_List, Image);
 				free(Image);
@@ -967,10 +1168,19 @@ static void Image_Render_OpenImage(struct Image_Editor *IE)
 
 				Image_Set(IE, IE->Image_Tab_List->size - 1);
 			} else {
-				Error = true;
-				Error_Timer = Game_FPS * 6;
+				if(Dir_Exists(TB->Value)) {
+					// Load animation
+					struct Image_Tab *Image = Image_Tab_LoadAnimation(TB->Value);
+					vector_push_back(IE->Image_Tab_List, Image);
+					free(Image);
+					GOTO_DEFAULT = true;
+
+					Image_Set(IE, IE->Image_Tab_List->size - 1);
+				} else {
+					Error = true;
+					Error_Timer = Game_FPS * 6;
+				}
 			}
-			free(Path);
 		} else if (Pressed) {
 			// Cancel
 			GOTO_DEFAULT = true;
@@ -1122,22 +1332,27 @@ static void Image_Render_NewImage(struct Image_Editor *IE)
 				Image->Name_Edit = malloc(sizeof(char) * (String_length(TB->Value) + 1));
 				Image->Name_Edit = memcpy(Image->Name_Edit, TB->Value, sizeof(char) * (String_length(TB->Value) + 1));
 
-				Image->Image_Original = malloc(sizeof(struct Image_RawData));
-				Image->Image_Original->Width = String_toInt(TB[1].Value);
-				Image->Image_Original->Height = String_toInt(TB[2].Value);
-				Image->Image_Original->Data = malloc(sizeof(unsigned char) * (Image->Image_Original->Width * Image->Image_Original->Height * 4));
-				for(int i = 0; i < Image->Image_Original->Width * Image->Image_Original->Height * 4; i++)
-					Image->Image_Original->Data[i] = 255;
+				Image->Frames = malloc(sizeof(struct Image_Frame));
+				Image->Frames->Image_Original = malloc(sizeof(struct Image_RawData));
+				Image->Frames->Image_Original->Width = String_toInt(TB[1].Value);
+				Image->Frames->Image_Original->Height = String_toInt(TB[2].Value);
+				Image->Frames->Image_Original->Data = malloc(sizeof(unsigned char) * (Image->Frames->Image_Original->Width * Image->Frames->Image_Original->Height * 4));
+				for(int i = 0; i < Image->Frames->Image_Original->Width * Image->Frames->Image_Original->Height * 4; i++)
+					Image->Frames->Image_Original->Data[i] = 255;
 
-				Image->Image_Edit = malloc(sizeof(struct Image_RawData));
-				Image->Image_Edit->Data = malloc(sizeof(unsigned char) * Image->Image_Original->Width * Image->Image_Original->Height * 4);
-				Image->Image_Edit->Data = memcpy(Image->Image_Edit->Data, Image->Image_Original->Data, sizeof(unsigned char) * Image->Image_Original->Width * Image->Image_Original->Height * 4);
-				Image->Image_Edit->Width = Image->Image_Original->Width;
-				Image->Image_Edit->Height = Image->Image_Original->Height;
+				Image->Frames->Image_Edit = malloc(sizeof(struct Image_RawData));
+				Image->Frames->Image_Edit->Data = malloc(sizeof(unsigned char) * Image->Frames->Image_Original->Width * Image->Frames->Image_Original->Height * 4);
+				Image->Frames->Image_Edit->Data = memcpy(Image->Frames->Image_Edit->Data, Image->Frames->Image_Original->Data, sizeof(unsigned char) * Image->Frames->Image_Original->Width * Image->Frames->Image_Original->Height * 4);
+				Image->Frames->Image_Edit->Width = Image->Frames->Image_Original->Width;
+				Image->Frames->Image_Edit->Height = Image->Frames->Image_Original->Height;
 
 				Image->BarY = 0;
-				Image->BarValue = MIN(Image->Image_Edit->Width, Image->Image_Edit->Height) / 100.0f;
+				Image->BarValue = MIN(Image->Frames->Image_Edit->Width, Image->Frames->Image_Edit->Height) / 100.0f;
 				Image->X = Image->Y = 0;
+
+				Image->Frames_Num = 1;
+				Image->Frames_On = 0;
+				Image->Frame_Selected = -1;
 
 				vector_push_back(IE->Image_Tab_List, Image);
 				free(Image);
@@ -1279,6 +1494,107 @@ static void Image_Render_ConfirmDelete(struct Image_Editor *IE)
 	}
 }
 
+static void Image_Editor_RenderFrames(struct Image_Editor *IE, struct Image_Tab *IT)
+{
+	GLuint TextToFree = -1;
+
+	if(TextToFree != -1)
+	{
+		Texture_Free(TextToFree);
+		TextToFree = -1;
+	}
+
+	float width = IE->Editor_Dimensions.z / 10.0f, height = IE->Editor_Dimensions.w / 10.0f;
+	for(int x = 0; x < IT->Frames_Num; x++)
+	{
+		float xx = (x%6)*1.5 * width + width * 0.75f;
+		float yy = (7 * height) - (x/6)*1.5 * height;
+
+		struct Quad Quad = Quad_Create(xx, yy, xx, yy + height, xx + width, yy + height, xx + width, yy);
+		_Bool Hover = Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), Quad);
+		if(Hover || IT->Frame_Selected == x)
+			Image_Shader.pushQuad(Quad, Quad_Create(0, 0, 0, 1, 1, 1, 1, 0), IT->Frames[x].Texture, IE->Hover_addColor);
+		else
+			Image_Shader.pushQuad(Quad, Quad_Create(0, 0, 0, 1, 1, 1, 1, 0), IT->Frames[x].Texture, Vector4_Create(0,0,0,0));
+
+		if(Hover && Mouse.justPressed) {
+			IT->Frame_Selected = x;
+		}
+		if(Hover && Mouse.just_DoubleClicked) {
+			IT->Frames_On = x;
+			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+			glGenTextures(1, &IE->Image_Texture);
+			glBindTexture(GL_TEXTURE_2D, IE->Image_Texture);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+					IT->Frames[x].Image_Edit->Width,
+					IT->Frames[x].Image_Edit->Height, 0, GL_RGBA,
+					GL_UNSIGNED_BYTE,
+					IT->Frames[x].Image_Edit->Data);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		}
+	}
+
+	_Bool Hover_Add = Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), IE->Button_FrameConfirm),
+			Hover_Delete =  Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), IE->Button_FrameCancel);
+
+	if(Hover_Add && Mouse.justReleased) {
+		IT->Frames = realloc(IT->Frames, sizeof(struct Image_Frame) * (IT->Frames_Num + 1));
+		IT->Frames[IT->Frames_Num].Image_Edit = malloc(sizeof(struct Image_RawData));
+		IT->Frames[IT->Frames_Num].Image_Original = malloc(sizeof(struct Image_RawData));
+
+		IT->Frames[IT->Frames_Num].Image_Edit->Width = IT->Frames[IT->Frames_Num - 1].Image_Edit->Width;
+		IT->Frames[IT->Frames_Num].Image_Edit->Height = IT->Frames[IT->Frames_Num - 1].Image_Edit->Height;
+		IT->Frames[IT->Frames_Num].Image_Edit->Data = malloc(sizeof(unsigned char) * IT->Frames[IT->Frames_Num].Image_Edit->Width * IT->Frames[IT->Frames_Num].Image_Edit->Height * 4);
+		memcpy(IT->Frames[IT->Frames_Num].Image_Edit->Data, IT->Frames[IT->Frames_Num - 1].Image_Edit->Data, sizeof(unsigned char) * IT->Frames[IT->Frames_Num].Image_Edit->Width * IT->Frames[IT->Frames_Num].Image_Edit->Height * 4);
+
+		IT->Frames[IT->Frames_Num].Image_Original->Width = IT->Frames[IT->Frames_Num - 1].Image_Edit->Width;
+		IT->Frames[IT->Frames_Num].Image_Original->Height = IT->Frames[IT->Frames_Num - 1].Image_Edit->Height;
+		IT->Frames[IT->Frames_Num].Image_Original->Data = malloc(sizeof(unsigned char) * IT->Frames[IT->Frames_Num].Image_Edit->Width * IT->Frames[IT->Frames_Num].Image_Edit->Height * 4);
+		memcpy(IT->Frames[IT->Frames_Num].Image_Original->Data, IT->Frames[IT->Frames_Num - 1].Image_Edit->Data, sizeof(unsigned char) * IT->Frames[IT->Frames_Num].Image_Edit->Width * IT->Frames[IT->Frames_Num].Image_Edit->Height * 4);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glGenTextures(1, &IT->Frames[IT->Frames_Num].Texture);
+		glBindTexture(GL_TEXTURE_2D, IT->Frames[IT->Frames_Num].Texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, IT->Frames[IT->Frames_Num].Image_Edit->Width,
+				IT->Frames[IT->Frames_Num].Image_Edit->Height, 0, GL_RGBA,
+				GL_UNSIGNED_BYTE, IT->Frames[IT->Frames_Num].Image_Edit->Data);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		IT->Frames_Num++;
+	} else if(Hover_Delete && Mouse.justReleased) {
+		free(IT->Frames[IT->Frame_Selected].Image_Edit->Data);
+		free(IT->Frames[IT->Frame_Selected].Image_Edit);
+		free(IT->Frames[IT->Frame_Selected].Image_Original->Data);
+		free(IT->Frames[IT->Frame_Selected].Image_Original);
+
+		TextToFree = IT->Frames[IT->Frame_Selected].Texture;
+
+		for(int i = IT->Frame_Selected; i + 1 < IT->Frames_Num; i++)
+		{
+			IT->Frames[i].Image_Edit = IT->Frames[i+1].Image_Edit;
+			IT->Frames[i].Image_Original = IT->Frames[i+1].Image_Original;
+			IT->Frames[i].Texture = IT->Frames[i+1].Texture;
+		}
+		IT->OldSize = IT->Frames_Num;
+		IT->Frames_Num -= 1;
+		IT->Frames = realloc(IT->Frames, sizeof(struct Image_Frame) * IT->Frames_Num);
+	}
+
+	if(Hover_Add)
+		Image_Shader.pushQuad(IE->Button_FrameConfirm, Quad_Create(IE->Add_Texture->x, IE->Add_Texture->y2, IE->Add_Texture->x, IE->Add_Texture->y, IE->Add_Texture->x2, IE->Add_Texture->y, IE->Add_Texture->x2, IE->Add_Texture->y2), IE->Add_Texture->Image, Vector4_Create(0.5f + IE->Hover_addColor.x, 0.5f + IE->Hover_addColor.y, 0.5f + IE->Hover_addColor.z, 0.0f));
+	else
+		Image_Shader.pushQuad(IE->Button_FrameConfirm, Quad_Create(IE->Add_Texture->x, IE->Add_Texture->y2, IE->Add_Texture->x, IE->Add_Texture->y, IE->Add_Texture->x2, IE->Add_Texture->y, IE->Add_Texture->x2, IE->Add_Texture->y2), IE->Add_Texture->Image, Vector4_Create(0.5f, 0.5f, 0.5f, 0));
+
+	if(Hover_Delete)
+		Image_Shader.pushQuad(IE->Button_FrameCancel, Quad_Create(IE->Delete_Texture->x, IE->Delete_Texture->y2, IE->Delete_Texture->x, IE->Delete_Texture->y, IE->Delete_Texture->x2, IE->Delete_Texture->y, IE->Delete_Texture->x2, IE->Delete_Texture->y2), IE->Delete_Texture->Image, Vector4_Create(0.5f + IE->Hover_addColor.x, 0.5f + IE->Hover_addColor.y, 0.5f + IE->Hover_addColor.z, 0.0f));
+	else
+		Image_Shader.pushQuad(IE->Button_FrameCancel, Quad_Create(IE->Delete_Texture->x, IE->Delete_Texture->y2, IE->Delete_Texture->x, IE->Delete_Texture->y, IE->Delete_Texture->x2, IE->Delete_Texture->y, IE->Delete_Texture->x2, IE->Delete_Texture->y2), IE->Delete_Texture->Image, Vector4_Create(0.5f, 0.5f, 0.5f, 0));
+}
+
 void Image_Editor_Render(struct Image_Editor *IE)
 {
 	Image_Editor_Header(IE);
@@ -1300,6 +1616,17 @@ void Image_Editor_Render(struct Image_Editor *IE)
 
 	struct Image_Tab *IT = ((struct Image_Tab *)IE->Image_Tab_List->items) + IE->Image_Tab_Index;
 
+	Gui_TextBox_Render(IE->Name);
+
+	if(IT->Frames_On == -1) {
+		Image_Editor_RenderFrames(IE, IT);
+		return;
+	}
+
+	_Bool Frame_Confirm = false, Frame_Close;
+
+	struct Image_Frame *IF = IT->Frames + IT->Frames_On;
+
 	//Image_Editor_CheckScroll(IE, IT);
 	Gui_Vertical_ScrollBar_Render(IE->Image_Scroll);
 
@@ -1308,32 +1635,32 @@ void Image_Editor_Render(struct Image_Editor *IE)
 		IT->X = 0;
 	if(IT->Y < 0)
 		IT->Y = 0;
-	if(IT->X + (float)IT->Image_Edit->Width / 100.0f * IT->BarY > IT->Image_Edit->Width)
-		IT->X = IT->Image_Edit->Width - (float)IT->Image_Edit->Width / 100.0f * IT->BarY;
-	if(IT->Y + (float)IT->Image_Edit->Height / 100.0f * IT->BarY > IT->Image_Edit->Height)
-		IT->Y = IT->Image_Edit->Height - (float)IT->Image_Edit->Height / 100.0f * IT->BarY;
+	if(IT->X + (float)IF->Image_Edit->Width / 100.0f * IT->BarY > IF->Image_Edit->Width)
+		IT->X = IF->Image_Edit->Width - (float)IF->Image_Edit->Width / 100.0f * IT->BarY;
+	if(IT->Y + (float)IF->Image_Edit->Height / 100.0f * IT->BarY > IF->Image_Edit->Height)
+		IT->Y = IF->Image_Edit->Height - (float)IF->Image_Edit->Height / 100.0f * IT->BarY;
 
 	// Drawing Visible sprite to screen
-	IE->Image_View = Vector4_Create(IT->X, IT->Y, (float)IT->Image_Edit->Width / 100.0f * IT->BarY, (float)IT->Image_Edit->Height / 100.0f * IT->BarY);
+	IE->Image_View = Vector4_Create(IT->X, IT->Y, (float)IF->Image_Edit->Width / 100.0f * IT->BarY, (float)IF->Image_Edit->Height / 100.0f * IT->BarY);
 
 	glBindTexture(GL_TEXTURE_2D, IE->Image_Texture);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, IT->Image_Edit->Width,
-			IT->Image_Edit->Height, GL_RGBA, GL_UNSIGNED_BYTE,
-			(GLvoid*) IT->Image_Edit->Data);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, IF->Image_Edit->Width,
+			IF->Image_Edit->Height, GL_RGBA, GL_UNSIGNED_BYTE,
+			(GLvoid*) IF->Image_Edit->Data);
 
 	Image_Shader.pushQuad(IE->Image_Editor_View,
-			Quad_Create(IE->Image_View.x / IT->Image_Edit->Width,
-					IE->Image_View.y / IT->Image_Edit->Height
-							+ IE->Image_View.w / IT->Image_Edit->Height,
-							IE->Image_View.x / IT->Image_Edit->Width,
-							IE->Image_View.y / IT->Image_Edit->Height,
-							IE->Image_View.x / IT->Image_Edit->Width
-							+ IE->Image_View.z / IT->Image_Edit->Width,
-							IE->Image_View.y / IT->Image_Edit->Height,
-							IE->Image_View.x / IT->Image_Edit->Width
-							+ IE->Image_View.z / IT->Image_Edit->Width,
-							IE->Image_View.y / IT->Image_Edit->Height
-						+ IE->Image_View.w / IT->Image_Edit->Height), IE->Image_Texture,
+			Quad_Create(IE->Image_View.x / IF->Image_Edit->Width,
+					IE->Image_View.y / IF->Image_Edit->Height
+							+ IE->Image_View.w / IF->Image_Edit->Height,
+							IE->Image_View.x / IF->Image_Edit->Width,
+							IE->Image_View.y / IF->Image_Edit->Height,
+							IE->Image_View.x / IF->Image_Edit->Width
+							+ IE->Image_View.z / IF->Image_Edit->Width,
+							IE->Image_View.y / IF->Image_Edit->Height,
+							IE->Image_View.x / IF->Image_Edit->Width
+							+ IE->Image_View.z / IF->Image_Edit->Width,
+							IE->Image_View.y / IF->Image_Edit->Height
+						+ IE->Image_View.w / IF->Image_Edit->Height), IE->Image_Texture,
 			Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
 
 	// Drawing Pencil and PickColor Buttons
@@ -1344,6 +1671,9 @@ void Image_Editor_Render(struct Image_Editor *IE)
 	IE->Button_FillHover = Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), IE->Button_Fill);
 
 	IE->Button_PanViewHover = Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), IE->Button_PanView);
+
+	Frame_Confirm = Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), IE->Button_FrameConfirm);
+	Frame_Close = Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), IE->Button_FrameCancel);
 
 	if (IE->Button_PencilHover && Mouse.justPressed) {
 		IE->Button_PencilOn = true;
@@ -1365,7 +1695,44 @@ void Image_Editor_Render(struct Image_Editor *IE)
 		IE->Button_FillOn = false;
 		IE->Button_PickColorOn = false;
 		IE->Button_PencilOn = false;
+	} else if (Frame_Confirm && Mouse.justReleased) {
+		Texture_Free(IF->Texture);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		glGenTextures(1, &IF->Texture);
+		glBindTexture(GL_TEXTURE_2D, IF->Texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, IF->Image_Edit->Width,
+				IF->Image_Edit->Height, 0, GL_RGBA,
+				GL_UNSIGNED_BYTE, IF->Image_Edit->Data);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		memcpy(IF->Image_Original->Data, IF->Image_Edit->Data, sizeof(unsigned char) * IF->Image_Edit->Width * IF->Image_Edit->Height * 4);
+		IT->Frames_On = -1;
+		IT->Frame_Selected = -1;
+	} else if (Frame_Close && Mouse.justReleased) {
+		IT->Frames_On = -1;
+		memcpy(IF->Image_Edit->Data, IF->Image_Original->Data, sizeof(unsigned char) * IF->Image_Edit->Width * IF->Image_Edit->Height * 4);
+		IT->Frame_Selected = -1;
 	}
+
+	if(Frame_Confirm)
+		Image_Shader.pushQuad(IE->Button_FrameConfirm,
+				Quad_Create(IE->Change_Confirm_Texture->x, IE->Change_Confirm_Texture->y2, IE->Change_Confirm_Texture->x, IE->Change_Confirm_Texture->y, IE->Change_Confirm_Texture->x2, IE->Change_Confirm_Texture->y, IE->Change_Confirm_Texture->x2, IE->Change_Confirm_Texture->y2), IE->Change_Confirm_Texture->Image,
+				Vector4_Create(-0.20f, -0.20f, -0.20f, 0.0f));
+	else
+		Image_Shader.pushQuad(IE->Button_FrameConfirm,
+				Quad_Create(IE->Change_Confirm_Texture->x, IE->Change_Confirm_Texture->y2, IE->Change_Confirm_Texture->x, IE->Change_Confirm_Texture->y, IE->Change_Confirm_Texture->x2, IE->Change_Confirm_Texture->y, IE->Change_Confirm_Texture->x2, IE->Change_Confirm_Texture->y2), IE->Change_Confirm_Texture->Image,
+				Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
+
+	if(Frame_Close)
+		Image_Shader.pushQuad(IE->Button_FrameCancel,
+				Quad_Create(IE->Close_Texture->x, IE->Close_Texture->y2, IE->Close_Texture->x, IE->Close_Texture->y, IE->Close_Texture->x2, IE->Close_Texture->y, IE->Close_Texture->x2, IE->Close_Texture->y2), IE->Close_Texture->Image,
+				Vector4_Create(-0.20f, -0.20f, -0.20f, 0.0f));
+	else
+		Image_Shader.pushQuad(IE->Button_FrameCancel,
+				Quad_Create(IE->Close_Texture->x, IE->Close_Texture->y2, IE->Close_Texture->x, IE->Close_Texture->y, IE->Close_Texture->x2, IE->Close_Texture->y, IE->Close_Texture->x2, IE->Close_Texture->y2), IE->Close_Texture->Image,
+				Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
 
 	if (IE->Button_PencilHover || IE->Button_PencilOn)
 		Image_Shader.pushQuad(IE->Button_Pencil,
@@ -1433,13 +1800,13 @@ void Image_Editor_Render(struct Image_Editor *IE)
 
 		if (IE->Button_PencilOn && Mouse.isPressed)
 		{
-			IT->Image_Edit->Data[(X + IT->Image_Edit->Width * Y) * 4] =
+			IF->Image_Edit->Data[(X + IF->Image_Edit->Width * Y) * 4] =
 					(char) IE->CurrentColor.x;
-			IT->Image_Edit->Data[(X + IT->Image_Edit->Width * Y) * 4 + 1] =
+			IF->Image_Edit->Data[(X + IF->Image_Edit->Width * Y) * 4 + 1] =
 					(char) IE->CurrentColor.y;
-			IT->Image_Edit->Data[(X + IT->Image_Edit->Width * Y) * 4 + 2] =
+			IF->Image_Edit->Data[(X + IF->Image_Edit->Width * Y) * 4 + 2] =
 					(char) IE->CurrentColor.z;
-			IT->Image_Edit->Data[(X + IT->Image_Edit->Width * Y) * 4 + 3] =
+			IF->Image_Edit->Data[(X + IF->Image_Edit->Width * Y) * 4 + 3] =
 					(char) IE->CurrentColor.w;
 		}
 		else if (IE->Button_PickColorOn && Mouse.justPressed)
@@ -1450,13 +1817,13 @@ void Image_Editor_Render(struct Image_Editor *IE)
 			Gui_TextBox_ClearText(IE->Color_Alpha);
 
 			unsigned char Red =
-					IT->Image_Edit->Data[(X + IT->Image_Edit->Width * Y) * 4];
-			unsigned char Green = IT->Image_Edit->Data[(X
-					+ IT->Image_Edit->Width * Y) * 4 + 1];
-			unsigned char Blue = IT->Image_Edit->Data[(X
-					+ IT->Image_Edit->Width * Y) * 4 + 2];
-			unsigned char Alpha = IT->Image_Edit->Data[(X
-					+ IT->Image_Edit->Width * Y) * 4 + 3];
+					IF->Image_Edit->Data[(X + IF->Image_Edit->Width * Y) * 4];
+			unsigned char Green = IF->Image_Edit->Data[(X
+					+ IF->Image_Edit->Width * Y) * 4 + 1];
+			unsigned char Blue = IF->Image_Edit->Data[(X
+					+ IF->Image_Edit->Width * Y) * 4 + 2];
+			unsigned char Alpha = IF->Image_Edit->Data[(X
+					+ IF->Image_Edit->Width * Y) * 4 + 3];
 
 			char *Text = Integer_toString((int) Red);
 			IE->Color_Red->Value = memcpy(IE->Color_Red->Value, Text,
@@ -1480,14 +1847,14 @@ void Image_Editor_Render(struct Image_Editor *IE)
 		}
 		else if (IE->Button_FillOn && Mouse.justPressed && !BF_Thread_Running)
 		{
-			BF_IT = IT->Image_Edit;
+			BF_IT = IF->Image_Edit;
 			BF_Orig_X = X;
 			BF_Orig_Y = Y;
 			BF_Color_From = Vector4_Create(
-					IT->Image_Edit->Data[(X + IT->Image_Edit->Width * Y) * 4],
-					IT->Image_Edit->Data[(X + IT->Image_Edit->Width * Y) * 4 + 1],
-					IT->Image_Edit->Data[(X + IT->Image_Edit->Width * Y) * 4 + 2],
-					IT->Image_Edit->Data[(X + IT->Image_Edit->Width * Y) * 4 + 3]);
+					IF->Image_Edit->Data[(X + IF->Image_Edit->Width * Y) * 4],
+					IF->Image_Edit->Data[(X + IF->Image_Edit->Width * Y) * 4 + 1],
+					IF->Image_Edit->Data[(X + IF->Image_Edit->Width * Y) * 4 + 2],
+					IF->Image_Edit->Data[(X + IF->Image_Edit->Width * Y) * 4 + 3]);
 			BF_Color_To = IE->CurrentColor;
 
 			/* Flood filling algorithm can take a couple of milliseconds on large images, so a thread is created to run it */
@@ -1523,8 +1890,6 @@ void Image_Editor_Render(struct Image_Editor *IE)
 		if (Mouse.justReleased)
 			IE->PanningView = false;
 	}
-
-	Gui_TextBox_Render(IE->Name);
 	Gui_TextBox_Render(IE->Color_Red);
 	Gui_TextBox_Render(IE->Color_Green);
 	Gui_TextBox_Render(IE->Color_Blue);
@@ -1543,6 +1908,7 @@ void Image_Editor_Free(struct Image_Editor **IE)
 	Image_Free((*IE)->Close_Texture);
 	Image_Free((*IE)->Delete_Texture);
 	Image_Free((*IE)->New_Texture);
+	Image_Free((*IE)->Add_Texture);
 
 	Gui_TextBox_Free(&(*IE)->Color_Red);
 	Gui_TextBox_Free(&(*IE)->Color_Green);
@@ -1551,10 +1917,14 @@ void Image_Editor_Free(struct Image_Editor **IE)
 	Gui_TextBox_Free(&(*IE)->Name);
 
 	struct Image_Tab *IM = (*IE)->Image_Tab_List->items;
+
+	log_info("Hi");
 	for(int i = 0; i < (*IE)->Image_Tab_List->size; i++)
 	{
+		log_info("%i", i);
 		Image_Tab_Close(IM + i);
 	}
+	log_info("Hello");
 	vector_delete((*IE)->Image_Tab_List);
 
 	free((*IE));

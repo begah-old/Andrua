@@ -57,8 +57,8 @@ static int Lua_loadImage(lua_State *L)
 	}
 	if(!lua_isstring(L, -1))
 	{
-		fprintf(Log, "Error loading image, argument needs to be a string\n");
-		Lua_Close(NULL);
+		fprintf(Log, "Error image.load, argument needs to be a string\n");
+		Lua_requestClose = true;
 		lua_pushnumber(L, -1.0);
 		return 1;
 	}
@@ -170,7 +170,7 @@ static int Lua_freeImage(lua_State *L)
 	if(!lua_isnumber(L, -1))
 	{
 		fprintf(Log, "Error freeing image, argument needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 
@@ -189,13 +189,383 @@ static int Lua_freeImage(lua_State *L)
 	{
 		if(LT[i].ID == TextureID)
 		{
-			Image_Free(LT[i].TextID);
+			Image_FreeSimple(LT[i].TextID);
 			vector_erase(Lua_Texture_List, i);
 			return 0;
 		}
 	}
 
 	return 0;
+}
+
+// Animation Management
+double Animation_NextID = 0.0;
+struct Lua_Animation { double ID; struct Animation *Animation; };
+struct vector_t *Lua_Animation_List = NULL;
+
+static int Lua_loadAnimation(lua_State *State)
+{
+    if(!Lua_Animation_List)
+    {
+        Lua_Animation_List = vector_new(sizeof(struct Lua_Animation));
+    }
+
+    if(!lua_isstring(Lua_State, -1))
+    {
+        fprintf(Log, "animation.load : Argument need to be a string");
+        Lua_requestClose = true;
+		lua_pushnumber(Lua_State, -1.0);
+		return 1;
+    }
+
+    const char *Name = lua_tostring(Lua_State, -1);
+
+    struct Lua_Animation Anim = {Animation_NextID++, Animation_LoadExternal(Name)};
+    Anim.Animation->Time_perFrame = 500;
+    Anim.Animation->x = Lua_Window.x;
+    Anim.Animation->y = Lua_Window.y;
+
+    vector_push_back(Lua_Animation_List, &Anim);
+
+    lua_pushnumber(Lua_State, Anim.ID);
+
+    return 1;
+}
+
+static int Lua_setSizeAnimation(lua_State *State)
+{
+    if(!Lua_Animation_List)
+    {
+        fprintf(Log, "animation.setSize : No animation created");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    if(!lua_isnumber(Lua_State, -3))
+    {
+        fprintf(Log, "animation.setSize : Argument 1 needs to be a number (Animation ID)");
+        Lua_requestClose = true;
+        return 0;
+    } if(!lua_isnumber(Lua_State, -2))
+    {
+        fprintf(Log, "animation.setSize : Argument 2 needs to be a number (Animation ID)");
+        Lua_requestClose = true;
+        return 0;
+    } if(!lua_isnumber(Lua_State, -1))
+    {
+        fprintf(Log, "animation.setSize : Argument 3 needs to be a number (Animation ID)");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    double ID = lua_tonumber(Lua_State, -3);
+
+    if(ID < 0 || ID >= Animation_NextID)
+    {
+        fprintf(Log, "animation.setSize : Argument 1 is a invalid animation ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    struct Lua_Animation *LA = Lua_Animation_List->items;
+    struct Animation *Animation = NULL;
+
+	// Search for corresponding texture
+	for(int i = 0; i < Lua_Animation_List->size; i++)
+	{
+		if(LA[i].ID == ID)
+		{
+			Animation = LA[i].Animation;
+			break;
+		}
+	}
+
+	if(!Animation)
+    {
+        fprintf(Log, "animation.setSize : No animation matching that ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    double w = lua_tonumber(Lua_State, -2), h = lua_tonumber(Lua_State, -1);
+    Animation_SetSize(Animation, w, h);
+    return 0;
+}
+
+static int Lua_setPosAnimation(lua_State *State)
+{
+    if(!Lua_Animation_List)
+    {
+        fprintf(Log, "animation.setPos : No animation created");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    if(!lua_isnumber(Lua_State, -3))
+    {
+        fprintf(Log, "animation.setPos : Argument 1 needs to be a number (Animation ID)");
+        Lua_requestClose = true;
+        return 0;
+    } if(!lua_isnumber(Lua_State, -2))
+    {
+        fprintf(Log, "animation.setPos : Argument 2 needs to be a number (Animation ID)");
+        Lua_requestClose = true;
+        return 0;
+    } if(!lua_isnumber(Lua_State, -1))
+    {
+        fprintf(Log, "animation.setPos : Argument 3 needs to be a number (Animation ID)");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    double ID = lua_tonumber(Lua_State, -3);
+
+    if(ID < 0 || ID >= Animation_NextID)
+    {
+        fprintf(Log, "animation.setPos : Argument 1 is a invalid animation ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    struct Lua_Animation *LA = Lua_Animation_List->items;
+    struct Animation *Animation = NULL;
+
+	// Search for corresponding texture
+	for(int i = 0; i < Lua_Animation_List->size; i++)
+	{
+		if(LA[i].ID == ID)
+		{
+			Animation = LA[i].Animation;
+			break;
+		}
+	}
+
+	if(!Animation)
+    {
+        fprintf(Log, "animation.setPos : No animation matching that ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    double x = lua_tonumber(Lua_State, -2) + Lua_Window.x, y = lua_tonumber(Lua_State, -1) + Lua_Window.y;
+    Animation_SetPosition(Animation, x, y);
+    return 0;
+}
+
+static int Lua_setAngleAnimation(lua_State *State)
+{
+    if(!Lua_Animation_List)
+    {
+        fprintf(Log, "animation.setAngle : No animation created");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    if(!lua_isnumber(Lua_State, -2))
+    {
+        fprintf(Log, "animation.setAngle : Argument 1 needs to be a number (Animation ID)");
+        Lua_requestClose = true;
+        return 0;
+    } if(!lua_isnumber(Lua_State, -1))
+    {
+        fprintf(Log, "animation.setAngle : Argument 2 needs to be a number (Animation ID)");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    double ID = lua_tonumber(Lua_State, -2);
+
+    if(ID < 0 || ID >= Animation_NextID)
+    {
+        fprintf(Log, "animation.setAngle : Argument 1 is a invalid animation ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    struct Lua_Animation *LA = Lua_Animation_List->items;
+    struct Animation *Animation = NULL;
+
+	// Search for corresponding texture
+	for(int i = 0; i < Lua_Animation_List->size; i++)
+	{
+		if(LA[i].ID == ID)
+		{
+			Animation = LA[i].Animation;
+			break;
+		}
+	}
+
+	if(!Animation)
+    {
+        fprintf(Log, "animation.setAngle : No animation matching that ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    double Angle = lua_tonumber(Lua_State, -1);
+    Animation_SetAngle(Animation, Angle);
+    return 0;
+}
+
+static int Lua_setFrameTimeAnimation(lua_State *State)
+{
+    if(!Lua_Animation_List)
+    {
+        fprintf(Log, "animation.timePerFrame : No animation created");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    if(!lua_isnumber(Lua_State, -2))
+    {
+        fprintf(Log, "animation.timePerFrame : Argument 1 needs to be a number (Animation ID)");
+        Lua_requestClose = true;
+        return 0;
+    } if(!lua_isnumber(Lua_State, -1))
+    {
+        fprintf(Log, "animation.timePerFrame : Argument 2 needs to be a number (Animation ID)");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    double ID = lua_tonumber(Lua_State, -2);
+
+    if(ID < 0 || ID >= Animation_NextID)
+    {
+        fprintf(Log, "animation.timePerFrame : Argument 1 is a invalid animation ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    struct Lua_Animation *LA = Lua_Animation_List->items;
+    struct Animation *Animation = NULL;
+
+	// Search for corresponding texture
+	for(int i = 0; i < Lua_Animation_List->size; i++)
+	{
+		if(LA[i].ID == ID)
+		{
+			Animation = LA[i].Animation;
+			break;
+		}
+	}
+
+	if(!Animation)
+    {
+        fprintf(Log, "animation.timePerFrame : No animation matching that ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    double Time = lua_tonumber(Lua_State, -1);
+    Animation->Time_perFrame = (long)Time;
+    return 0;
+}
+
+static int Lua_renderAnimation(lua_State *State)
+{
+        if(!Lua_Animation_List)
+    {
+        fprintf(Log, "animation.render : No animation created");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    if(!lua_isnumber(Lua_State, -1))
+    {
+        fprintf(Log, "animation.render : Argument 1 needs to be a number (Animation ID)");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    double ID = lua_tonumber(Lua_State, -1);
+
+    if(ID < 0 || ID >= Animation_NextID)
+    {
+        fprintf(Log, "animation.render : Argument 1 is a invalid animation ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    struct Lua_Animation *LA = Lua_Animation_List->items;
+    struct Animation *Animation = NULL;
+
+	// Search for corresponding texture
+	for(int i = 0; i < Lua_Animation_List->size; i++)
+	{
+		if(LA[i].ID == ID)
+		{
+			Animation = LA[i].Animation;
+			break;
+		}
+	}
+
+	if(!Animation)
+    {
+        fprintf(Log, "animation.render : No animation matching that ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    Animation_Render(Animation);
+    return 0;
+}
+
+static int Lua_freeAnimation(lua_State *State)
+{
+    if(!Lua_Animation_List)
+    {
+        fprintf(Log, "animation.free : No animation created");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    if(!lua_isnumber(Lua_State, -1))
+    {
+        fprintf(Log, "animation.free : Argument 1 needs to be a number (Animation ID)");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    double ID = lua_tonumber(Lua_State, -1);
+
+    if(ID < 0 || ID >= Animation_NextID)
+    {
+        fprintf(Log, "animation.free : Argument 1 is a invalid animation ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    struct Lua_Animation *LA = Lua_Animation_List->items;
+    int Index = -1;
+
+	// Search for corresponding texture
+	for(int i = 0; i < Lua_Animation_List->size; i++)
+	{
+		if(LA[i].ID == ID)
+		{
+			Index = i;
+			break;
+		}
+	}
+
+	if(Index == -1)
+    {
+        fprintf(Log, "animation.free : No animation matching that ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    Animation_Free(LA[Index].Animation);
+    vector_erase(Lua_Animation_List, Index);
+
+    if(!Lua_Animation_List->size)
+    {
+        Animation_NextID = 0.0;
+        vector_delete(Lua_Animation_List);
+        Lua_Animation_List = NULL;
+    }
+    return 0;
 }
 
 // Gui Button Management
@@ -212,35 +582,35 @@ static int Lua_newButton(lua_State *L)
 	if(!lua_isstring(L, -5))
 	{
 		fprintf(Log, "Error creating button, argument 1 needs to be a string\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		lua_pushnumber(L, -1.0);
 		return 1;
 	}
 	if(!lua_isnumber(L, -4))
 	{
 		fprintf(Log, "Error creating button, argument 2 needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		lua_pushnumber(L, -1.0);
 		return 1;
 	}
 	if(!lua_isnumber(L, -3))
 	{
 		fprintf(Log, "Error creating button, argument 3 needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		lua_pushnumber(L, -1.0);
 		return 1;
 	}
 	if(!lua_isnumber(L, -2))
 	{
 		fprintf(Log, "Error creating button, argument 4 needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		lua_pushnumber(L, -1.0);
 		return 1;
 	}
 	if(!lua_isnumber(L, -1))
 	{
 		fprintf(Log, "Error creating button, argument 5 needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		lua_pushnumber(L, -1.0);
 		return 1;
 	}
@@ -275,55 +645,55 @@ static int Lua_colorButton(lua_State *L)
 	if(!lua_isnumber(L, -9))
 	{
 		fprintf(Log, "Error coloring button, argument 1 needs to be a number");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -8))
 	{
 		fprintf(Log, "Error coloring button, argument 2 needs to be a number");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -7))
 	{
 		fprintf(Log, "Error coloring button, argument 3 needs to be a number");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -6))
 	{
 		fprintf(Log, "Error coloring button, argument 4 needs to be a number");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -5))
 	{
 		fprintf(Log, "Error coloring button, argument 5 needs to be a number");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -4))
 	{
 		fprintf(Log, "Error coloring button, argument 6 needs to be a number");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -3))
 	{
 		fprintf(Log, "Error coloring button, argument 7 needs to be a number");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -2))
 	{
 		fprintf(Log, "Error coloring button, argument 8 needs to be a number");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -1))
 	{
 		fprintf(Log, "Error coloring button, argument 9 needs to be a number");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 
@@ -332,7 +702,7 @@ static int Lua_colorButton(lua_State *L)
 	if(ID < 0 || ID >= Gui_Button_NextID)
 	{
 		fprintf(Log, "Error coloring button, argument 1 needs to be a valid button");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 
@@ -346,7 +716,7 @@ static int Lua_colorButton(lua_State *L)
 	if(!bu)
 	{
 		fprintf(Log, "Error coloring button, didn't find button");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 
@@ -371,31 +741,31 @@ static int Lua_colorButtonText(lua_State *L)
 	if(!lua_isnumber(L, -5))
 	{
 		fprintf(Log, "Error creating button, argument 1 needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -4))
 	{
 		fprintf(Log, "Error creating button, argument 2 needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -3))
 	{
 		fprintf(Log, "Error creating button, argument 3 needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -2))
 	{
 		fprintf(Log, "Error creating button, argument 4 needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -1))
 	{
 		fprintf(Log, "Error creating button, argument 5 needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 
@@ -404,7 +774,7 @@ static int Lua_colorButtonText(lua_State *L)
 	if(ID < 0 || ID >= Gui_Button_NextID)
 	{
 		fprintf(Log, "Error coloring button, argument 1 needs to be a valid button");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 
@@ -418,7 +788,7 @@ static int Lua_colorButtonText(lua_State *L)
 	if(!bu)
 	{
 		fprintf(Log, "Error coloring button, didn't find button");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 
@@ -536,7 +906,7 @@ static int Lua_freeButton(lua_State *L)
 	if(!lua_isnumber(L, -1))
 	{
 		fprintf(Log, "Error freeing button, argument needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 
@@ -571,35 +941,35 @@ static int Lua_newTextBox(lua_State *L)
 	if(!lua_isstring(L, -5))
 	{
 		fprintf(Log, "Error creating text box, argument 1 needs to be a string\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		lua_pushnumber(L, -1.0);
 		return 1;
 	}
 	if(!lua_isnumber(L, -4))
 	{
 		fprintf(Log, "Error creating text box, argument 2 needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		lua_pushnumber(L, -1.0);
 		return 1;
 	}
 	if(!lua_isnumber(L, -3))
 	{
 		fprintf(Log, "Error creating text box, argument 3 needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		lua_pushnumber(L, -1.0);
 		return 1;
 	}
 	if(!lua_isnumber(L, -2))
 	{
 		fprintf(Log, "Error creating text box, argument 4 needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		lua_pushnumber(L, -1.0);
 		return 1;
 	}
 	if(!lua_isnumber(L, -1))
 	{
 		fprintf(Log, "Error creating text box, argument 5 needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		lua_pushnumber(L, -1.0);
 		return 1;
 	}
@@ -802,55 +1172,55 @@ static int Lua_colorTextBox(lua_State *L)
 	if(!lua_isnumber(L, -9))
 	{
 		fprintf(Log, "Error coloring text box, argument 1 needs to be a number");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -8))
 	{
 		fprintf(Log, "Error coloring text box, argument 2 needs to be a number");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -7))
 	{
 		fprintf(Log, "Error coloring text box, argument 3 needs to be a number");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -6))
 	{
 		fprintf(Log, "Error coloring text box, argument 4 needs to be a number");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -5))
 	{
 		fprintf(Log, "Error coloring text box, argument 5 needs to be a number");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -4))
 	{
 		fprintf(Log, "Error coloring text box, argument 6 needs to be a number");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -3))
 	{
 		fprintf(Log, "Error coloring text box, argument 7 needs to be a number");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -2))
 	{
 		fprintf(Log, "Error coloring text box, argument 8 needs to be a number");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -1))
 	{
 		fprintf(Log, "Error coloring text box, argument 9 needs to be a number");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 
@@ -859,7 +1229,7 @@ static int Lua_colorTextBox(lua_State *L)
 	if(ID < 0 || ID >= Gui_TextBox_NextID)
 	{
 		fprintf(Log, "Error coloring text box, argument 1 needs to be a valid button");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 
@@ -873,7 +1243,7 @@ static int Lua_colorTextBox(lua_State *L)
 	if(!bu)
 	{
 		fprintf(Log, "Error coloring text box, didn't find button");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 
@@ -898,31 +1268,31 @@ static int Lua_colorTextBoxText(lua_State *L)
 	if(!lua_isnumber(L, -5))
 	{
 		fprintf(Log, "Error textbox.textColor, argument 1 needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -4))
 	{
 		fprintf(Log, "Error textbox.textColor, argument 2 needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -3))
 	{
 		fprintf(Log, "Error textbox.textColor, argument 3 needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -2))
 	{
 		fprintf(Log, "Error textbox.textColor, argument 4 needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -1))
 	{
 		fprintf(Log, "Error textbox.textColor, argument 5 needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 
@@ -931,7 +1301,7 @@ static int Lua_colorTextBoxText(lua_State *L)
 	if(ID < 0 || ID >= Gui_TextBox_NextID)
 	{
 		fprintf(Log, "Error textbox.textColor, argument 1 needs to be a valid button");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 
@@ -945,7 +1315,7 @@ static int Lua_colorTextBoxText(lua_State *L)
 	if(!bu)
 	{
 		fprintf(Log, "Error textbox.textColor, didn't find button");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 
@@ -967,31 +1337,31 @@ static int Lua_resizeTextBox(lua_State *L)
 	if(!lua_isnumber(L, -5))
 	{
 		fprintf(Log, "Error textbox.resize, argument 1 needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -4))
 	{
 		fprintf(Log, "Error textbox.resize, argument 2 needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -3))
 	{
 		fprintf(Log, "Error textbox.resize, argument 3 needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -2))
 	{
 		fprintf(Log, "Error textbox.resize, argument 4 needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 	if(!lua_isnumber(L, -1))
 	{
 		fprintf(Log, "Error textbox.resize, argument 5 needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 
@@ -1000,7 +1370,7 @@ static int Lua_resizeTextBox(lua_State *L)
 	if(ID < 0 || ID >= Gui_TextBox_NextID)
 	{
 		fprintf(Log, "Error textbox.resize, argument 1 needs to be a valid button");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 
@@ -1014,7 +1384,7 @@ static int Lua_resizeTextBox(lua_State *L)
 	if(!bu)
 	{
 		fprintf(Log, "Error textbox.resize, didn't find button");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 
@@ -1181,7 +1551,7 @@ static int Lua_freeTextBox(lua_State *L)
 	if(!lua_isnumber(L, -1))
 	{
 		fprintf(Log, "Error freeing button, argument needs to be a number\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 		return 0;
 	}
 
@@ -1208,7 +1578,7 @@ static int Lua_DrawRectangle(lua_State *L)
 	if(!App_UsingDisplay)
 	{
 		fprintf(Log, "renderer.rectangle : need to call have useDisplay to true to get access to rendering functions\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 	}
 	if(!lua_isnumber(L, -8))
 	{
@@ -1291,7 +1661,7 @@ static int Lua_fixedFontRender(lua_State *L)
 	if(!App_UsingDisplay)
 	{
 		fprintf(Log, "renderer.rectangle : need to call have useDisplay to true to get access to rendering functions\n");
-		Lua_Close(NULL);
+		Lua_requestClose = true;
 	}
 	if(!lua_isstring(L, -9))
 	{
@@ -1424,6 +1794,17 @@ void Lua_LoadLibrary(FILE *F)
 			{NULL, NULL}
     };
 
+    static const luaL_Reg Animation_Functions[] = {
+        {"new", Lua_loadAnimation},
+        {"setPos", Lua_setPosAnimation},
+        {"setSize", Lua_setSizeAnimation},
+        {"setAngle", Lua_setAngleAnimation},
+        {"timePerFrame", Lua_setFrameTimeAnimation},
+        {"render", Lua_renderAnimation},
+        {"free", Lua_freeAnimation},
+        {NULL, NULL}
+    };
+
     lua_newtable(Lua_State);
     luaL_setfuncs(Lua_State, Engine_Functions, 0);
     lua_setglobal(Lua_State, "engine");
@@ -1443,20 +1824,26 @@ void Lua_LoadLibrary(FILE *F)
     lua_newtable(Lua_State);
     luaL_setfuncs(Lua_State, TextBox_Functions, 0);
     lua_setglobal(Lua_State, "textbox");
+
+    lua_newtable(Lua_State);
+    luaL_setfuncs(Lua_State, Animation_Functions, 0);
+    lua_setglobal(Lua_State, "animation");
 }
 
 void Lua_closeLibrary()
 {
+    log_info("Closing Lua Library");
 	if (Lua_Texture_List) {
 		struct Lua_Texture *LT = Lua_Texture_List->items;
 
 		for (int i = 0; i < Lua_Texture_List->size; i++)
-			Image_Free(LT[i].TextID);
+			Image_FreeSimple(LT[i].TextID);
 
 		vector_delete(Lua_Texture_List);
 		Lua_Texture_List = NULL;
 		Texture_NextID = 0.0;
 	}
+	log_info("Free'd all textures");
 	if (Lua_Button_List) {
 		struct Lua_Button *lb = Lua_Button_List->items;
 
@@ -1467,4 +1854,17 @@ void Lua_closeLibrary()
 		Lua_Button_List = NULL;
 		Gui_Button_NextID = 0.0;
 	}
+	log_info("Free'd all buttons");
+	if (Lua_Animation_List) {
+        struct Lua_Animation *la = Lua_Animation_List->items;
+
+        for(int i = 0; i < Lua_Animation_List->size; i++)
+            Animation_FreeSimple(la[i].Animation);
+
+        vector_delete(Lua_Animation_List);
+        Lua_Animation_List = NULL;
+        Animation_NextID = 0.0;
+	}
+	log_info("Free'd all animations");
+	log_info("Done closing Lua Library");
 }

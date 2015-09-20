@@ -237,6 +237,21 @@ struct Image
 	int pX, pY, pW, pH;
 };
 
+struct Animation
+{
+	struct Image *Frames;
+	long Time_perFrame;
+
+	int Current_Frame, Frame_Count;
+	struct timeval Current_FrameStart;
+
+	struct Quad Calculated_Quad;
+
+	float x, y;
+	float width, height;
+	double Angle;
+};
+
 /* Simple structure to hold a string, used with vector_t */
 struct String_Struct
 {
@@ -449,6 +464,7 @@ GLuint ImageEngine_GetAtlas();
 struct Image *Image_LoadExternal(const char *Path); // Load Images using the Executable_Path
 struct Image *Image_Load(const char *Path); // Load Images using Asset_Path
 void Image_Free(struct Image *Image);
+void Image_FreeSimple(struct Image *Image);
 
 /* Use if engine runs into an error, like unable to link shader */
 void Application__Error(const char *FunctionName);
@@ -568,7 +584,7 @@ void Gui_Vertical_ScrollBar_Render(struct Gui_Vertical_ScrollBar *ScrollBar);
 void Gui_Vertical_ScrollBar_Resize(struct Gui_Vertical_ScrollBar *ScrollBar, float x, float y, float w, float h, float barValue, float totalValue);
 void Gui_Vertical_ScrollBar_Free(struct Gui_Vertical_ScrollBar **ScrollTab);
 
-void String_Add(char *String1, char *String2); // Concatenates two strings together, the first string must have space for the second
+void String_Add(char *String1, const char *String2); // Concatenates two strings together, the first string must have space for the second
 void String_Copy(char *String1, const char *String2); // Copy String2 to another String1
 void String_Remove(char *String1, char *String2); // Remove String2 from String1
 
@@ -611,6 +627,15 @@ struct Vertex Vertex_Create(struct Vector3f vec3, struct Vector2f vec2);
 struct Quad Quad_Create(float x, float y, float x2, float y2, float x3,
 						float y3, float x4, float y4);
 
+struct Animation *Animation_LoadInternal(const char *Name);
+struct Animation *Animation_LoadExternal(const char *Name);
+void Animation_SetSize(struct Animation *Animation, float w, float h);
+void Animation_SetPosition(struct Animation *Animation, float x, float y);
+void Animation_SetAngle(struct Animation *Animation, double Angle);
+void Animation_Render(struct Animation *Animation);
+void Animation_Free(struct Animation *Animation);
+void Animation_FreeSimple(struct Animation *Animation);
+
 /* Function used to Calculate FPS on Windows, and to calculate mouse event's timing */
 long int Time_elapsed(struct timeval Start, struct timeval End);
 
@@ -634,6 +659,7 @@ void Engine_closeKeyboard();
 /* Platform independent file layer */
 struct F_FileInternal *FileInternal_Open(const char *FilePath);
 long int FileInternal_Length(struct F_FileInternal *file);
+_Bool FileInternal_Exists(const char *FilePath);
 void FileInternal_Seek(struct F_FileInternal *file, int offset, int whence);
 int FileInternal_Read(void *ptr, size_t Unit_size, int Unit_number, struct F_FileInternal *file);
 void FileInternal_Close(struct F_FileInternal *file);

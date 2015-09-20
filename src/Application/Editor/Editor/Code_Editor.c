@@ -675,31 +675,20 @@ Code_SplitToParts(struct Lua_Code_Editor *LCE, char *Code, int *NumOfParts)
 		{
 			if ((int) ReserveWords[i].x != 0)
 			{
-				Part[0].Part = malloc(
-						sizeof(char) * ((int) ReserveWords[0].x + 1));
-				Part[0].Part = memcpy(Part[0].Part, Code,
-									  sizeof(char) * (int) ReserveWords[0].x);
+				Part[0].Part = malloc(sizeof(char) * ((int) ReserveWords[0].x + 1));
+				Part[0].Part = memcpy(Part[0].Part, Code, sizeof(char) * (int) ReserveWords[0].x);
 				Part[0].Part[(int) ReserveWords[0].x] = '\0';
 				Part[0].Color = COLOR_BLACK;
-				Part[1].Part = malloc(
-						sizeof(char)
-						* ((int) ReserveWords[0].y
-						   - (int) ReserveWords[0].x + 1));
-				Part[1].Part = memcpy(Part[1].Part,
-									  Code + (int) ReserveWords[0].x,
-									  sizeof(char) * (int) ReserveWords[0].y
-									  - (int) ReserveWords[0].x);
-				Part[1].Part[(int) ReserveWords[0].y - (int) ReserveWords[0].x] =
-						'\0';
+				Part[1].Part = malloc(sizeof(char) * ((int) ReserveWords[0].y - (int) ReserveWords[0].x + 1));
+				Part[1].Part = memcpy(Part[1].Part, Code + (int) ReserveWords[0].x, sizeof(char) * (int) ReserveWords[0].y - (int) ReserveWords[0].x);
+				Part[1].Part[(int) ReserveWords[0].y - (int) ReserveWords[0].x] = '\0';
 				Part[1].Color = Vector4_Create(ReserveWords[0].z, ReserveWords[0].w, ReserveWords[0].h, ReserveWords[0].o);
 				j += 2;
 			}
 			else
 			{
-				Part[0].Part = malloc(
-						sizeof(char) * ((int) ReserveWords[0].y + 1));
-				Part[0].Part = memcpy(Part[0].Part, Code,
-									  sizeof(char) * (int) ReserveWords[0].y);
+				Part[0].Part = malloc(sizeof(char) * ((int) ReserveWords[0].y + 1));
+				Part[0].Part = memcpy(Part[0].Part, Code, sizeof(char) * (int) ReserveWords[0].y);
 				Part[0].Part[(int) ReserveWords[0].y] = '\0';
 				Part[0].Color = Vector4_Create(ReserveWords[0].z, ReserveWords[0].w, ReserveWords[0].h, ReserveWords[0].o);
 				j += 1;
@@ -707,36 +696,21 @@ Code_SplitToParts(struct Lua_Code_Editor *LCE, char *Code, int *NumOfParts)
 		}
 		else if ((int) ReserveWords[i].x != (int) ReserveWords[i - 1].y)
 		{
-			Part[j].Part = malloc(
-					sizeof(char) * ((int) ReserveWords[i].x - (int) ReserveWords[i - 1].y + 1));
-			Part[j].Part = memcpy(Part[j].Part,  Code + (int) ReserveWords[i - 1].y,
-								  sizeof(char) * ((int) ReserveWords[i].x - (int) ReserveWords[i - 1].y));
+			Part[j].Part = malloc(sizeof(char) * ((int) ReserveWords[i].x - (int) ReserveWords[i - 1].y + 1));
+			Part[j].Part = memcpy(Part[j].Part,  Code + (int) ReserveWords[i - 1].y, sizeof(char) * ((int) ReserveWords[i].x - (int) ReserveWords[i - 1].y));
 			Part[j].Part[(int) ReserveWords[i].x - (int) ReserveWords[i - 1].y] = '\0';
 			Part[j].Color = COLOR_BLACK;
-			Part[j + 1].Part = malloc(
-					sizeof(char)
-					* ((int) ReserveWords[i].y - (int) ReserveWords[i].x
-					   + 1));
-			Part[j + 1].Part = memcpy(Part[j + 1].Part,
-									  Code + (int) ReserveWords[i].x,
-									  sizeof(char) * (int) ReserveWords[i].y
-									  - (int) ReserveWords[i].x);
-			Part[j + 1].Part[(int) ReserveWords[i].y - (int) ReserveWords[i].x] =
-					'\0';
+			Part[j + 1].Part = malloc(sizeof(char) * ((int) ReserveWords[i].y - (int) ReserveWords[i].x + 1));
+			Part[j + 1].Part = memcpy(Part[j + 1].Part, Code + (int) ReserveWords[i].x, sizeof(char) * (int) ReserveWords[i].y - (int) ReserveWords[i].x);
+			Part[j + 1].Part[(int) ReserveWords[i].y - (int) ReserveWords[i].x] = '\0';
 			Part[j + 1].Color = Vector4_Create(ReserveWords[i].z, ReserveWords[i].w, ReserveWords[i].h, ReserveWords[i].o);
 			j += 2;
 		}
 		else
 		{
-			Part[j].Part = malloc(
-					sizeof(char)
-					* ((int) ReserveWords[i].y - (int) ReserveWords[i].x
-					   + 1));
-			Part[j].Part = memcpy(Part[j].Part, Code + (int) ReserveWords[i].x,
-								  sizeof(char) * (int) ReserveWords[i].y
-								  - (int) ReserveWords[i].x);
-			Part[j].Part[(int) ReserveWords[i].y - (int) ReserveWords[i].x] =
-					'\0';
+			Part[j].Part = malloc(sizeof(char) * ((int) ReserveWords[i].y - (int) ReserveWords[i].x + 1));
+			Part[j].Part = memcpy(Part[j].Part, Code + (int) ReserveWords[i].x, sizeof(char) * (int) ReserveWords[i].y - (int) ReserveWords[i].x);
+			Part[j].Part[(int) ReserveWords[i].y - (int) ReserveWords[i].x] = '\0';
 			Part[j].Color = Vector4_Create(ReserveWords[i].z, ReserveWords[i].w, ReserveWords[i].h, ReserveWords[i].o);
 			j += 1;
 		}
@@ -744,16 +718,11 @@ Code_SplitToParts(struct Lua_Code_Editor *LCE, char *Code, int *NumOfParts)
 
 	if ((int) ReserveWords[Num - 1].y != Code_Length)
 	{
-		Part[Num + NumParts - 1].Part = malloc(
-				sizeof(char)
-				* (Code_Length - (int) ReserveWords[Num - 1].y + 1));
+		Part[Num + NumParts - 1].Part = malloc(sizeof(char) * (Code_Length - (int) ReserveWords[Num - 1].y + 1));
 
-		Part[Num + NumParts - 1].Part = memcpy(Part[Num + NumParts - 1].Part,
-											   Code + (int) ReserveWords[Num - 1].y,
-											   (Code_Length - (int) ReserveWords[Num - 1].y));
+		Part[Num + NumParts - 1].Part = memcpy(Part[Num + NumParts - 1].Part, Code + (int) ReserveWords[Num - 1].y, (Code_Length - (int) ReserveWords[Num - 1].y));
 
-		Part[Num + NumParts - 1].Part[Code_Length
-									  - (int) ReserveWords[Num - 1].y] = '\0';
+		Part[Num + NumParts - 1].Part[Code_Length - (int) ReserveWords[Num - 1].y] = '\0';
 		Part[Num + NumParts - 1].Color = COLOR_BLACK;
 	}
 
@@ -767,8 +736,7 @@ static _Bool Header_Render(struct Lua_Code_Editor *LCE)
 	// Make sure unfinished block comment doesn't transition over to next frame
 	Comment_Block = Multi_LineQuote = false;
 
-	if (LCE->Close.v3.x != LCE->X + LCE->Width
-		|| LCE->Close.v3.y != LCE->Y + LCE->Height || LCE->ScrollBar->ScrollBar.v1.y != LCE->Y || LCE->Ligne_Num.v1.x != LCE->X)
+	if (LCE->Close.v3.x != LCE->X + LCE->Width || LCE->Close.v3.y != LCE->Y + LCE->Height || LCE->ScrollBar->ScrollBar.v1.y != LCE->Y || LCE->Ligne_Num.v1.x != LCE->X)
 	{
 		log_info("Code Editor Resizing : %i %i", Game_Width, Game_Height);
 
@@ -1047,7 +1015,7 @@ static void Lignes_Render(struct Lua_Code_Editor *LCE)
 
 	if(Mouse.y > LCE->Ligne_Text.v1.y && Mouse.y < LCE->Ligne_Text.v2.y && Mouse.justPressed)
 		LCE->WritingCode = true;
-	if(Mouse.justPressed && ((Mouse.y < LCE->Ligne_Text.v1.y) | (Mouse.y > LCE->Ligne_Text.v2.y)) && Mouse.y > LCE->Y)
+	if(Mouse.justPressed && Mouse.y > LCE->Ligne_Text.v2.y)
 		LCE->WritingCode = false;
 
 	Gui_Horizontal_ScrollBar_Render(LCE->ScrollBar);
@@ -1750,33 +1718,6 @@ void Lua_Code_Editor_Render(struct Lua_Code_Editor *LCE)
 	error: return;
 }
 
-static void Check_CursorInView(struct Lua_Code_Editor *LCE)
-{
-	struct File_Tab_File *File = ((struct File_Tab_File * ) LCE->File_Tab_List->items) + LCE->File_Tab_Index;
-
-	struct Quad Quad = Quad_Create(LCE->X,
-								   LCE->Ligne_Text.v2.y - LCE->Ligne_Height
-								   - LCE->Ligne_Height * File->Cursor_Pos.y
-								   - (float) File->ScrollValue / 480 * Game_Height, LCE->X,
-								   LCE->Ligne_Text.v2.y - LCE->Ligne_Height * File->Cursor_Pos.y
-								   - (float) File->ScrollValue / 480 * Game_Height,
-								   LCE->X + LCE->Width,
-								   LCE->Ligne_Text.v2.y - LCE->Ligne_Height * File->Cursor_Pos.y
-								   - (float) File->ScrollValue / 480 * Game_Height,
-								   LCE->X + LCE->Width,
-								   LCE->Ligne_Text.v2.y - LCE->Ligne_Height
-								   - LCE->Ligne_Height * File->Cursor_Pos.y
-								   - (float) File->ScrollValue / 480 * Game_Height);
-	if (Quad.v2.y > LCE->Ligne_Text.v2.y)
-	{
-		File->ScrollValue += Quad.v2.y - LCE->Ligne_Text.v2.y;
-	}
-	else if (Quad.v1.y <= LCE->Ligne_Text.v1.y)
-	{
-		File->ScrollValue += (Quad.v1.y - LCE->Ligne_Text.v1.y);
-	}
-}
-
 static void
 		Check_CharacterTyped(struct Lua_Code_Editor *LCE);
 static void
@@ -2005,6 +1946,40 @@ void Check_Scrolled(struct Lua_Code_Editor *LCE)
 	LCE->VScrollBar->BarY = File->ScrollValue;
 }
 
+static void Code_Editor_CenterCursor(struct Lua_Code_Editor *LCE, struct File_Tab_File *File)
+{
+	struct Lua_Code_Ligne *Code =
+			(struct Lua_Code_Ligne *) File->Editing->Code->items;
+	float Line_DefaultStart = LCE->Ligne_Text.v2.x + (LCE->Ligne_Text.v3.x - LCE->Ligne_Text.v1.x) / 35.0f - LCE->ScrollBar->BarX;
+	float Scroll =  File->ScrollValue / 480.0f * (float)Game_Height;
+
+	float X = Font_HeightMaxCharacterPosition(
+				DefaultFontManager, Code[(int)File->Cursor_Pos.y].Ligne,
+				Line_DefaultStart, LCE->Ligne_Height, LCE->Ligne_Default_Width,
+				(int)File->Cursor_Pos.x);
+	float Low_Y = LCE->Ligne_Text.v2.y - LCE->Ligne_Height - LCE->Ligne_Height * (int)File->Cursor_Pos.y
+			   - Scroll;
+	float High_Y = Low_Y + LCE->Ligne_Height;
+
+	/* If cursor is out of window, move the window to it */
+	if(X < LCE->Ligne_Text.v1.x)
+		LCE->ScrollBar->BarX -= LCE->Ligne_Text.v1.x - X;
+	if(X > LCE->Ligne_Text.v3.x)
+		LCE->ScrollBar->BarX += X - LCE->Ligne_Text.v3.x;
+
+	if (Low_Y < LCE->Ligne_Text.v1.y)
+	{
+		float delta = LCE->Ligne_Text.v1.y - Low_Y;
+		delta = delta / LCE->Height * 480.0f;
+		LCE->VScrollBar->BarY -= delta;
+	} else if(High_Y > LCE->Ligne_Text.v2.y)
+	{
+		float delta = High_Y - LCE->Ligne_Text.v2.y;
+		delta = delta / LCE->Height * 480.0f;
+		LCE->VScrollBar->BarY += delta;
+	}
+}
+
 static void Check_CharacterTyped(struct Lua_Code_Editor *LCE)
 {
 	if(!LCE->WritingCode)
@@ -2018,8 +1993,6 @@ static void Check_CharacterTyped(struct Lua_Code_Editor *LCE)
 		return;
 
 	Remove_SelectedCheck(LCE);
-
-	Check_CursorInView(LCE);
 
 	struct Lua_Code_Ligne *SS =
 			((struct Lua_Code_Ligne *) File->Editing->Code->items)
@@ -2035,12 +2008,14 @@ static void Check_CharacterTyped(struct Lua_Code_Editor *LCE)
 
 	char *Temp = malloc(sizeof(char) * Length_toMove);
 	Temp = memcpy(Temp, SS->Ligne + (int) File->Cursor_Pos.x,
-				  sizeof(char) * Length_toMove);
+        sizeof(char) * Length_toMove);
 	char *Temp2 = SS->Ligne + (int) File->Cursor_Pos.x + 1;
 	Temp2 = memcpy(Temp2, Temp, sizeof(char) * Length_toMove);
 	free(Temp);
 	SS->Ligne[(int) File->Cursor_Pos.x] = Keyboard.Character;
 	File->Cursor_Pos.x++;
+
+	Code_Editor_CenterCursor(LCE, File);
 }
 
 static void Delete_Lua_Code_Key(struct Lua_Code_Editor *LCE)
@@ -2259,40 +2234,6 @@ static struct Vector2f Lua_Code_Addtext(struct Lua_Code_Editor *LCE,
 	return Vector2_Create(File->Cursor_Pos.x, File->Cursor_Pos.y);
 }
 
-static void Code_Editor_CenterCursor(struct Lua_Code_Editor *LCE, struct File_Tab_File *File)
-{
-	struct Lua_Code_Ligne *Code =
-			(struct Lua_Code_Ligne *) File->Editing->Code->items;
-	float Line_DefaultStart = LCE->Ligne_Text.v2.x + (LCE->Ligne_Text.v3.x - LCE->Ligne_Text.v1.x) / 35.0f - LCE->ScrollBar->BarX;
-	float Scroll =  File->ScrollValue / 480.0f * (float)Game_Height;
-
-	float X = Font_HeightMaxCharacterPosition(
-				DefaultFontManager, Code[(int)File->Cursor_Pos.y].Ligne,
-				Line_DefaultStart, LCE->Ligne_Height, LCE->Ligne_Default_Width,
-				(int)File->Cursor_Pos.x);
-	float Low_Y = LCE->Ligne_Text.v2.y - LCE->Ligne_Height - LCE->Ligne_Height * (int)File->Cursor_Pos.y
-			   - Scroll;
-	float High_Y = Low_Y + LCE->Ligne_Height;
-
-	/* If cursor is out of window, move the window to it */
-	if(X < LCE->Ligne_Text.v1.x)
-		LCE->ScrollBar->BarX -= LCE->Ligne_Text.v1.x - X;
-	if(X > LCE->Ligne_Text.v3.x)
-		LCE->ScrollBar->BarX += X - LCE->Ligne_Text.v3.x;
-
-	if (Low_Y < LCE->Ligne_Text.v1.y)
-	{
-		float delta = LCE->Ligne_Text.v1.y - Low_Y;
-		delta = delta / LCE->Height * 480.0f;
-		LCE->VScrollBar->BarY -= delta;
-	} else if(High_Y > LCE->Ligne_Text.v2.y)
-	{
-		float delta = High_Y - LCE->Ligne_Text.v2.y;
-		delta = delta / LCE->Height * 480.0f;
-		LCE->VScrollBar->BarY += delta;
-	}
-}
-
 static void Check_KeyPressed(struct Lua_Code_Editor *LCE)
 {
 	if (!Keyboard.justPressed || !LCE->WritingCode)
@@ -2302,19 +2243,12 @@ static void Check_KeyPressed(struct Lua_Code_Editor *LCE)
 
 	if (File->Cursor_Pos.y > File->Editing->Code->size - 1)
 		File->Cursor_Pos.y = File->Editing->Code->size - 1;
-	if (File->Cursor_Pos.x
-		> String_length(
-				((struct Lua_Code_Ligne * ) File->Editing->Code->items
-				 + (int ) File->Cursor_Pos.y)->Ligne))
+	if (File->Cursor_Pos.x > String_length( ((struct Lua_Code_Ligne * ) File->Editing->Code->items + (int ) File->Cursor_Pos.y)->Ligne))
 	{
-		File->Cursor_Pos.x =
-				String_length(
-						((struct Lua_Code_Ligne *) File->Editing->Code->items
-						 + (int) File->Cursor_Pos.y)->Ligne) - 1;
+		File->Cursor_Pos.x = String_length(((struct Lua_Code_Ligne *) File->Editing->Code->items + (int) File->Cursor_Pos.y)->Ligne) - 1;
 	}
 
-	if (Keyboard.Key.key == GLFW_KEY_DOWN
-		&& File->Cursor_Pos.y + 1 < File->Editing->Code->size)
+	if (Keyboard.Key.key == GLFW_KEY_DOWN && File->Cursor_Pos.y + 1 < File->Editing->Code->size)
 	{ // Down
 		File->isTextSelected = false;
 		File->Cursor_Pos.y++;
@@ -2322,25 +2256,16 @@ static void Check_KeyPressed(struct Lua_Code_Editor *LCE)
 
 		if (LCE->XtoReset == -1)
 		{
-			LCE->XtoReset =
-					File->Cursor_Pos.x
-					+ String_numoftab(
-							((struct Lua_Code_Ligne *) File->Editing->Code->items)[(int) File->Cursor_Pos.y
+			LCE->XtoReset = File->Cursor_Pos.x + String_numoftab(((struct Lua_Code_Ligne *) File->Editing->Code->items)[(int) File->Cursor_Pos.y
 																					- 1].Ligne);
 		}
-		File->Cursor_Pos.x =
-				LCE->XtoReset
-				- String_numoftab(
-						((struct Lua_Code_Ligne *) File->Editing->Code->items)[(int) File->Cursor_Pos.y].Ligne);
+		File->Cursor_Pos.x = LCE->XtoReset - String_numoftab(((struct Lua_Code_Ligne *) File->Editing->Code->items)[(int) File->Cursor_Pos.y].Ligne);
 
-		int Length =
-				String_length(
-						((struct Lua_Code_Ligne * ) File->Editing->Code->items)[(int ) File->Cursor_Pos.y].Ligne);
+		int Length = String_length(((struct Lua_Code_Ligne * ) File->Editing->Code->items)[(int ) File->Cursor_Pos.y].Ligne);
 		if (File->Cursor_Pos.x > Length)
 			File->Cursor_Pos.x = Length;
 		else if (File->Cursor_Pos.x < 0)
 			File->Cursor_Pos.x = 0;
-		Code_Editor_CenterCursor(LCE, File);
 	}
 	else if (Keyboard.Key.key == GLFW_KEY_UP) // Up
 	{
@@ -2351,25 +2276,16 @@ static void Check_KeyPressed(struct Lua_Code_Editor *LCE)
 
 		if (LCE->XtoReset == -1)
 		{
-			LCE->XtoReset =
-					File->Cursor_Pos.x
-					+ String_numoftab(
-							((struct Lua_Code_Ligne *) File->Editing->Code->items)[(int) File->Cursor_Pos.y
+			LCE->XtoReset = File->Cursor_Pos.x + String_numoftab(((struct Lua_Code_Ligne *) File->Editing->Code->items)[(int) File->Cursor_Pos.y
 																					+ 1].Ligne);
 		}
-		File->Cursor_Pos.x =
-				LCE->XtoReset
-				- String_numoftab(
-						((struct Lua_Code_Ligne *) File->Editing->Code->items)[(int) File->Cursor_Pos.y].Ligne);
+		File->Cursor_Pos.x = LCE->XtoReset - String_numoftab(((struct Lua_Code_Ligne *) File->Editing->Code->items)[(int) File->Cursor_Pos.y].Ligne);
 
-		int Length =
-				String_length(
-						((struct Lua_Code_Ligne * ) File->Editing->Code->items)[(int ) File->Cursor_Pos.y].Ligne);
+		int Length = String_length(((struct Lua_Code_Ligne * ) File->Editing->Code->items)[(int ) File->Cursor_Pos.y].Ligne);
 		if (File->Cursor_Pos.x > Length)
 			File->Cursor_Pos.x = Length;
 		else if (File->Cursor_Pos.x < 0)
 			File->Cursor_Pos.x = 0;
-		Code_Editor_CenterCursor(LCE, File);
 	}
 	else if (Keyboard.Key.key == GLFW_KEY_RIGHT)
 	{ // Right
@@ -2392,7 +2308,6 @@ static void Check_KeyPressed(struct Lua_Code_Editor *LCE)
 			else
 				File->Cursor_Pos.x--;
 		}
-		Code_Editor_CenterCursor(LCE, File);
 	}
 	else if (Keyboard.Key.key == GLFW_KEY_LEFT) // Left
 	{
@@ -2418,7 +2333,6 @@ static void Check_KeyPressed(struct Lua_Code_Editor *LCE)
 				File->Cursor_Pos.x = TextLength;
 			}
 		}
-		Code_Editor_CenterCursor(LCE, File);
 	}
 
 	else if (Keyboard.Key.key == GLFW_KEY_BACKSPACE)
@@ -2635,7 +2549,7 @@ static void Check_KeyPressed(struct Lua_Code_Editor *LCE)
 		return;
 	}
 
-	Check_CursorInView(LCE);
+	Code_Editor_CenterCursor(LCE, File);
 }
 
 void Lua_Code_Editor_Free(struct Lua_Code_Editor **LCE)
