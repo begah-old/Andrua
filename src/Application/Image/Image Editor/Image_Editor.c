@@ -155,7 +155,11 @@ void Image_Tab_Save(struct Image_Tab *ITL)
 
 				remove(Names2);
 			}
+#ifdef _WIN32
 			_rmdir(C);
+#else
+			rmdir(C);
+#endif
 			ITL->OldSize = ITL->Frames_Num;
 		}
 		free(C);

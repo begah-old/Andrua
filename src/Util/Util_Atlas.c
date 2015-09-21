@@ -234,7 +234,7 @@ struct PackAtlas *PackAtlas_Init(int w, int h)
 	return PA;
 }
 
-int PackAtlas_Add(struct PackAtlas *PA, int w, int h, int *x, int *y)
+int PackAtlas_Add(struct PackAtlas * restrict PA, int w, int h, int * restrict x, int * restrict y)
 {
 	if (w > PA->width || h > PA->height)
 		return 0;
@@ -278,6 +278,9 @@ int PackAtlas_Add(struct PackAtlas *PA, int w, int h, int *x, int *y)
 
 void PackAtlas_Remove(struct PackAtlas *PA, int x, int y, int w, int h)
 {
+    if(!PA->Atlas[x + y * PA->width])
+        return;
+
 	for(int xx = 0; xx < w; xx++)
 	{
 		for(int yy = 0; yy < h; yy++)

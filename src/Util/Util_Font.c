@@ -112,7 +112,7 @@ static void Font_AddTextureAtlas(struct Font *Font, FT_Face face, GLuint Width,
 	PackAtlas_Free(Atlas);
 }
 
-GLint Font_Add(struct FontManager *Manager, char *Path, unsigned int Size)
+GLint Font_Add(struct FontManager * restrict Manager, char * restrict Path, unsigned int Size)
 {
 	if (!Manager)
 		return -1;
@@ -213,7 +213,7 @@ static inline void Font_LoadAppropriate(struct FontManager *Manager, float h)
 		Font_Use(Manager, ((struct Font *)Manager->Fonts->items)[0].ID);
 }
 
-float Font_Length(struct FontManager *Manager, const char *Text, GLfloat scale)
+float Font_Length(struct FontManager * restrict Manager, const char * restrict Text, GLfloat scale)
 {
 	GLfloat x = 0;
 	// Iterate through all characters
@@ -227,7 +227,7 @@ float Font_Length(struct FontManager *Manager, const char *Text, GLfloat scale)
 	return x;
 }
 
-float Font_HeightLength(struct FontManager *Manager, char *Text,
+float Font_HeightLength(struct FontManager * restrict Manager, char * restrict Text,
 		GLfloat DesiredHeight, GLfloat scale)
 {
 	GLfloat x = 0;
@@ -270,7 +270,7 @@ void Font_Use(struct FontManager *Manager, GLint ID)
 			+ Font_Find(Manager, ID);
 }
 
-GLfloat Font_HeightRender(struct FontManager *Manager, char *Text, GLfloat x,
+GLfloat Font_HeightRender(struct FontManager * restrict Manager, char * restrict Text, GLfloat x,
 		GLfloat y, GLfloat DesiredHeight, GLfloat scale, struct Vector4f Color)
 {
 	if (!Manager || !Manager->CurrentFont)
@@ -284,7 +284,7 @@ GLfloat Font_HeightRender(struct FontManager *Manager, char *Text, GLfloat x,
 	return Width;
 }
 
-void Font_HeightMaxRender(struct FontManager *Manager, char *Text, GLfloat x,
+void Font_HeightMaxRender(struct FontManager * restrict Manager, char * restrict Text, GLfloat x,
 		GLfloat y, GLfloat DesiredHeight, GLfloat MaxWidth, GLfloat scale,
 		struct Vector4f Color)
 {
@@ -300,7 +300,7 @@ void Font_HeightMaxRender(struct FontManager *Manager, char *Text, GLfloat x,
 	Font_FixedRender(Manager, Text, x, y, DesiredHeight, Width, scale, Color);
 }
 
-void Font_FixedRender(struct FontManager *Manager, const char *Text, GLfloat x,
+void Font_FixedRender(struct FontManager * restrict Manager, const char * restrict Text, GLfloat x,
 		GLfloat y, GLfloat DesiredHeight, GLfloat DesiredWidth, GLfloat scale,
 		struct Vector4f Color)
 {
@@ -361,7 +361,7 @@ void Font_FixedRender(struct FontManager *Manager, const char *Text, GLfloat x,
 	printOpenGLError();
 }
 
-GLint Font_HeightRenderCA(struct FontManager *Manager, char *Text, GLfloat x,
+GLint Font_HeightRenderCA(struct FontManager * restrict Manager, char * restrict Text, GLfloat x,
 		GLfloat y, GLint DesiredHeight, GLfloat scale, struct Vector4f Color) // Center aligned
 {
 	if (!Manager || !Manager->CurrentFont)
@@ -376,7 +376,7 @@ GLint Font_HeightRenderCA(struct FontManager *Manager, char *Text, GLfloat x,
 	Font_FixedRender(Manager, Text, x, y, DesiredHeight, Width, scale, Color);
 	return Width;
 }
-void Font_HeightMaxRenderCA(struct FontManager *Manager, char *Text, GLfloat x,
+void Font_HeightMaxRenderCA(struct FontManager * restrict Manager, char * restrict Text, GLfloat x,
 		GLfloat y, GLint DesiredHeight, GLint MaxWidth, GLfloat scale,
 		struct Vector4f Color) // Center aligned
 {
@@ -394,7 +394,7 @@ void Font_HeightMaxRenderCA(struct FontManager *Manager, char *Text, GLfloat x,
 	Font_FixedRender(Manager, Text, x, y, DesiredHeight, Width, scale, Color);
 }
 
-void Font_FixedRenderCA(struct FontManager *Manager, char *Text, GLfloat x,
+void Font_FixedRenderCA(struct FontManager * restrict Manager, char * restrict Text, GLfloat x,
 		GLfloat y, GLint DesiredHeight, GLint DesiredWidth, GLfloat scale,
 		struct Vector4f Color) // Center aligned
 {
@@ -427,7 +427,7 @@ void Font_CharacterHeightRenderCA(struct FontManager *Manager, char Character, G
 									 Manager->CurrentFont->Characters[(int)Character].TexturePos.y, Manager->CurrentFont->Characters[(int)Character].TexturePos.z, Manager->CurrentFont->Characters[(int)Character].TexturePos.w), Color);
 }
 
-GLfloat Font_HeightRenderRenderConstraint(struct FontManager *Manager, char *Text,
+GLfloat Font_HeightRenderRenderConstraint(struct FontManager * restrict Manager, char * restrict Text,
 		GLfloat x, GLfloat y, GLfloat DesiredHeight, GLfloat scale,
 		struct Vector4f Color, struct Vector2f Constraint) // Center aligned
 {
@@ -443,8 +443,8 @@ GLfloat Font_HeightRenderRenderConstraint(struct FontManager *Manager, char *Tex
 	return Width;
 }
 
-void Font_HeightMaxRenderRenderConstraint(struct FontManager *Manager,
-		char *Text, GLfloat x, GLfloat y, GLfloat DesiredHeight, GLfloat MaxWidth,
+void Font_HeightMaxRenderRenderConstraint(struct FontManager * restrict Manager,
+		char * restrict Text, GLfloat x, GLfloat y, GLfloat DesiredHeight, GLfloat MaxWidth,
 		GLfloat scale, struct Vector4f Color, struct Vector2f Constraint) // Center aligned
 {
 	if (!Manager || !Manager->CurrentFont)
@@ -460,7 +460,7 @@ void Font_HeightMaxRenderRenderConstraint(struct FontManager *Manager,
 			scale, Color, Constraint);
 }
 
-void Font_FixedRenderRenderConstraint(struct FontManager *Manager, char *Text,
+void Font_FixedRenderRenderConstraint(struct FontManager * restrict Manager, char * restrict Text,
 		GLfloat x, GLfloat y, GLfloat DesiredHeight, GLfloat DesiredWidth,
 		GLfloat scale, struct Vector4f Color, struct Vector2f Constraint) // Center aligned
 {
@@ -549,8 +549,8 @@ void Font_FixedRenderRenderConstraint(struct FontManager *Manager, char *Text,
 	printOpenGLError();
 }
 
-float Font_HeightCharacterPosition(struct FontManager *Manager,
-		char *Text, GLfloat x, GLfloat DesiredHeight, GLint Position)
+float Font_HeightCharacterPosition(struct FontManager * restrict Manager,
+		char * restrict Text, GLfloat x, GLfloat DesiredHeight, GLint Position)
 {
 	if (!Manager || !Manager->CurrentFont)
 		return -1.0f;
@@ -565,8 +565,8 @@ float Font_HeightCharacterPosition(struct FontManager *Manager,
 			Position);
 }
 
-float Font_HeightMaxCharacterPosition(struct FontManager *Manager,
-		char *Text, GLfloat x, GLfloat DesiredHeight, GLfloat MaxWidth,
+float Font_HeightMaxCharacterPosition(struct FontManager * restrict Manager,
+		char * restrict Text, GLfloat x, GLfloat DesiredHeight, GLfloat MaxWidth,
 		GLint Position)
 {
 	if (!Manager || !Manager->CurrentFont)
@@ -584,8 +584,8 @@ float Font_HeightMaxCharacterPosition(struct FontManager *Manager,
 			Position);
 }
 
-float Font_GetCharacterPosition(struct FontManager *Manager,
-		char *Text, GLfloat x, GLfloat DesiredHeight,
+float Font_GetCharacterPosition(struct FontManager * restrict Manager,
+		char * restrict Text, GLfloat x, GLfloat DesiredHeight,
 		GLfloat DesiredWidth, GLint Position)
 {
 	if (!Manager || !Manager->CurrentFont)
@@ -616,7 +616,7 @@ float Font_GetCharacterPosition(struct FontManager *Manager,
 	return x;
 }
 
-int Font_HeightCharacterAt(struct FontManager *Manager, char *Text, GLfloat x, GLfloat DesiredHeight, GLint PosX)
+int Font_HeightCharacterAt(struct FontManager * restrict Manager, char * restrict Text, GLfloat x, GLfloat DesiredHeight, GLint PosX)
 {
 	if (!Manager || !Manager->CurrentFont)
 		return 0;
@@ -628,7 +628,7 @@ int Font_HeightCharacterAt(struct FontManager *Manager, char *Text, GLfloat x, G
 	return Font_CharacterAt(Manager, Text, x, DesiredHeight, Width, PosX);
 }
 
-int Font_HeightMaxCharacterAt(struct FontManager *Manager, char *Text,
+int Font_HeightMaxCharacterAt(struct FontManager * restrict Manager, char * restrict Text,
 		GLfloat x, GLfloat DesiredHeight, GLfloat MaxWidth, GLint PosX)
 {
 	if (!Manager || !Manager->CurrentFont)
@@ -643,7 +643,7 @@ int Font_HeightMaxCharacterAt(struct FontManager *Manager, char *Text,
 	return Font_CharacterAt(Manager, Text, x, DesiredHeight, Width, PosX);
 }
 
-int Font_CharacterAt(struct FontManager *Manager, char *Text, GLfloat x, GLfloat DesiredHeight, GLfloat DesiredWidth, GLint PosX)
+int Font_CharacterAt(struct FontManager * restrict Manager, char * restrict Text, GLfloat x, GLfloat DesiredHeight, GLfloat DesiredWidth, GLint PosX)
 {
 	if (!Manager || !Manager->CurrentFont)
 		return 0;

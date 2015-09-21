@@ -7,7 +7,7 @@
 
 #include "Util.h"
 
-void String_Add(char *String1, const char *String2)
+void String_Add(char * restrict String1, const char * restrict String2)
 {
 	int Index1 = 0, I = 0;
 	while (1)
@@ -30,7 +30,7 @@ void String_Add(char *String1, const char *String2)
 	}
 }
 
-void String_Copy(char *String1, const char *String2)
+void String_Copy(char * restrict String1, const char * restrict String2)
 {
 	int i = 0;
 	while (1)
@@ -45,7 +45,7 @@ void String_Copy(char *String1, const char *String2)
 	return;
 }
 
-void String_Remove(char *String1, char *String2)
+void String_Remove(char * restrict String1, char * restrict String2)
 {
 	int Length2 = 0, Index1 = 0, InTemp = 0, At = 0;
 	while (1)
@@ -91,7 +91,7 @@ void String_Remove(char *String1, char *String2)
 	String1[At] = '\0';
 }
 
-int String_fulllength(char *String)
+int String_fulllength(char * restrict String)
 {
 	int Num = 0;
 	while (*String)
@@ -104,7 +104,7 @@ int String_fulllength(char *String)
 	return Num;
 }
 
-int String_numoftab(char *String)
+int String_numoftab(char * restrict String)
 {
 	int Num = 0;
 	while (*String)
@@ -116,7 +116,7 @@ int String_numoftab(char *String)
 	return Num;
 }
 
-int String_numoftab_Length(const char *String, int Length)
+int String_numoftab_Length(const char * restrict String, int Length)
 {
 	int Num = 0;
 	for(int i = 0; i < Length; i++)
@@ -127,7 +127,7 @@ int String_numoftab_Length(const char *String, int Length)
 	return Num;
 }
 
-int String_toInt(char *String)
+int String_toInt(char  * restrict String)
 {
 	int Num = 0;
 	if (*String == 0 || *String == '\0')
@@ -143,7 +143,7 @@ int String_toInt(char *String)
 	return Num;
 }
 
-struct String_Struct *String_Split(char *String, char Spliter, int *NumOfSplit)
+struct String_Struct *String_Split(char * restrict String, char Spliter, int * restrict NumOfSplit)
 {
 	struct String_Struct *Struct;
 	if (!NumOfSplit)
@@ -174,7 +174,7 @@ struct String_Struct *String_Split(char *String, char Spliter, int *NumOfSplit)
 	return Struct;
 }
 
-_Bool String_contain(const char *ori, const char *Con)
+_Bool String_contain(const char * restrict ori, const char * restrict Con)
 {
 	if (*Con == '\0')
 		return true;
@@ -186,7 +186,7 @@ _Bool String_contain(const char *ori, const char *Con)
 }
 
 //TODO: Optimize
-int String_replace(char *Ligne, const char *OldName, const char *NewName)
+int String_replace(char * restrict Ligne, const char * restrict OldName, const char * restrict NewName)
 {
 	char *Ori = Ligne;
 	while (!String_contain(Ligne, OldName))

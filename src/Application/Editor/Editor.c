@@ -308,7 +308,7 @@ void Editor_Render()
 			Console_Minimized = false;
 			Console_Show = false;
 
-			Lua_Close(NULL);
+			Lua_requestClose = true;
 		} else if (Console_Message == 2)
 			Console_Minimized = true;
 		else if (Console_Message == 3)
@@ -321,7 +321,7 @@ void Editor_Render()
 
 		if (Keyboard.justReleased && Keyboard.Key.key == GLFW_KEY_ESCAPE) //TODO: Simulate Escape with return button on android
 		{
-			Lua_Close(NULL);
+			Lua_requestClose = true;
 			goto Render_Code_Editor;
 		}
 
@@ -380,7 +380,7 @@ void Editor_Render()
 			if (lua_pcall(Lua_State, 0, 0, 0) != 0) {
 				const char *Error = lua_tostring(Lua_State, -1);
 				fprintf(Log, "Error resize : %s", Error);
-				Lua_Close(NULL);
+				Lua_requestClose = true;
 				return;
 			}
 		}
@@ -404,7 +404,7 @@ void Editor_Render()
 			if (lua_pcall(Lua_State, 0, 0, 0) != 0) {
 				const char *Error = lua_tostring(Lua_State, -1);
 				fprintf(Log, "Error render : %s", Error);
-				Lua_Close(NULL);
+				Lua_requestClose = true;
 				return;
 			}
 		}

@@ -462,6 +462,56 @@ static int Lua_setFrameTimeAnimation(lua_State *State)
     return 0;
 }
 
+static int Lua_setReverseOnFinish(lua_State *State)
+{
+    if(!Lua_Animation_List)
+    {
+        fprintf(Log, "animation.reverseOnFinish : No animation created");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    if(!lua_isnumber(Lua_State, -1))
+    {
+        fprintf(Log, "animation.reverseOnFinish : Argument 1 needs to be a number (Animation ID)");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    double ID = lua_tonumber(Lua_State, -1);
+
+    if(ID < 0 || ID >= Animation_NextID)
+    {
+        fprintf(Log, "animation.reverseOnFinish : Argument 1 is a invalid animation ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    struct Lua_Animation *LA = Lua_Animation_List->items;
+    struct Animation *Animation = NULL;
+
+	// Search for corresponding texture
+	for(int i = 0; i < Lua_Animation_List->size; i++)
+	{
+		if(LA[i].ID == ID)
+		{
+			Animation = LA[i].Animation;
+			break;
+		}
+	}
+
+	if(!Animation)
+    {
+        fprintf(Log, "animation.reverseOnFinish : No animation matching that ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    Animation_toggleReverseOnFinish(Animation);
+
+    return 0;
+}
+
 static int Lua_renderAnimation(lua_State *State)
 {
         if(!Lua_Animation_List)
@@ -1795,11 +1845,12 @@ void Lua_LoadLibrary(FILE *F)
     };
 
     static const luaL_Reg Animation_Functions[] = {
-        {"new", Lua_loadAnimation},
+        {"load", Lua_loadAnimation},
         {"setPos", Lua_setPosAnimation},
         {"setSize", Lua_setSizeAnimation},
         {"setAngle", Lua_setAngleAnimation},
         {"timePerFrame", Lua_setFrameTimeAnimation},
+        {"reverseOnFinish", Lua_setReverseOnFinish},
         {"render", Lua_renderAnimation},
         {"free", Lua_freeAnimation},
         {NULL, NULL}
@@ -1837,7 +1888,7 @@ void Lua_closeLibrary()
 		struct Lua_Texture *LT = Lua_Texture_List->items;
 
 		for (int i = 0; i < Lua_Texture_List->size; i++)
-			Image_FreeSimple(LT[i].TextID);
+			Image_Free(LT[i].TextID);
 
 		vector_delete(Lua_Texture_List);
 		Lua_Texture_List = NULL;
@@ -1848,7 +1899,7 @@ void Lua_closeLibrary()
 		struct Lua_Button *lb = Lua_Button_List->items;
 
 		for (int i = 0; i < Lua_Button_List->size; i++)
-			Gui_Button_Free_Simple((lb + i)->B);
+			Gui_Button_Free(&(lb + i)->B);
 
 		vector_delete(Lua_Button_List);
 		Lua_Button_List = NULL;
@@ -1859,7 +1910,7 @@ void Lua_closeLibrary()
         struct Lua_Animation *la = Lua_Animation_List->items;
 
         for(int i = 0; i < Lua_Animation_List->size; i++)
-            Animation_FreeSimple(la[i].Animation);
+            Animation_Free(la[i].Animation);
 
         vector_delete(Lua_Animation_List);
         Lua_Animation_List = NULL;

@@ -240,6 +240,8 @@ struct Image
 struct Animation
 {
 	struct Image *Frames;
+	_Bool Copied;
+
 	long Time_perFrame;
 
 	int Current_Frame, Frame_Count;
@@ -475,7 +477,7 @@ void Application__Error(const char *FunctionName);
 /* Packaging algorithm functions used in Util_Font.c to pack characters glyphs */
 struct PackAtlas* PackAtlas_Init(int w, int h);
 void PackAtlas_Free(struct PackAtlas* atlas);
-int PackAtlas_Add(struct PackAtlas* atlas, int rw, int rh, int* rx, int* ry);
+int PackAtlas_Add(struct PackAtlas* restrict  atlas, int rw, int rh, int* restrict  rx, int* restrict  ry);
 void PackAtlas_Remove(struct PackAtlas *PA, int x, int y, int w, int h);
 
 /* Font engine specific functions */
@@ -486,44 +488,44 @@ void Font_Free(struct FontManager *Manager, GLint ID);
 void Font_End(struct FontManager **Manager);
 
 /* Font rendering functions */
-GLfloat Font_HeightRender(struct FontManager *Manager, char *Text, GLfloat x,
+GLfloat Font_HeightRender(struct FontManager * restrict Manager, char * restrict Text, GLfloat x,
 						GLfloat y, GLfloat DesiredHeight, GLfloat scale, struct Vector4f Color);
-void Font_HeightMaxRender(struct FontManager *Manager, char *Text, GLfloat x,
+void Font_HeightMaxRender(struct FontManager * restrict Manager, char * restrict Text, GLfloat x,
 						  GLfloat y, GLfloat DesiredHeight, GLfloat MaxWidth, GLfloat scale,
 						  struct Vector4f Color);
-void Font_FixedRender(struct FontManager *Manager, const char *Text, GLfloat x,
+void Font_FixedRender(struct FontManager * restrict Manager, const char * restrict Text, GLfloat x,
 					  GLfloat y, GLfloat DesiredHeight, GLfloat DesiredWidth, GLfloat scale,
 					  struct Vector4f Color);
-GLint Font_HeightRenderCA(struct FontManager *Manager, char *Text, GLfloat x,
+GLint Font_HeightRenderCA(struct FontManager * restrict Manager, char * restrict Text, GLfloat x,
 						  GLfloat y, GLint DesiredHeight, GLfloat scale, struct Vector4f Color); // Center aligned
-void Font_HeightMaxRenderCA(struct FontManager *Manager, char *Text, GLfloat x,
+void Font_HeightMaxRenderCA(struct FontManager * restrict Manager, char * restrict Text, GLfloat x,
 							GLfloat y, GLint DesiredHeight, GLint MaxWidth, GLfloat scale,
 							struct Vector4f Color); // Center aligned
-void Font_FixedRenderCA(struct FontManager *Manager, char *Text, GLfloat x,
+void Font_FixedRenderCA(struct FontManager * restrict Manager, char * restrict Text, GLfloat x,
 						GLfloat y, GLint DesiredHeight, GLint DesiredWidth, GLfloat scale,
 						struct Vector4f Color); // Center aligned
 void Font_CharacterHeightRenderCA(struct FontManager *Manager, char Character, GLfloat center_x, GLfloat center_y, GLfloat MaxHeight, GLfloat h,
 								  struct Vector4f Color); // Precise alignment for a single character
-GLfloat Font_HeightRenderRenderConstraint(struct FontManager *Manager, char *Text, GLfloat x,
+GLfloat Font_HeightRenderRenderConstraint(struct FontManager * restrict Manager, char * restrict Text, GLfloat x,
 										GLfloat y, GLfloat DesiredHeight, GLfloat scale, struct Vector4f Color, struct Vector2f Constraint); // Center aligned
-void Font_HeightMaxRenderRenderConstraint(struct FontManager *Manager, char *Text, GLfloat x,
+void Font_HeightMaxRenderRenderConstraint(struct FontManager * restrict Manager, char * restrict Text, GLfloat x,
 										  GLfloat y, GLfloat DesiredHeight, GLfloat MaxWidth, GLfloat scale,
 										  struct Vector4f Color, struct Vector2f Constraint); // Center aligned
-void Font_FixedRenderRenderConstraint(struct FontManager *Manager, char *Text, GLfloat x,
+void Font_FixedRenderRenderConstraint(struct FontManager * restrict Manager, char * restrict Text, GLfloat x,
 									  GLfloat y, GLfloat DesiredHeight, GLfloat DesiredWidth, GLfloat scale,
 									  struct Vector4f Color, struct Vector2f Constraint); // Center aligned
-float Font_HeightCharacterPosition(struct FontManager *Manager,
-											 char *Text, GLfloat x, GLfloat DesiredHeight, GLint Position);
+float Font_HeightCharacterPosition(struct FontManager * restrict Manager,
+											 char * restrict Text, GLfloat x, GLfloat DesiredHeight, GLint Position);
 float Font_HeightMaxCharacterPosition(struct FontManager *Manager,
-												char *Text, GLfloat x, GLfloat DesiredHeight, GLfloat MaxWidth, GLint Position);
-float Font_GetCharacterPosition(struct FontManager *Manager,
-										  char *Text, GLfloat x, GLfloat DesiredHeight, GLfloat DesiredWidth, GLint Position);
-int Font_HeightCharacterAt(struct FontManager *Manager, char *Text, GLfloat x, GLfloat DesiredHeight, GLint PosX);
-int Font_HeightMaxCharacterAt(struct FontManager *Manager, char *Text,
+												char * restrict Text, GLfloat x, GLfloat DesiredHeight, GLfloat MaxWidth, GLint Position);
+float Font_GetCharacterPosition(struct FontManager * restrict Manager,
+										  char * restrict Text, GLfloat x, GLfloat DesiredHeight, GLfloat DesiredWidth, GLint Position);
+int Font_HeightCharacterAt(struct FontManager * restrict Manager, char * restrict Text, GLfloat x, GLfloat DesiredHeight, GLint PosX);
+int Font_HeightMaxCharacterAt(struct FontManager * restrict Manager, char * restrict Text,
 							  GLfloat x, GLfloat DesiredHeight, GLfloat MaxWidth, GLint PosX);
-int Font_CharacterAt(struct FontManager *Manager, char *Text, GLfloat x, GLfloat DesiredHeight, GLfloat DesiredWidth, GLint PosX);
-float Font_Length(struct FontManager *Manager, const char *Text, GLfloat scale);
-float Font_HeightLength(struct FontManager *Manager, char *Text,
+int Font_CharacterAt(struct FontManager * restrict Manager, char * restrict Text, GLfloat x, GLfloat DesiredHeight, GLfloat DesiredWidth, GLint PosX);
+float Font_Length(struct FontManager * restrict Manager, const char * restrict Text, GLfloat scale);
+float Font_HeightLength(struct FontManager *Manager, char * restrict Text,
 					  float DesiredHeight, GLfloat scale);
 float Font_HeightLength_SLength(struct FontManager *Manager, int Length,
 		GLfloat DesiredHeight, GLfloat scale);
@@ -584,17 +586,17 @@ void Gui_Vertical_ScrollBar_Render(struct Gui_Vertical_ScrollBar *ScrollBar);
 void Gui_Vertical_ScrollBar_Resize(struct Gui_Vertical_ScrollBar *ScrollBar, float x, float y, float w, float h, float barValue, float totalValue);
 void Gui_Vertical_ScrollBar_Free(struct Gui_Vertical_ScrollBar **ScrollTab);
 
-void String_Add(char *String1, const char *String2); // Concatenates two strings together, the first string must have space for the second
-void String_Copy(char *String1, const char *String2); // Copy String2 to another String1
-void String_Remove(char *String1, char *String2); // Remove String2 from String1
+void String_Add(char * restrict String1, const char * restrict String2); // Concatenates two strings together, the first string must have space for the second
+void String_Copy(char * restrict String1, const char * restrict String2); // Copy String2 to another String1
+void String_Remove(char * restrict String1, char * restrict String2); // Remove String2 from String1
 
-int String_fulllength(char *String); // Full length counts \t as double
-int String_numoftab(char *String); // Return number of \t
-int String_numoftab_Length(const char *String, int Length); // Return number of \t in a string of length Length
-int String_toInt(char *String); // Converts String to int
-struct String_Struct *String_Split(char *String, char Spliter, int *NumOfSplit); // Splits a string into String_Struct's
-_Bool String_contain(const char *ori, const char *Con); // Verify if ori contains Con at index
-int String_replace(char *Ligne, const char *OldName, const char *NewName); // Replace OldName with NewName in string Ligne
+int String_fulllength(char * restrict String); // Full length counts \t as double
+int String_numoftab(char * restrict String); // Return number of \t
+int String_numoftab_Length(const char * restrict String, int Length); // Return number of \t in a string of length Length
+int String_toInt(char * restrict String); // Converts String to int
+struct String_Struct *String_Split(char * restrict String, char Spliter, int * restrict NumOfSplit); // Splits a string into String_Struct's
+_Bool String_contain(const char * restrict ori, const char * restrict Con); // Verify if ori contains Con at index
+int String_replace(char * restrict Ligne, const char * restrict OldName, const char * restrict NewName); // Replace OldName with NewName in string Ligne
 _Bool Character_isValid(char C); // Checks if character that my engine can render
 
 /* Simple math helper functions */
@@ -632,6 +634,7 @@ struct Animation *Animation_LoadExternal(const char *Name);
 void Animation_SetSize(struct Animation *Animation, float w, float h);
 void Animation_SetPosition(struct Animation *Animation, float x, float y);
 void Animation_SetAngle(struct Animation *Animation, double Angle);
+void Animation_toggleReverseOnFinish(struct Animation *Animation); // Toggle : If true the stop it from reversing, else enable reversion
 void Animation_Render(struct Animation *Animation);
 void Animation_Free(struct Animation *Animation);
 void Animation_FreeSimple(struct Animation *Animation);

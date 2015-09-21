@@ -71,7 +71,7 @@ void Engine_requestKeyboard(float X, float Y, float Width, float Height)
     char *Primary_L11 = "1234567890", *Secondary_L11 = "!@#$%^&*()";
 
     char *Primary_L2 = "asdfghjkl", *Secondary_L2 = "+*_[]{}\".";
-    char *Primary_L22 = "+-*/{}\\\"\'", *Secondary_L22 = "[].;?!^/|";
+    char *Primary_L22 = "+-*/{}\\\"\'", *Secondary_L22 = "[].;?!^/~";
 
     char *Primary_L3 = "zxcvbnm", *Secondary_L3 = "<>:|\\&*";
     char *Primary_L33 = ",=<>;:`";

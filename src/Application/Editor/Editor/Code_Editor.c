@@ -2137,8 +2137,9 @@ static void Delete_Lua_Code_Key(struct Lua_Code_Editor *LCE)
 	}
 }
 
+// Use by text paste feature
 static struct Vector2f Lua_Code_Addtext(struct Lua_Code_Editor *LCE,
-										const char *String, int Length)
+										const char * restrict String, int Length)
 {
 	struct File_Tab_File *File = ((struct File_Tab_File * ) LCE->File_Tab_List->items) + LCE->File_Tab_Index;
 
@@ -2151,7 +2152,7 @@ static struct Vector2f Lua_Code_Addtext(struct Lua_Code_Editor *LCE,
 	if (Length2 + FullLength <= CODE_MAX_LENGTH)
 	{
 		if((int)File->Cursor_Pos.x != CharLength2)
-			memmove(LCL[(int) File->Cursor_Pos.y].Ligne + (int)File->Cursor_Pos.x + CharLength, LCL[(int) File->Cursor_Pos.y].Ligne + (int)File->Cursor_Pos.x, sizeof(char) * CharLength);
+			memmove(LCL[(int) File->Cursor_Pos.y].Ligne + (int)File->Cursor_Pos.x + CharLength, LCL[(int) File->Cursor_Pos.y].Ligne + (int)File->Cursor_Pos.x, sizeof(char) * (CharLength2 - (int)File->Cursor_Pos.x));
 
 		memcpy(LCL[(int) File->Cursor_Pos.y].Ligne +  (int)File->Cursor_Pos.x, String, sizeof(char) * Length);
 

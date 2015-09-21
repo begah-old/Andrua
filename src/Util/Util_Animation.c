@@ -63,6 +63,8 @@ struct Animation *Animation_LoadInternal(const char *Name)
     Animation->Calculated_Quad = Quad_Create(Animation->x, Animation->y, Animation->x, Animation->y + Animation->height,
         Animation->x + Animation->width, Animation->y + Animation->height, Animation->x + Animation->width, Animation->y);
 
+    Animation->Copied = false;
+
 	return Animation;
 }
 
@@ -120,6 +122,8 @@ struct Animation *Animation_LoadExternal(const char *Name)
 	Animation->Calculated_Quad = Quad_Create(Animation->x, Animation->y, Animation->x, Animation->y + Animation->height,
              Animation->x + Animation->width, Animation->y + Animation->height, Animation->x + Animation->width, Animation->y);
 
+    Animation->Copied = false;
+
 	return Animation;
 }
 
@@ -175,6 +179,24 @@ void Animation_SetAngle(struct Animation *Animation, double Angle)
     }
 }
 
+// Toggle : If true the stop it from reversing, else enable reversion
+void Animation_toggleReverseOnFinish(struct Animation *Animation)
+{
+    Animation->Copied = !Animation->Copied;
+    if(Animation->Copied)
+    {
+        Animation->Frames = realloc(Animation->Frames, sizeof(struct Image) * Animation->Frame_Count * 2);
+        for(int i = Animation->Frame_Count; i < Animation->Frame_Count * 2; i++)
+        {
+            Animation->Frames[i] = Animation->Frames[Animation->Frame_Count * 2 - i - 1];
+        }
+        Animation->Frame_Count *= 2;
+    } else {
+        Animation->Frame_Count /= 2;
+        Animation->Frames = realloc(Animation->Frames, sizeof(struct Image) * Animation->Frame_Count);
+    }
+}
+
 void Animation_Render(struct Animation *Animation)
 {
 	struct timeval Current;
@@ -184,6 +206,7 @@ void Animation_Render(struct Animation *Animation)
 			Last = Animation->Current_FrameStart.tv_usec + Animation->Current_FrameStart.tv_sec * 1000000;
 	Curr /= 1000;
 	Last /= 1000;
+
 	if(Curr - Last >= Animation->Time_perFrame)
 	{
 		Animation->Current_FrameStart = Current;
@@ -201,7 +224,9 @@ void Animation_Render(struct Animation *Animation)
 
 void Animation_Free(struct Animation *Animation)
 {
-	for(int i = 0; i < Animation->Frame_Count; i++)
+    // If Animation has been reversed on finish, half of the pointers will be copies of the first half
+    int ToDelete = Animation->Copied ? Animation->Frame_Count / 2 : Animation->Frame_Count;
+	for(int i = 0; i < ToDelete; i++)
 	{
 		Image_FreeSimple(Animation->Frames + i);
 	}
@@ -211,7 +236,9 @@ void Animation_Free(struct Animation *Animation)
 
 void Animation_FreeSimple(struct Animation *Animation)
 {
-	for(int i = 0; i < Animation->Frame_Count; i++)
+    // If Animation has been reversed on finish, half of the pointers will be copies of the first half
+    int ToDelete = Animation->Copied ? Animation->Frame_Count / 2 : Animation->Frame_Count;
+	for(int i = 0; i < ToDelete; i++)
 	{
 		Image_FreeSimple(Animation->Frames + i);
 	}

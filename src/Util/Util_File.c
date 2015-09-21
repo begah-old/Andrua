@@ -272,7 +272,7 @@ struct F_FileInternal *FileInternal_Open(const char *FilePath)
 	return file;
 }
 
-_Bool FileExternal_Exists(const char *FilePath)
+_Bool FileInternal_Exists(const char *FilePath)
 {
 	JNIEnv *env;
 	int isAttached = 0, status;
