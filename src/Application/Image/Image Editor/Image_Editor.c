@@ -408,6 +408,24 @@ static void Image_Editor_Resize(struct Image_Editor *IE)
 			IE->Editor_Dimensions.z / 10.0f * 1.0f + IE->Editor_Dimensions.x,
 			IE->Editor_Dimensions.w / 20.0f * 17.0f + IE->Editor_Dimensions.y);
 
+    IE->Button_FrameMoveLeft = Quad_Create(IE->Editor_Dimensions.z / 10.0f * 3.0f + IE->Editor_Dimensions.x,
+			IE->Editor_Dimensions.w / 20.0f * 17.0f + IE->Editor_Dimensions.y,
+			IE->Editor_Dimensions.z / 10.0f * 3.0f + IE->Editor_Dimensions.x,
+			IE->Editor_Dimensions.w / 20.0f * 18.0f + IE->Editor_Dimensions.y,
+			IE->Editor_Dimensions.z / 10.0f * 4.0f + IE->Editor_Dimensions.x,
+			IE->Editor_Dimensions.w / 20.0f * 18.0 + IE->Editor_Dimensions.y,
+			IE->Editor_Dimensions.z / 10.0f * 4.0f + IE->Editor_Dimensions.x,
+			IE->Editor_Dimensions.w / 20.0f * 17.0f + IE->Editor_Dimensions.y);
+
+    IE->Button_FrameMoveRight = Quad_Create(IE->Editor_Dimensions.z / 10.0f * 6.0f + IE->Editor_Dimensions.x,
+			IE->Editor_Dimensions.w / 20.0f * 17.0f + IE->Editor_Dimensions.y,
+			IE->Editor_Dimensions.z / 10.0f * 6.0f + IE->Editor_Dimensions.x,
+			IE->Editor_Dimensions.w / 20.0f * 18.0f + IE->Editor_Dimensions.y,
+			IE->Editor_Dimensions.z / 10.0f * 7.0f + IE->Editor_Dimensions.x,
+			IE->Editor_Dimensions.w / 20.0f * 18.0 + IE->Editor_Dimensions.y,
+			IE->Editor_Dimensions.z / 10.0f * 7.0f + IE->Editor_Dimensions.x,
+			IE->Editor_Dimensions.w / 20.0f * 17.0f + IE->Editor_Dimensions.y);
+
 	IE->Button_FrameCancel = Quad_Create(
 			IE->Editor_Dimensions.z / 10 * 9 + IE->Editor_Dimensions.x,
 			IE->Editor_Dimensions.w / 20.0f * 17.0f + IE->Editor_Dimensions.y,
@@ -619,6 +637,9 @@ struct Image_Editor *Image_Editor_Init(float x, float y, float width, float heig
 
 	IE->Add_Texture = Image_Load("Image_Editor/Add.png");
 	check(IE->Add_Texture->Image != -1, "Couldn't load AddTexture");
+
+	IE->Arrow_Texture = Image_Load("Image_Editor/BlankArrow.png");
+	check(IE->Add_Texture->Image != -1, "Couldn't load ArrowTexture");
 
 	IE->State = STATE_DEFAULT;
 
@@ -1508,6 +1529,10 @@ static void Image_Editor_RenderFrames(struct Image_Editor *IE, struct Image_Tab 
 		TextToFree = -1;
 	}
 
+    // Ensure that IT->Frame_Selected can go back to -1 if mouse pressed on no image frame
+    if(Mouse.justPressed && Mouse.y < IE->Button_FrameConfirm.v1.y)
+        IT->Frame_Selected = -1;
+
 	float width = IE->Editor_Dimensions.z / 10.0f, height = IE->Editor_Dimensions.w / 10.0f;
 	for(int x = 0; x < IT->Frames_Num; x++)
 	{
@@ -1542,22 +1567,39 @@ static void Image_Editor_RenderFrames(struct Image_Editor *IE, struct Image_Tab 
 	}
 
 	_Bool Hover_Add = Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), IE->Button_FrameConfirm),
-			Hover_Delete =  Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), IE->Button_FrameCancel);
+			Hover_Delete =  Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), IE->Button_FrameCancel),
+			Hover_Left = Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), IE->Button_FrameMoveLeft),
+			Hover_Right = Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), IE->Button_FrameMoveRight);
 
 	if(Hover_Add && Mouse.justReleased) {
+        // Add new frame to animation
 		IT->Frames = realloc(IT->Frames, sizeof(struct Image_Frame) * (IT->Frames_Num + 1));
 		IT->Frames[IT->Frames_Num].Image_Edit = malloc(sizeof(struct Image_RawData));
 		IT->Frames[IT->Frames_Num].Image_Original = malloc(sizeof(struct Image_RawData));
 
-		IT->Frames[IT->Frames_Num].Image_Edit->Width = IT->Frames[IT->Frames_Num - 1].Image_Edit->Width;
-		IT->Frames[IT->Frames_Num].Image_Edit->Height = IT->Frames[IT->Frames_Num - 1].Image_Edit->Height;
-		IT->Frames[IT->Frames_Num].Image_Edit->Data = malloc(sizeof(unsigned char) * IT->Frames[IT->Frames_Num].Image_Edit->Width * IT->Frames[IT->Frames_Num].Image_Edit->Height * 4);
-		memcpy(IT->Frames[IT->Frames_Num].Image_Edit->Data, IT->Frames[IT->Frames_Num - 1].Image_Edit->Data, sizeof(unsigned char) * IT->Frames[IT->Frames_Num].Image_Edit->Width * IT->Frames[IT->Frames_Num].Image_Edit->Height * 4);
+        if(IT->Frame_Selected == -1) // No frame selected, so copies last frame
+        {
+            IT->Frames[IT->Frames_Num].Image_Edit->Width = IT->Frames[IT->Frames_Num - 1].Image_Edit->Width;
+            IT->Frames[IT->Frames_Num].Image_Edit->Height = IT->Frames[IT->Frames_Num - 1].Image_Edit->Height;
+            IT->Frames[IT->Frames_Num].Image_Edit->Data = malloc(sizeof(unsigned char) * IT->Frames[IT->Frames_Num].Image_Edit->Width * IT->Frames[IT->Frames_Num].Image_Edit->Height * 4);
+            memcpy(IT->Frames[IT->Frames_Num].Image_Edit->Data, IT->Frames[IT->Frames_Num - 1].Image_Edit->Data, sizeof(unsigned char) * IT->Frames[IT->Frames_Num].Image_Edit->Width * IT->Frames[IT->Frames_Num].Image_Edit->Height * 4);
 
-		IT->Frames[IT->Frames_Num].Image_Original->Width = IT->Frames[IT->Frames_Num - 1].Image_Edit->Width;
-		IT->Frames[IT->Frames_Num].Image_Original->Height = IT->Frames[IT->Frames_Num - 1].Image_Edit->Height;
-		IT->Frames[IT->Frames_Num].Image_Original->Data = malloc(sizeof(unsigned char) * IT->Frames[IT->Frames_Num].Image_Edit->Width * IT->Frames[IT->Frames_Num].Image_Edit->Height * 4);
-		memcpy(IT->Frames[IT->Frames_Num].Image_Original->Data, IT->Frames[IT->Frames_Num - 1].Image_Edit->Data, sizeof(unsigned char) * IT->Frames[IT->Frames_Num].Image_Edit->Width * IT->Frames[IT->Frames_Num].Image_Edit->Height * 4);
+            IT->Frames[IT->Frames_Num].Image_Original->Width = IT->Frames[IT->Frames_Num - 1].Image_Edit->Width;
+            IT->Frames[IT->Frames_Num].Image_Original->Height = IT->Frames[IT->Frames_Num - 1].Image_Edit->Height;
+            IT->Frames[IT->Frames_Num].Image_Original->Data = malloc(sizeof(unsigned char) * IT->Frames[IT->Frames_Num].Image_Edit->Width * IT->Frames[IT->Frames_Num].Image_Edit->Height * 4);
+            memcpy(IT->Frames[IT->Frames_Num].Image_Original->Data, IT->Frames[IT->Frames_Num - 1].Image_Edit->Data, sizeof(unsigned char) * IT->Frames[IT->Frames_Num].Image_Edit->Width * IT->Frames[IT->Frames_Num].Image_Edit->Height * 4);
+        } else { // Else copy selected frame
+            IT->Frames[IT->Frames_Num].Image_Edit->Width = IT->Frames[IT->Frame_Selected].Image_Edit->Width;
+            IT->Frames[IT->Frames_Num].Image_Edit->Height = IT->Frames[IT->Frame_Selected].Image_Edit->Height;
+            IT->Frames[IT->Frames_Num].Image_Edit->Data = malloc(sizeof(unsigned char) * IT->Frames[IT->Frames_Num].Image_Edit->Width * IT->Frames[IT->Frames_Num].Image_Edit->Height * 4);
+            memcpy(IT->Frames[IT->Frames_Num].Image_Edit->Data, IT->Frames[IT->Frame_Selected].Image_Edit->Data, sizeof(unsigned char) * IT->Frames[IT->Frames_Num].Image_Edit->Width * IT->Frames[IT->Frames_Num].Image_Edit->Height * 4);
+
+            IT->Frames[IT->Frames_Num].Image_Original->Width = IT->Frames[IT->Frame_Selected].Image_Edit->Width;
+            IT->Frames[IT->Frames_Num].Image_Original->Height = IT->Frames[IT->Frame_Selected].Image_Edit->Height;
+            IT->Frames[IT->Frames_Num].Image_Original->Data = malloc(sizeof(unsigned char) * IT->Frames[IT->Frames_Num].Image_Edit->Width * IT->Frames[IT->Frames_Num].Image_Edit->Height * 4);
+            memcpy(IT->Frames[IT->Frames_Num].Image_Original->Data, IT->Frames[IT->Frame_Selected].Image_Edit->Data, sizeof(unsigned char) * IT->Frames[IT->Frames_Num].Image_Edit->Width * IT->Frames[IT->Frames_Num].Image_Edit->Height * 4);
+        }
+		// Create new frame's texture
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		glGenTextures(1, &IT->Frames[IT->Frames_Num].Texture);
 		glBindTexture(GL_TEXTURE_2D, IT->Frames[IT->Frames_Num].Texture);
@@ -1586,17 +1628,47 @@ static void Image_Editor_RenderFrames(struct Image_Editor *IE, struct Image_Tab 
 		IT->OldSize = IT->Frames_Num;
 		IT->Frames_Num -= 1;
 		IT->Frames = realloc(IT->Frames, sizeof(struct Image_Frame) * IT->Frames_Num);
-	}
+	} else if(Hover_Left && Mouse.justReleased && IT->Frame_Selected > 0)
+	{
+	    struct Image_Frame Frame = IT->Frames[IT->Frame_Selected];
+	    IT->Frames[IT->Frame_Selected] = IT->Frames[IT->Frame_Selected - 1];
+	    IT->Frames[IT->Frame_Selected - 1] = Frame;
+	    IT->Frame_Selected--;
+	} else if(Hover_Right && Mouse.justReleased && IT->Frame_Selected < IT->Frames_Num - 1)
+    {
+        struct Image_Frame Frame = IT->Frames[IT->Frame_Selected];
+	    IT->Frames[IT->Frame_Selected] = IT->Frames[IT->Frame_Selected + 1];
+	    IT->Frames[IT->Frame_Selected + 1] = Frame;
+	    IT->Frame_Selected++;
+    }
 
 	if(Hover_Add)
-		Image_Shader.pushQuad(IE->Button_FrameConfirm, Quad_Create(IE->Add_Texture->x, IE->Add_Texture->y2, IE->Add_Texture->x, IE->Add_Texture->y, IE->Add_Texture->x2, IE->Add_Texture->y, IE->Add_Texture->x2, IE->Add_Texture->y2), IE->Add_Texture->Image, Vector4_Create(0.5f + IE->Hover_addColor.x, 0.5f + IE->Hover_addColor.y, 0.5f + IE->Hover_addColor.z, 0.0f));
+		Image_Shader.pushQuad(IE->Button_FrameConfirm, Quad_Create(IE->Add_Texture->x, IE->Add_Texture->y2, IE->Add_Texture->x, IE->Add_Texture->y, IE->Add_Texture->x2, IE->Add_Texture->y, IE->Add_Texture->x2, // This texture is very dark by default
+                                                             IE->Add_Texture->y2), IE->Add_Texture->Image, Vector4_Create(0.5f + IE->Hover_addColor.x, 0.5f + IE->Hover_addColor.y, 0.5f + IE->Hover_addColor.z, 0));
 	else
-		Image_Shader.pushQuad(IE->Button_FrameConfirm, Quad_Create(IE->Add_Texture->x, IE->Add_Texture->y2, IE->Add_Texture->x, IE->Add_Texture->y, IE->Add_Texture->x2, IE->Add_Texture->y, IE->Add_Texture->x2, IE->Add_Texture->y2), IE->Add_Texture->Image, Vector4_Create(0.5f, 0.5f, 0.5f, 0));
+		Image_Shader.pushQuad(IE->Button_FrameConfirm, Quad_Create(IE->Add_Texture->x, IE->Add_Texture->y2, IE->Add_Texture->x, IE->Add_Texture->y, IE->Add_Texture->x2, IE->Add_Texture->y, IE->Add_Texture->x2,
+                                                             IE->Add_Texture->y2), IE->Add_Texture->Image, Vector4_Create(0.5f, 0.5f, 0.5f, 0));
 
 	if(Hover_Delete)
-		Image_Shader.pushQuad(IE->Button_FrameCancel, Quad_Create(IE->Delete_Texture->x, IE->Delete_Texture->y2, IE->Delete_Texture->x, IE->Delete_Texture->y, IE->Delete_Texture->x2, IE->Delete_Texture->y, IE->Delete_Texture->x2, IE->Delete_Texture->y2), IE->Delete_Texture->Image, Vector4_Create(0.5f + IE->Hover_addColor.x, 0.5f + IE->Hover_addColor.y, 0.5f + IE->Hover_addColor.z, 0.0f));
+		Image_Shader.pushQuad(IE->Button_FrameCancel, Quad_Create(IE->Delete_Texture->x, IE->Delete_Texture->y2, IE->Delete_Texture->x, IE->Delete_Texture->y, IE->Delete_Texture->x2, IE->Delete_Texture->y, IE->Delete_Texture->x2,
+                                                            IE->Delete_Texture->y2), IE->Delete_Texture->Image, IE->Hover_addColor);
 	else
-		Image_Shader.pushQuad(IE->Button_FrameCancel, Quad_Create(IE->Delete_Texture->x, IE->Delete_Texture->y2, IE->Delete_Texture->x, IE->Delete_Texture->y, IE->Delete_Texture->x2, IE->Delete_Texture->y, IE->Delete_Texture->x2, IE->Delete_Texture->y2), IE->Delete_Texture->Image, Vector4_Create(0.5f, 0.5f, 0.5f, 0));
+		Image_Shader.pushQuad(IE->Button_FrameCancel, Quad_Create(IE->Delete_Texture->x, IE->Delete_Texture->y2, IE->Delete_Texture->x, IE->Delete_Texture->y, IE->Delete_Texture->x2, IE->Delete_Texture->y, IE->Delete_Texture->x2,
+                                                            IE->Delete_Texture->y2), IE->Delete_Texture->Image, Vector4_Create(0.0f, 0.0f, 0.0f, 0));
+
+    if(Hover_Left)
+        Image_Shader.pushQuad(IE->Button_FrameMoveLeft, Quad_Create(IE->Arrow_Texture->x2, IE->Arrow_Texture->y, IE->Arrow_Texture->x, IE->Arrow_Texture->y, // This texture is very dark by default
+                                                             IE->Arrow_Texture->x, IE->Arrow_Texture->y2, IE->Arrow_Texture->x2, IE->Arrow_Texture->y2), IE->Arrow_Texture->Image, Vector4_Create(0.5f + IE->Hover_addColor.x, 0.5f + IE->Hover_addColor.y, 0.5f + IE->Hover_addColor.z, 0));
+	else
+		Image_Shader.pushQuad(IE->Button_FrameMoveLeft, Quad_Create(IE->Arrow_Texture->x2, IE->Arrow_Texture->y, IE->Arrow_Texture->x, IE->Arrow_Texture->y,
+                                                              IE->Arrow_Texture->x, IE->Arrow_Texture->y2, IE->Arrow_Texture->x2, IE->Arrow_Texture->y2), IE->Arrow_Texture->Image, Vector4_Create(-0.5f, 0.0f, -0.5f, 0.0f));
+
+    if(Hover_Right)
+        Image_Shader.pushQuad(IE->Button_FrameMoveRight, Quad_Create(IE->Arrow_Texture->x2, IE->Arrow_Texture->y2, IE->Arrow_Texture->x, IE->Arrow_Texture->y2, IE->Arrow_Texture->x, IE->Arrow_Texture->y, // This texture is very dark by default
+                                                             IE->Arrow_Texture->x2, IE->Arrow_Texture->y), IE->Arrow_Texture->Image, Vector4_Create(0.5f + IE->Hover_addColor.x, 0.5f + IE->Hover_addColor.y, 0.5f + IE->Hover_addColor.z, 0));
+	else
+		Image_Shader.pushQuad(IE->Button_FrameMoveRight, Quad_Create(IE->Arrow_Texture->x2, IE->Arrow_Texture->y2, IE->Arrow_Texture->x, IE->Arrow_Texture->y2, IE->Arrow_Texture->x, IE->Arrow_Texture->y,
+                                                             IE->Arrow_Texture->x2, IE->Arrow_Texture->y), IE->Arrow_Texture->Image, Vector4_Create(-0.5f, 0.0f, -0.5f, 0.0f));
 }
 
 void Image_Editor_Render(struct Image_Editor *IE)

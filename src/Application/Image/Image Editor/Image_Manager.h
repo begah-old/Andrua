@@ -45,7 +45,7 @@ struct Image_Editor
 
 	struct Quad Change_Confirm, Close, Delete, New;
 	_Bool Change_Confirm_Hover, Close_Hover, Delete_Hover, New_Hover;
-	struct Image *Change_Confirm_Texture, *Close_Texture, *Delete_Texture, *New_Texture, *Add_Texture;
+	struct Image *Change_Confirm_Texture, *Close_Texture, *Delete_Texture, *New_Texture, *Add_Texture, *Arrow_Texture;
 
 	struct Quad Image_Tab;
 
@@ -56,6 +56,7 @@ struct Image_Editor
 	float PanningView_OX, PanningView_OY;
 
 	struct Quad Button_FrameConfirm, Button_FrameCancel;
+    struct Quad Button_FrameMoveLeft, Button_FrameMoveRight;
 
 	struct Quad Button_Save, Button_Load;
 	struct Image *Button_SaveTexture, *Button_LoadTexture;
