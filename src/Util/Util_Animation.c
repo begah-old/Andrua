@@ -68,7 +68,7 @@ struct Animation *Animation_LoadInternal(const char *Name)
 	return Animation;
 }
 
-struct Animation *Animation_LoadExternal(const char *Name)
+struct Animation *Animation_LoadExternal(const char * restrict Name)
 {
 	struct Animation *Animation = malloc(sizeof(struct Animation));
 

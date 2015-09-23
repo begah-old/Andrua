@@ -79,6 +79,7 @@ GLint HighDefaultFont, LowDefaultFont;
 
 /* Game FPS, calculated in Lua Editor.c for desktop or in Native.java for Android */
 int Game_FPS;
+long int Frame_Time_Passed;
 
 /* If set to false stops the main loop */
 _Bool GameRunning;

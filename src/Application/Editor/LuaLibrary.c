@@ -169,7 +169,7 @@ static int Lua_freeImage(lua_State *L)
 
 	if(!lua_isnumber(L, -1))
 	{
-		fprintf(Log, "Error freeing image, argument needs to be a number\n");
+		fprintf(Log, "Error image.free, argument needs to be a number\n");
 		Lua_requestClose = true;
 		return 0;
 	}
@@ -618,6 +618,580 @@ static int Lua_freeAnimation(lua_State *State)
     return 0;
 }
 
+// Particle Systems Management
+double ParcticleS_NextID = 0.0;
+struct Lua_ParcticleS { double ID; struct Particle_Emitter *Emitter; };
+struct Particle_System *Lua_ParticleSystem = NULL;
+struct vector_t *Lua_ParcticleS_List = NULL;
+
+static int Lua_particleSnew(lua_State *L)
+{
+    if(!lua_isnumber(Lua_State, -3))
+    {
+        fprintf(Log, "particles.new : No number for argument 1");
+        Lua_requestClose = true;
+        lua_pushnumber(Lua_State, -1);
+        return 1;
+    } else if(!lua_isnumber(Lua_State, -2))
+    {
+        fprintf(Log, "particles.new : No number for argument 2");
+        Lua_requestClose = true;
+        lua_pushnumber(Lua_State, -1);
+        return 1;
+    } else if(!lua_isnumber(Lua_State, -1))
+    {
+        fprintf(Log, "particles.new : No number for argument 3");
+        Lua_requestClose = true;
+        lua_pushnumber(Lua_State, -1);
+        return 1;
+    }
+
+    if(!Lua_ParcticleS_List)
+    {
+        Lua_ParcticleS_List = vector_new(sizeof(struct Lua_ParcticleS));
+        ParcticleS_NextID = 0.0;
+        Lua_ParticleSystem = Particle_System_New();
+    }
+
+    int numParticle = lua_tonumber(Lua_State, -3);
+    int x = lua_tonumber(Lua_State, -2), y = lua_tonumber(Lua_State, -1);
+
+    int Temp = Particle_Emitter_New(Lua_ParticleSystem, x, y, numParticle);
+    struct Lua_ParcticleS PP = { ParcticleS_NextID++,  Lua_ParticleSystem->Emitters + Temp};
+    vector_push_back(Lua_ParcticleS_List, &PP);
+
+    lua_pushnumber(Lua_State, PP.ID);
+    return 1;
+}
+
+static int Lua_particleScolor(lua_State *L)
+{
+    if(!Lua_ParcticleS_List)
+        return 0;
+
+    if(!lua_isnumber(Lua_State, -9))
+    {
+        fprintf(Log, "particle.setColor : argument 1 (ID) needs to be a number");
+        Lua_requestClose = true;
+        return 0;
+    } else if(!lua_isnumber(Lua_State, -8))
+    {
+        fprintf(Log, "particle.setColor : argument 2 needs to be a number");
+        Lua_requestClose = true;
+        return 0;
+    } else if(!lua_isnumber(Lua_State, -7))
+    {
+        fprintf(Log, "particle.setColor : argument 3 needs to be a number");
+        Lua_requestClose = true;
+        return 0;
+    } else if(!lua_isnumber(Lua_State, -6))
+    {
+        fprintf(Log, "particle.setColor : argument 4 needs to be a number");
+        Lua_requestClose = true;
+        return 0;
+    } else if(!lua_isnumber(Lua_State, -5))
+    {
+        fprintf(Log, "particle.setColor : argument 5 needs to be a number");
+        Lua_requestClose = true;
+        return 0;
+    } else if(!lua_isnumber(Lua_State, -4))
+    {
+        fprintf(Log, "particle.setColor : argument 6 needs to be a number");
+        Lua_requestClose = true;
+        return 0;
+    } else if(!lua_isnumber(Lua_State, -3))
+    {
+        fprintf(Log, "particle.setColor : argument 7 needs to be a number");
+        Lua_requestClose = true;
+        return 0;
+    } else if(!lua_isnumber(Lua_State, -2))
+    {
+        fprintf(Log, "particle.setColor : argument 8 needs to be a number");
+        Lua_requestClose = true;
+        return 0;
+    } else if(!lua_isnumber(Lua_State, -1))
+    {
+        fprintf(Log, "particle.setColor : argument 9 needs to be a number");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    int ID = lua_tonumber(Lua_State, -9);
+
+    if(ID < 0 || ID >= ParcticleS_NextID)
+    {
+        fprintf(Log, "particle.setColor : argument 1 is an invalid ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    int IDX = -1;
+    struct Lua_ParcticleS *PS = Lua_ParcticleS_List->items;
+    for(int i = 0; i < Lua_ParcticleS_List->size; i++)
+    {
+        if(PS[i].ID == ID)
+        {
+            IDX = i;
+            break;
+        }
+    }
+
+    if(IDX == -1)
+    {
+        fprintf(Log, "particle.setColor : cannot find particle emitter with that id");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    PS[IDX].Emitter->Color_Start = Vector4_Create(lua_tonumber(Lua_State, -8), lua_tonumber(Lua_State, -7), lua_tonumber(Lua_State, -6), lua_tonumber(Lua_State, -5));
+    PS[IDX].Emitter->Color_End = Vector4_Create(lua_tonumber(Lua_State, -4), lua_tonumber(Lua_State, -3), lua_tonumber(Lua_State, -2), lua_tonumber(Lua_State, -1));
+
+    return 0;
+}
+
+static int Lua_particleSgravityType(lua_State *L)
+{
+    if(!Lua_ParcticleS_List)
+        return 0;
+
+    if(!lua_isnumber(Lua_State, -2))
+    {
+        fprintf(Log, "particle.gravityType needs ID as argument");
+        Lua_requestClose = true;
+        return 0;
+    } else if(!lua_isstring(Lua_State, -1))
+    {
+        fprintf(Log, "particle.gravityType needs String as argument 2");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    int ID = lua_tonumber(Lua_State, -2);
+
+    if(ID < 0 || ID >= ParcticleS_NextID)
+    {
+        fprintf(Log, "particle.setColor : argument 1 is an invalid ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    int IDX = -1;
+    struct Lua_ParcticleS *PS = Lua_ParcticleS_List->items;
+    for(int i = 0; i < Lua_ParcticleS_List->size; i++)
+    {
+        if(PS[i].ID == ID)
+        {
+            IDX = i;
+            break;
+        }
+    }
+
+    if(IDX == -1)
+    {
+        fprintf(Log, "particle.setColor : cannot find particle emitter with that id");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    const char *str = lua_tostring(Lua_State, -1);
+
+    if(!strcmp(str, "down"))
+        PS[IDX].Emitter->Gravity_Type = GRAVITY_TYPE_DOWN;
+    else if(!strcmp(str, "up"))
+        PS[IDX].Emitter->Gravity_Type = GRAVITY_TYPE_UP;
+    else if(!strcmp(str, "right"))
+        PS[IDX].Emitter->Gravity_Type = GRAVITY_TYPE_RIGHT;
+    else if(!strcmp(str, "left"))
+        PS[IDX].Emitter->Gravity_Type = GRAVITY_TYPE_LEFT;
+    else if(!strcmp(str, "other"))
+        PS[IDX].Emitter->Gravity_Type = GRAVITY_TYPE_OTHER;
+    else
+    {
+        fprintf(Log, "particle.setColor : cannot find type math with argument 2");
+        Lua_requestClose = true;
+    }
+
+    return 0;
+}
+
+static int Lua_particleSparticles(lua_State *L)
+{
+    if(!Lua_ParcticleS_List)
+        return 0;
+
+    if(!lua_isnumber(Lua_State, -2))
+    {
+        fprintf(Log, "particle.maxParticles needs ID as argument");
+        Lua_requestClose = true;
+        return 0;
+    } else if(!lua_isnumber(Lua_State, -1))
+    {
+        fprintf(Log, "particle.maxParticles needs number as argument 2");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    int ID = lua_tonumber(Lua_State, -2);
+
+    if(ID < 0 || ID >= ParcticleS_NextID)
+    {
+        fprintf(Log, "particle.maxParticles : argument 1 is an invalid ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    int IDX = -1;
+    struct Lua_ParcticleS *PS = Lua_ParcticleS_List->items;
+    for(int i = 0; i < Lua_ParcticleS_List->size; i++)
+    {
+        if(PS[i].ID == ID)
+        {
+            IDX = i;
+            break;
+        }
+    }
+
+    if(IDX == -1)
+    {
+        fprintf(Log, "particle.maxParticles : cannot find particle emitter with that id");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    PS[IDX].Emitter->Particle_Count = lua_tonumber(Lua_State, -1);
+
+    return 0;
+}
+
+static int Lua_particleSlife(lua_State *L)
+{
+    if(!Lua_ParcticleS_List)
+        return 0;
+
+    if(!lua_isnumber(Lua_State, -3))
+    {
+        fprintf(Log, "particle.setLife needs ID as argument 1");
+        Lua_requestClose = true;
+        return 0;
+    } else if(!lua_isnumber(Lua_State, -2))
+    {
+        fprintf(Log, "particle.setLife needs number as argument 2");
+        Lua_requestClose = true;
+        return 0;
+    } else if(!lua_isnumber(Lua_State, -1))
+    {
+        fprintf(Log, "particle.setLife needs number as argument 3");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    int ID = lua_tonumber(Lua_State, -3);
+
+    if(ID < 0 || ID >= ParcticleS_NextID)
+    {
+        fprintf(Log, "particle.setLife : argument 1 is an invalid ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    int IDX = -1;
+    struct Lua_ParcticleS *PS = Lua_ParcticleS_List->items;
+    for(int i = 0; i < Lua_ParcticleS_List->size; i++)
+    {
+        if(PS[i].ID == ID)
+        {
+            IDX = i;
+            break;
+        }
+    }
+
+    if(IDX == -1)
+    {
+        fprintf(Log, "particle.setLife : cannot find particle emitter with that id");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    PS[IDX].Emitter->Min_Life = lua_tonumber(Lua_State, -2);
+    PS[IDX].Emitter->Max_Life = lua_tonumber(Lua_State, -1);
+
+    return 0;
+}
+
+static int Lua_particleSgravity(lua_State *L)
+{
+    if(!Lua_ParcticleS_List)
+        return 0;
+
+    if(!lua_isnumber(Lua_State, -2))
+    {
+        fprintf(Log, "particle.setGravity needs ID as argument");
+        Lua_requestClose = true;
+        return 0;
+    } else if(!lua_isnumber(Lua_State, -1))
+    {
+        fprintf(Log, "particle.setGravity needs number as argument 2");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    int ID = lua_tonumber(Lua_State, -2);
+
+    if(ID < 0 || ID >= ParcticleS_NextID)
+    {
+        fprintf(Log, "particle.setGravity : argument 1 is an invalid ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    int IDX = -1;
+    struct Lua_ParcticleS *PS = Lua_ParcticleS_List->items;
+    for(int i = 0; i < Lua_ParcticleS_List->size; i++)
+    {
+        if(PS[i].ID == ID)
+        {
+            IDX = i;
+            break;
+        }
+    }
+
+    if(IDX == -1)
+    {
+        fprintf(Log, "particle.setGravity : cannot find particle emitter with that id");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    double value = lua_tonumber(Lua_State, -1);
+
+    PS[IDX].Emitter->Gravity = value;
+
+    return 0;
+}
+
+static int Lua_particleSposition(lua_State *L)
+{
+    if(!Lua_ParcticleS_List)
+        return 0;
+
+    if(!lua_isnumber(Lua_State, -3))
+    {
+        fprintf(Log, "particle.setPosition needs ID as argument 1");
+        Lua_requestClose = true;
+        return 0;
+    } else if(!lua_isnumber(Lua_State, -2))
+    {
+        fprintf(Log, "particle.setPosition needs number as argument 2");
+        Lua_requestClose = true;
+        return 0;
+    } else if(!lua_isnumber(Lua_State, -1))
+    {
+        fprintf(Log, "particle.setPosition needs number as argument 3");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    int ID = lua_tonumber(Lua_State, -3);
+
+    if(ID < 0 || ID >= ParcticleS_NextID)
+    {
+        fprintf(Log, "particle.setPosition : argument 1 is an invalid ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    int IDX = -1;
+    struct Lua_ParcticleS *PS = Lua_ParcticleS_List->items;
+    for(int i = 0; i < Lua_ParcticleS_List->size; i++)
+    {
+        if(PS[i].ID == ID)
+        {
+            IDX = i;
+            break;
+        }
+    }
+
+    if(IDX == -1)
+    {
+        fprintf(Log, "particle.setPosition : cannot find particle emitter with that id");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    PS[IDX].Emitter->x = lua_tonumber(Lua_State, -2);
+    PS[IDX].Emitter->y = lua_tonumber(Lua_State, -1);
+
+    return 0;
+}
+
+static int Lua_particleSgravityCenter(lua_State *L)
+{
+    if(!Lua_ParcticleS_List)
+        return 0;
+
+    if(!lua_isnumber(Lua_State, -3))
+    {
+        fprintf(Log, "particle.gravityCenter needs ID as argument 1");
+        Lua_requestClose = true;
+        return 0;
+    } else if(!lua_isnumber(Lua_State, -2))
+    {
+        fprintf(Log, "particle.gravityCenter needs number as argument 2");
+        Lua_requestClose = true;
+        return 0;
+    } else if(!lua_isnumber(Lua_State, -1))
+    {
+        fprintf(Log, "particle.gravityCenter needs number as argument 3");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    int ID = lua_tonumber(Lua_State, -3);
+
+    if(ID < 0 || ID >= ParcticleS_NextID)
+    {
+        fprintf(Log, "particle.gravityCenter : argument 1 is an invalid ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    int IDX = -1;
+    struct Lua_ParcticleS *PS = Lua_ParcticleS_List->items;
+    for(int i = 0; i < Lua_ParcticleS_List->size; i++)
+    {
+        if(PS[i].ID == ID)
+        {
+            IDX = i;
+            break;
+        }
+    }
+
+    if(IDX == -1)
+    {
+        fprintf(Log, "particle.gravityCenter : cannot find particle emitter with that id");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    PS[IDX].Emitter->Gravity_Center = Vector2_Create(lua_tonumber(Lua_State, -2), lua_tonumber(Lua_State, -1));
+
+    return 0;
+}
+
+static int Lua_particleGetCount(lua_State *L)
+{
+    if(!Lua_ParcticleS_List)
+    {
+        lua_pushnumber(Lua_State, 0);
+        return 1;
+    }
+
+    if(!lua_isnumber(Lua_State, -1))
+    {
+        fprintf(Log, "particle.getCount needs ID as argument");
+        Lua_requestClose = true;
+        lua_pushnumber(Lua_State, 0);
+        return 1;
+    }
+
+    int ID = lua_tonumber(Lua_State, -1);
+
+    if(ID < 0 || ID >= ParcticleS_NextID)
+    {
+        fprintf(Log, "particle.gravityCenter : argument 1 is an invalid ID");
+        Lua_requestClose = true;
+        lua_pushnumber(Lua_State, 0);
+        return 1;
+    }
+
+    int IDX = -1;
+    struct Lua_ParcticleS *PS = Lua_ParcticleS_List->items;
+    for(int i = 0; i < Lua_ParcticleS_List->size; i++)
+    {
+        if(PS[i].ID == ID)
+        {
+            IDX = i;
+            break;
+        }
+    }
+
+    if(IDX == -1)
+    {
+        fprintf(Log, "particle.gravityCenter : cannot find particle emitter with that id");
+        Lua_requestClose = true;
+        lua_pushnumber(Lua_State, 0);
+        return 1;
+    }
+
+    lua_pushnumber(Lua_State, PS[IDX].Emitter->Particle_Count);
+    return 1;
+}
+
+static int Lua_particleFree(lua_State *L)
+{
+    if(!Lua_ParcticleS_List)
+        return 0;
+
+    if(!lua_isnumber(Lua_State, -1))
+    {
+        fprintf(Log, "particle.free needs ID as argument");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    int ID = lua_tonumber(Lua_State, -1);
+
+    if(ID < 0 || ID >= ParcticleS_NextID)
+    {
+        fprintf(Log, "particle.free : argument is an invalid ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    int IDX = -1;
+    struct Lua_ParcticleS *PS = Lua_ParcticleS_List->items;
+    for(int i = 0; i < Lua_ParcticleS_List->size; i++)
+    {
+        if(PS[i].ID == ID)
+        {
+            IDX = i;
+            break;
+        }
+    }
+
+    if(IDX == -1)
+    {
+        fprintf(Log, "particle.free : cannot find particle emitter with that id");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    struct Particle_Emitter *Em = PS[IDX].Emitter;
+
+    int IDX2 = -1;
+    for(int i = 0; i < Lua_ParticleSystem->Emitters_Count; i++)
+    {
+        if(Lua_ParticleSystem->Emitters[i].Gravity == Em->Gravity && Lua_ParticleSystem->Emitters[i].Gravity_Center.x == Em->Gravity_Center.x && Lua_ParticleSystem->Emitters[i].Gravity_Center.y == Em->Gravity_Center.y)
+        {
+            IDX2 = i;
+            break;
+        }
+    }
+
+    Particle_Emitter_Free(Lua_ParticleSystem, IDX2);
+
+    vector_erase(Lua_ParcticleS_List, IDX);
+    if(!Lua_ParcticleS_List->size)
+    {
+        vector_delete(Lua_ParcticleS_List);
+        Particle_System_Free(Lua_ParticleSystem);
+        Lua_ParticleSystem = NULL;
+        Lua_ParcticleS_List = NULL;
+    }
+
+    return 0;
+}
+
 // Gui Button Management
 double Gui_Button_NextID = 0.0;
 struct Lua_Button { double ID; struct Gui_Button *B; };
@@ -973,6 +1547,14 @@ static int Lua_freeButton(lua_State *L)
 			return 0;
 		}
 	}
+
+	if(!Lua_Button_List->size)
+    {
+        vector_delete(Lua_Button_List);
+        Particle_System_Free(Lua_ParticleSystem);
+        Lua_ParticleSystem = NULL;
+        Lua_Button_List = NULL;
+    }
 
 	return 0;
 }
@@ -1710,52 +2292,52 @@ static int Lua_fixedFontRender(lua_State *L)
 {
 	if(!App_UsingDisplay)
 	{
-		fprintf(Log, "renderer.rectangle : need to call have useDisplay to true to get access to rendering functions\n");
+		fprintf(Log, "renderer.fixedText : need to call have useDisplay to true to get access to rendering functions\n");
 		Lua_requestClose = true;
 	}
 	if(!lua_isstring(L, -9))
 	{
-		fprintf(Log, "renderer.rectangle : need string for argument 1\n");
+		fprintf(Log, "renderer.fixedText : need string for argument 1\n");
 		return 0;
 	}
 	if(!lua_isnumber(L, -8))
 	{
-		fprintf(Log, "renderer.rectangle : need number for argument 2\n");
+		fprintf(Log, "renderer.fixedText : need number for argument 2\n");
 		return 0;
 	}
 	if(!lua_isnumber(L, -7))
 	{
-		fprintf(Log, "renderer.rectangle : need number for argument 3\n");
+		fprintf(Log, "renderer.fixedText : need number for argument 3\n");
 		return 0;
 	}
 	if(!lua_isnumber(L, -6))
 	{
-		fprintf(Log, "renderer.rectangle : need number for argument 4\n");
+		fprintf(Log, "renderer.fixedText : need number for argument 4\n");
 		return 0;
 	}
 	if(!lua_isnumber(L, -5))
 	{
-		fprintf(Log, "renderer.rectangle : need number for argument 5\n");
+		fprintf(Log, "renderer.fixedText : need number for argument 5\n");
 		return 0;
 	}
 	if(!lua_isnumber(L, -4))
 	{
-		fprintf(Log, "renderer.rectangle : need number for argument 6\n");
+		fprintf(Log, "renderer.fixedText : need number for argument 6\n");
 		return 0;
 	}
 	if(!lua_isnumber(L, -3))
 	{
-		fprintf(Log, "renderer.rectangle : need number for argument 7\n");
+		fprintf(Log, "renderer.fixedText : need number for argument 7\n");
 		return 0;
 	}
 	if(!lua_isnumber(L, -2))
 	{
-		fprintf(Log, "renderer.rectangle : need number for argument 8\n");
+		fprintf(Log, "renderer.fixedText : need number for argument 8\n");
 		return 0;
 	}
 	if(!lua_isnumber(L, -1))
 	{
-		fprintf(Log, "renderer.rectangle : need number for argument 9\n");
+		fprintf(Log, "renderer.fixedText : need number for argument 9\n");
 		return 0;
 	}
 
@@ -1856,6 +2438,20 @@ void Lua_LoadLibrary(FILE *F)
         {NULL, NULL}
     };
 
+    static const luaL_Reg Particle_Functions[] = {
+        {"new", Lua_particleSnew},
+        {"maxParticles", Lua_particleSparticles},
+        {"setColor", Lua_particleScolor},
+        {"getCount", Lua_particleGetCount},
+        {"setPosition", Lua_particleSposition},
+        {"gravityCenter", Lua_particleSgravityCenter},
+        {"setGravity", Lua_particleSgravity},
+        {"gravityType", Lua_particleSgravityType},
+        {"setLife", Lua_particleSlife},
+        {"free", Lua_particleFree},
+        {NULL, NULL}
+    };
+
     lua_newtable(Lua_State);
     luaL_setfuncs(Lua_State, Engine_Functions, 0);
     lua_setglobal(Lua_State, "engine");
@@ -1879,6 +2475,10 @@ void Lua_LoadLibrary(FILE *F)
     lua_newtable(Lua_State);
     luaL_setfuncs(Lua_State, Animation_Functions, 0);
     lua_setglobal(Lua_State, "animation");
+
+    lua_newtable(Lua_State);
+    luaL_setfuncs(Lua_State, Particle_Functions, 0);
+    lua_setglobal(Lua_State, "particle");
 }
 
 void Lua_closeLibrary()
@@ -1917,5 +2517,21 @@ void Lua_closeLibrary()
         Animation_NextID = 0.0;
 	}
 	log_info("Free'd all animations");
+
+	if(Lua_ParcticleS_List)
+    {
+        vector_delete(Lua_ParcticleS_List);
+        Particle_System_Free(Lua_ParticleSystem);
+        Lua_ParticleSystem = NULL;
+        Lua_ParcticleS_List = NULL;
+    }
+    log_info("Free'd all particle systems");
+
 	log_info("Done closing Lua Library");
+}
+
+void LuaLibrary_Render()
+{
+    if(Lua_ParticleSystem)
+        Particle_System_Render(Lua_ParticleSystem);
 }

@@ -4,7 +4,7 @@
 
 struct Window *Window;
 
-clock_t Super_long_press = -1, Double_Click_Timer = -1;
+struct timeval Super_long_press = { -1, -1 }, Double_Click_Timer = { -1, -1 };
 
 jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     Java_VM = vm;
@@ -52,21 +52,24 @@ void Java_com_andrua_Native_NRender(JNIEnv* env, jobject thiz, jint FPS)
             Super_long_press = -1;
         else if(!Mouse.isSuper_longPress && Super_long_press > 0)
         {
-            float diff = (((float)clock() - (float)Super_long_press) / CLOCKS_PER_SEC ) * 10;
-            if(diff > 3.0f)
+		  struct timeval STR;
+		  gettimeofday(&STR, NULL);
+		  long int diff = Time_elapsed(Super_long_press, STR);
+            if(diff > 1)
             {
                 Mouse.isSuper_longPress = true;
-                Super_long_press = -1;
+                Super_long_press.tv_sec = -1;
             }
         }
     }
 
     if(Double_Click_Timer > 0)
     {
-        float diff = (((float)clock() - (float)Double_Click_Timer) / CLOCKS_PER_SEC) * 10;
-
-        if(diff > 1.0f)
-            Double_Click_Timer = -1;
+		  struct timeval STR;
+		  gettimeofday(&STR, NULL);
+		  long int diff = Time_elapsed(Double_Click_Timer, STR);
+        if(diff > 1)
+            Double_Click_Timer.tv_sec = -1;
     }
 
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -123,11 +126,11 @@ void Java_com_andrua_Native_justReleased(JNIEnv* env, jobject thiz)
     if(!Mouse.justLongPressedReleased) {
         Mouse.justQuickPressed = true;
 
-        if(Double_Click_Timer == -1)
-            Double_Click_Timer = -1;
+        if(Double_Click_Timer.tv_sec == -1)
+            gettimeofday(&Double_Click_Timer, NULL);
         else {
             Mouse.just_DoubleClicked = true;
-            Double_Click_Timer = -1;
+            Double_Click_Timer.tv_sec = -1;
         }
     }
 
@@ -138,7 +141,8 @@ void Java_com_andrua_Native_longPress(JNIEnv* env, jobject thiz)
 {
     Mouse.isLongedPressed = true;
     Mouse.isPressed = true;
-    Super_long_press = clock();
+    gettimeofday(&Super_long_press, NULL);
+
     __android_log_print(ANDROID_LOG_ERROR, "Native", "Just long Pressed");
 }
 

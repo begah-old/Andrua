@@ -24,6 +24,7 @@ _Bool Lua_requestClose;
 
 void Lua_LoadLibrary(FILE *F);
 void Lua_closeLibrary();
+void LuaLibrary_Render();
 int Lua_Close(lua_State *L);
 
 void Editor_Init();

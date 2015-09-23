@@ -8,10 +8,12 @@
 #include "Util.h"
 
 #define EXECUTABLE_NAME 6
-#define DEBUG 0
+#define DEBUG
 #define CODE_BLOCKS
 
 static void ImageEngine_SetUp();
+
+struct timeval Frame_TimePassed = {-1, -1};
 
 #ifndef ANDROID
 
@@ -42,6 +44,7 @@ void Util_Init(struct Window *Window,
 	Mouse.pressedCooldown = 0;
 	Mouse.Faked_Input = false;
 	Game_FPS = 0;
+	Frame_Time_Passed = 0;
 
 	Keyboard.justPressed = Keyboard.justReleased = Keyboard.justTyped = false;
 
@@ -131,6 +134,8 @@ void Util_Init(struct Window *Window,
 	ImageEngine_SetUp();
 	Renderer_SetUp();
 
+	gettimeofday(&Frame_TimePassed, NULL);
+
 	log_info("Done initializing util library");
 
 	return;
@@ -146,6 +151,7 @@ void Util_Init(struct Window *Window)
 	Mouse.pressedCooldown = 0;
 	Mouse.Faked_Input = false;
 	Game_FPS = 0;
+	Frame_Time_Passed = 0;
 
 	Keyboard.justPressed = Keyboard.justReleased = Keyboard.justTyped = false;
 
@@ -181,6 +187,15 @@ void Util_Init(struct Window *Window)
 
 void Util_Flush()
 {
+    struct timeval Current;
+    gettimeofday(&Current, NULL);
+
+    if(Current.tv_usec < Frame_TimePassed.tv_usec)
+        Frame_Time_Passed = (Current.tv_usec - (Frame_TimePassed.tv_usec - 1000000)) / 1000;
+    else
+        Frame_Time_Passed = (Current.tv_usec - Frame_TimePassed.tv_usec) / 1000;
+    Frame_TimePassed = Current;
+
 	Renderer_Flush();
 }
 

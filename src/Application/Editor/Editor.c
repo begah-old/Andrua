@@ -409,6 +409,8 @@ void Editor_Render()
 			}
 		}
 
+		LuaLibrary_Render();
+
 		if(Lua_requestClose)
 		{
 			Lua_Close(NULL);

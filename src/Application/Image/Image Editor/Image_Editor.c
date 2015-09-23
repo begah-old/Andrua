@@ -42,6 +42,7 @@ struct Image_Tab *Image_Tab_Load(const char *Name)
 			MIN(Image->Frames->Image_Edit->Width,
 					Image->Frames->Image_Edit->Height)
 					/ 100.0f;
+
 	Image->Frames_Num = 1;
 	Image->Frames_On = 0;
 	Image->OldSize = -1;
@@ -553,7 +554,11 @@ static void Image_Set(struct Image_Editor *IE, int INDEX)
 		IT->View.z = IT->Image_Edit->Width;
 		IT->View.w = IT->Image_Edit->Height;*/
 		IE->Image_Scroll->BarY = IT->BarY;
-		IE->Image_Scroll->BarValue = IT->BarValue;
+
+		if(IT->BarValue >= 1.0f)
+            IE->Image_Scroll->BarValue = IT->BarValue;
+        else
+            IE->Image_Scroll->BarValue = 1.0f / IT->BarValue;
 		IE->Image_Scroll->TotalValue = 100.0f + IE->Image_Scroll->BarValue;
 	}
 }
@@ -1536,8 +1541,8 @@ static void Image_Editor_RenderFrames(struct Image_Editor *IE, struct Image_Tab 
 	float width = IE->Editor_Dimensions.z / 10.0f, height = IE->Editor_Dimensions.w / 10.0f;
 	for(int x = 0; x < IT->Frames_Num; x++)
 	{
-		float xx = (x%6)*1.5 * width + width * 0.75f;
-		float yy = (7 * height) - (x/6)*1.5 * height;
+		float xx = (x%6)*1.5 * width + width * 0.75f + IE->Editor_Dimensions.x;
+		float yy = (7 * height) - (x/6)*1.5 * height + IE->Editor_Dimensions.y;
 
 		struct Quad Quad = Quad_Create(xx, yy, xx, yy + height, xx + width, yy + height, xx + width, yy);
 		_Bool Hover = Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), Quad);

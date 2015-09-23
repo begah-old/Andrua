@@ -254,6 +254,51 @@ struct Animation
 	double Angle;
 };
 
+/* Particle Engine structures */
+struct Particle
+{
+    float x, y;
+    float xspeed, yspeed;
+    float xacceleration, yacceleration;
+    float angle;
+
+    float width, height;
+    int life;
+};
+
+enum PARTICLE_GRAVITY_TYPE {
+    GRAVITY_TYPE_UP,
+    GRAVITY_TYPE_DOWN,
+    GRAVITY_TYPE_LEFT,
+    GRAVITY_TYPE_RIGHT,
+    GRAVITY_TYPE_OTHER
+};
+
+struct Particle_Emitter
+{
+    float x, y;
+
+    struct Particle *Particles;
+    long int Particle_Max, Particle_Count;
+
+    struct Vector4f Color_Start;
+    struct Vector4f Color_End;
+
+    int Min_Life, Max_Life;
+
+    enum PARTICLE_GRAVITY_TYPE Gravity_Type;
+
+    struct Vector2f Gravity_Center;
+
+    float Gravity;
+};
+
+struct Particle_System
+{
+    struct Particle_Emitter *Emitters;
+    int Emitters_Count;
+};
+
 /* Simple structure to hold a string, used with vector_t */
 struct String_Struct
 {
@@ -639,8 +684,17 @@ void Animation_Render(struct Animation *Animation);
 void Animation_Free(struct Animation *Animation);
 void Animation_FreeSimple(struct Animation *Animation);
 
+struct Particle_System *Particle_System_New();
+int Particle_Emitter_New(struct Particle_System *System, float oX, float oY, long int Max_Particles);
+void Particle_System_Render(struct Particle_System *System);
+void Particle_Emitter_Free(struct Particle_System *System, int IDX);
+void Particle_System_Free(struct Particle_System *System);
+
 /* Function used to Calculate FPS on Windows, and to calculate mouse event's timing */
 long int Time_elapsed(struct timeval Start, struct timeval End);
+
+double cosLK(int Degress); // Cosinus function, uses a lookup table
+double sinLK(int Degrees); // Sinus function, uses a lookup table
 
 void Dir_Create(char *name);
 _Bool Dir_Exists(char *name);
