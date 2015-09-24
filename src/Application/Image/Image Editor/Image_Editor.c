@@ -1867,6 +1867,30 @@ void Image_Editor_Render(struct Image_Editor *IE)
 		IE->CurrentColor.w = ColorA;
 	}
 
+	if (IE->PanningView)
+	{
+		double X = Mouse.x - Mouse.prevX;
+		double Y = Mouse.y - Mouse.prevY;
+		X = View_TranslateTo(X,
+							 IE->Image_Editor_View.v4.x - IE->Image_Editor_View.v1.x,
+							 IE->Image_View.z);
+		Y = View_TranslateTo(Y,
+							 IE->Image_Editor_View.v2.y - IE->Image_Editor_View.v1.y,
+							 IE->Image_View.w);
+		if (Mouse.x > Mouse.prevX && !X)
+			X = 1;
+		if (Mouse.x < Mouse.prevX && !X)
+			X = -1;
+		if (Mouse.y > Mouse.prevY && !Y)
+			Y = 1;
+		if (Mouse.y < Mouse.prevY && !Y)
+			Y = -1;
+		IT->X -= X;
+		IT->Y += Y;
+
+		if (Mouse.justReleased)
+			IE->PanningView = false;
+	}
 	if (Point_inQuad(Vector2_Create(Mouse.x, Mouse.y),
 			IE->Image_Editor_View))
 	{
@@ -1946,30 +1970,6 @@ void Image_Editor_Render(struct Image_Editor *IE)
 		{
 			IE->PanningView = true;
 		}
-	}
-	if (IE->PanningView)
-	{
-		double X = Mouse.x - Mouse.prevX;
-		double Y = Mouse.y - Mouse.prevY;
-		X = View_TranslateTo(X,
-				IE->Image_Editor_View.v4.x - IE->Image_Editor_View.v1.x,
-				IE->Image_View.z);
-		Y = View_TranslateTo(Y,
-				IE->Image_Editor_View.v2.y - IE->Image_Editor_View.v1.y,
-				IE->Image_View.w);
-		if (Mouse.x > Mouse.prevX && !X)
-			X = 1;
-		if (Mouse.x < Mouse.prevX && !X)
-			X = -1;
-		if (Mouse.y > Mouse.prevY && !Y)
-			Y = 1;
-		if (Mouse.y < Mouse.prevY && !Y)
-			Y = -1;
-		IT->X -= X;
-		IT->Y += Y;
-
-		if (Mouse.justReleased)
-			IE->PanningView = false;
 	}
 	Gui_TextBox_Render(IE->Color_Red);
 	Gui_TextBox_Render(IE->Color_Green);

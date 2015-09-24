@@ -277,6 +277,7 @@ enum PARTICLE_GRAVITY_TYPE {
 struct Particle_Emitter
 {
     float x, y;
+    int ID;
 
     struct Particle *Particles;
     long int Particle_Max, Particle_Count;
@@ -291,12 +292,17 @@ struct Particle_Emitter
     struct Vector2f Gravity_Center;
 
     float Gravity;
+
+    float Min_Speed, Max_Speed;
+
+    _Bool Continue_Emitting, Finished;
 };
 
 struct Particle_System
 {
     struct Particle_Emitter *Emitters;
     int Emitters_Count;
+    int ID_Count;
 };
 
 /* Simple structure to hold a string, used with vector_t */
@@ -686,9 +692,11 @@ void Animation_FreeSimple(struct Animation *Animation);
 
 struct Particle_System *Particle_System_New();
 int Particle_Emitter_New(struct Particle_System *System, float oX, float oY, long int Max_Particles);
+void Particle_EmitParticles(struct Particle_Emitter *Emitter, int Particles);
 void Particle_System_Render(struct Particle_System *System);
 void Particle_Emitter_Free(struct Particle_System *System, int IDX);
 void Particle_System_Free(struct Particle_System *System);
+struct Particle_Emitter *Particle_getEmitter(struct Particle_System *System, int ID);
 
 /* Function used to Calculate FPS on Windows, and to calculate mouse event's timing */
 long int Time_elapsed(struct timeval Start, struct timeval End);

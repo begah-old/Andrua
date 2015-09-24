@@ -774,6 +774,8 @@ static _Bool Header_Render(struct Lua_Code_Editor *LCE)
 
 		if(LCE->File_Tab_Index > 0)
 			LCE->File_Tab_Index--;
+		else if(!LCE->File_Tab_List->size)
+			LCE->File_Tab_Index = -1;
 	}
 	else if (Mouse.justPressed && LCE->Save_Hover && LCE->File_Tab_Index != -1)
 	{

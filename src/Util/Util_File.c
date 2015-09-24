@@ -52,6 +52,7 @@ _Bool Dir_Exists(char *name)
 	    return false;
 	}
 	free(FullPath);
+
 	return st.st_mode & S_IFDIR;
 }
 

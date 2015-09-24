@@ -49,8 +49,8 @@ void Java_com_andrua_Native_NRender(JNIEnv* env, jobject thiz, jint FPS)
     if(Mouse.isLongedPressed)
     {
         if(Distance > 1.0)
-            Super_long_press = -1;
-        else if(!Mouse.isSuper_longPress && Super_long_press > 0)
+            Super_long_press.tv_sec = -1;
+        else if(!Mouse.isSuper_longPress && Super_long_press.tv_sec > 0)
         {
 		  struct timeval STR;
 		  gettimeofday(&STR, NULL);
@@ -63,7 +63,7 @@ void Java_com_andrua_Native_NRender(JNIEnv* env, jobject thiz, jint FPS)
         }
     }
 
-    if(Double_Click_Timer > 0)
+    if(Double_Click_Timer.tv_sec > 0)
     {
 		  struct timeval STR;
 		  gettimeofday(&STR, NULL);
@@ -84,7 +84,7 @@ void Java_com_andrua_Native_NRender(JNIEnv* env, jobject thiz, jint FPS)
     Util_Flush();
 
     Mouse.justPressed = Mouse.justReleased = Mouse.justLongPressedReleased = Mouse.justScrolled =
-    Keyboard.justTyped = Keyboard.justPressed = Mouse.justQuickPressed =
+    Keyboard.justTyped = Keyboard.justPressed = Mouse.justQuickPressed = Mouse.just_DoubleClicked =
     Mouse.justSuper_longReleased = Keyboard.justReleased = false;
     Mouse.prevX = Mouse.x;
     Mouse.prevY = Mouse.y;
@@ -121,7 +121,7 @@ void Java_com_andrua_Native_justReleased(JNIEnv* env, jobject thiz)
     if(Mouse.isSuper_longPress)
         Mouse.justSuper_longReleased = true;
     Mouse.isSuper_longPress = false;
-    Super_long_press = -1;
+    Super_long_press.tv_sec = -1;
 
     if(!Mouse.justLongPressedReleased) {
         Mouse.justQuickPressed = true;

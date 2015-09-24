@@ -54,4 +54,8 @@
 #include <unistd.h>
 #endif
 
+#ifndef S_IFDIR
+#define S_IFDIR	__S_IFDIR
+#endif
+
 #endif //LUAEDITOR_PLATFORM_H

@@ -6,13 +6,18 @@ struct Particle_System *Particle_System_New()
 
     System->Emitters = NULL;
     System->Emitters_Count = 0;
+    System->ID_Count = 0;
 
     return System;
 };
 
 static void Particle_Set(struct Particle_Emitter *Emitter, int IDX)
 {
-    if(IDX >= Emitter->Particle_Max) return;
+    if(!Emitter->Continue_Emitting)
+    {
+        Emitter->Particles[IDX].life = 0;
+        return;
+    }
 
     Emitter->Particles[IDX].x = Emitter->x;
     Emitter->Particles[IDX].y = Emitter->y;
@@ -22,8 +27,13 @@ static void Particle_Set(struct Particle_Emitter *Emitter, int IDX)
 
     Emitter->Particles[IDX].angle = 0;
 
-    Emitter->Particles[IDX].xspeed = rand()/ (float)RAND_MAX * 2 - 1;
-    Emitter->Particles[IDX].yspeed = rand() / (float)RAND_MAX * 2 - 1;
+    float rando = ((rand()/ (float)RAND_MAX) * 2.0f - 1);
+    if(rando < 0) Emitter->Particles[IDX].xspeed =  rando * (Emitter->Max_Speed - Emitter->Min_Speed) - Emitter->Min_Speed;
+    else Emitter->Particles[IDX].xspeed =  rando * (Emitter->Max_Speed - Emitter->Min_Speed) + Emitter->Min_Speed;
+
+    rando = ((rand()/ (float)RAND_MAX) * 2.0f - 1);
+    if(rando < 0) Emitter->Particles[IDX].yspeed = ((rand() / (float)RAND_MAX) * 2.0f - 1) * (Emitter->Max_Speed - Emitter->Min_Speed) - Emitter->Min_Speed;
+    else Emitter->Particles[IDX].yspeed = ((rand() / (float)RAND_MAX) * 2.0f - 1) * (Emitter->Max_Speed - Emitter->Min_Speed) + Emitter->Min_Speed;
 
     Emitter->Particles[IDX].xacceleration = Emitter->Particles[IDX].yacceleration = 0;
 
@@ -61,9 +71,17 @@ int Particle_Emitter_New(struct Particle_System *System, float oX, float oY, lon
     System->Emitters[System->Emitters_Count].Gravity_Type = GRAVITY_TYPE_DOWN;
     System->Emitters[System->Emitters_Count].Gravity_Center = Vector2_Create(0.0f, 0.0f);
 
+    System->Emitters[System->Emitters_Count].Min_Speed = 0.01f;
+    System->Emitters[System->Emitters_Count].Max_Speed = 2.0f;
+
+    System->Emitters[System->Emitters_Count].Continue_Emitting = true;
+    System->Emitters[System->Emitters_Count].Finished = false;
+
+    System->Emitters[System->Emitters_Count].ID = System->ID_Count++;
+
     System->Emitters_Count++;
 
-    return System->Emitters_Count - 1;
+    return System->Emitters[System->Emitters_Count - 1].ID;
 }
 
 static void Particle_UpdateGravity_Simple(struct Particle_Emitter *Emitter, struct Particle *P)
@@ -92,13 +110,27 @@ static void Particle_UpdateGravity_Simple(struct Particle_Emitter *Emitter, stru
     }
 }
 
+void Particle_EmitParticles(struct Particle_Emitter *Emitter, int Particles)
+{
+    if(!Emitter || Emitter->Particle_Count == Emitter->Particle_Max || !Emitter->Continue_Emitting)
+        return;
+
+    if(Emitter->Particle_Count + Particles > Emitter->Particle_Max) Particles = Emitter->Particle_Max - Emitter->Particle_Count;
+
+    for(int i = 0; i < Particles; i++)
+        Particle_New(Emitter);
+}
+
 static void Particle_Emitter_Render(struct Particle_Emitter *Emitter)
 {
-    if(Emitter->Particle_Count != Emitter->Particle_Max)
+    if(Emitter->Continue_Emitting && Emitter->Particle_Count != Emitter->Particle_Max)
         Particle_New(Emitter);
 
+    _Bool Finished = true;
     for(int i = 0; i < Emitter->Particle_Count; i++)
     {
+        if(!Emitter->Particles[i].life) continue;
+        Finished = false;
         Particle_UpdateGravity_Simple(Emitter, Emitter->Particles + i);
 
         if(Emitter->Particles[i].xacceleration > 0.5) Emitter->Particles[i].xacceleration = 0.5;
@@ -110,11 +142,11 @@ static void Particle_Emitter_Render(struct Particle_Emitter *Emitter)
         Emitter->Particles[i].xspeed += Emitter->Particles[i].xacceleration;
         Emitter->Particles[i].yspeed += Emitter->Particles[i].yacceleration;
 
-        if(Emitter->Particles[i].xspeed > 2) Emitter->Particles[i].xspeed = 2;
-        else if(Emitter->Particles[i].xspeed < -2) Emitter->Particles[i].xspeed = -2;
+        if(Emitter->Particles[i].xspeed > Emitter->Max_Speed) Emitter->Particles[i].xspeed = 2;
+        else if(Emitter->Particles[i].xspeed < -Emitter->Max_Speed) Emitter->Particles[i].xspeed = -2;
 
-        if(Emitter->Particles[i].yspeed > 2) Emitter->Particles[i].yspeed = 2;
-        else if(Emitter->Particles[i].yspeed < -2) Emitter->Particles[i].yspeed = -2;
+        if(Emitter->Particles[i].yspeed > Emitter->Max_Speed) Emitter->Particles[i].yspeed = 2;
+        else if(Emitter->Particles[i].yspeed < -Emitter->Max_Speed) Emitter->Particles[i].yspeed = -2;
 
         Emitter->Particles[i].x += Emitter->Particles[i].xspeed;
         Emitter->Particles[i].y += Emitter->Particles[i].yspeed;
@@ -135,6 +167,7 @@ static void Particle_Emitter_Render(struct Particle_Emitter *Emitter)
         Default_Shader.pushQuad(Quad_Create(x,y,x,y2,x2,y2,x2,y), Vector4_Create(ratio * Emitter->Color_Start.x + ratio2 * Emitter->Color_End.x, ratio * Emitter->Color_Start.y + ratio2 * Emitter->Color_End.y,
                                                                                  ratio * Emitter->Color_Start.z + ratio2 * Emitter->Color_End.z, ratio * Emitter->Color_Start.w + ratio2 * Emitter->Color_End.w));
     }
+    Emitter->Finished = Finished;
 }
 
 void Particle_System_Render(struct Particle_System *System)
@@ -153,9 +186,14 @@ void Particle_Emitter_Free(struct Particle_System *System, int IDX)
     free(System->Emitters[IDX].Particles);
     if(IDX + 1 != System->Emitters_Count)
         memmove(System->Emitters + IDX, System->Emitters + IDX + 1, sizeof(struct Particle_Emitter) * (System->Emitters_Count - IDX));
+    else
+        System->ID_Count--;
     System->Emitters_Count--;
     if(!System->Emitters_Count)
+    {
         free(System->Emitters);
+        System->Emitters = NULL;
+    }
     else
         System->Emitters = realloc(System->Emitters, sizeof(struct Particle_Emitter) * (System->Emitters_Count));
 }
@@ -168,3 +206,11 @@ void Particle_System_Free(struct Particle_System *System)
         free(System->Emitters);
     free(System);
 }
+
+struct Particle_Emitter *Particle_getEmitter(struct Particle_System *System, int ID)
+{
+    for(int i = 0; i < System->ID_Count; i++)
+        if(System->Emitters[i].ID == ID)
+            return System->Emitters + i;
+    return NULL;
+};

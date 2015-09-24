@@ -316,6 +316,11 @@ void Editor_Render()
 	}
 
 	if (Lua_State) {
+		if(Lua_requestClose)
+		{
+			Lua_Close(NULL);
+			goto Render_Code_Editor;
+		}
 		// Check if Lua wrote to log
 		Console_Update();
 
@@ -410,12 +415,6 @@ void Editor_Render()
 		}
 
 		LuaLibrary_Render();
-
-		if(Lua_requestClose)
-		{
-			Lua_Close(NULL);
-			return;
-		}
 
 		_Bool UseDisplay = App_UsingDisplay, FullScreen = App_UseFullScreen;
 
