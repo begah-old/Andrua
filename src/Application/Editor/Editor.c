@@ -87,7 +87,7 @@ int Lua_Close(lua_State *L)
 		}
 	}
 
-	Lua_closeLibrary();
+	LuaLibrary_Close();
 
     lua_gc(Lua_State, LUA_GCCOLLECT, 0);
     lua_close(Lua_State);
@@ -161,7 +161,7 @@ static void Lua_Init()
     luaL_openlibs(Lua_State);
 
     log_info("Loading Andrua's libs");
-    Lua_LoadLibrary(Log);
+    LuaLibrary_Load(Log);
     log_info("Finished Loading in Lua");
 
     Lua_requestClose = false;

@@ -22,9 +22,6 @@ _Bool App_UsingDisplay, App_UseFullScreen, Lua_hasResize;
 _Bool Lua_giveWidth, Lua_giveHeight;
 _Bool Lua_requestClose;
 
-void Lua_LoadLibrary(FILE *F);
-void Lua_closeLibrary();
-void LuaLibrary_Render();
 int Lua_Close(lua_State *L);
 
 void Editor_Init();
@@ -33,5 +30,6 @@ void Editor_Close();
 
 #include "Editor/Code_Manager.h"
 #include "Console/Console.h"
+#include "Library/LuaLibrary.h"
 
 #endif /* APPLICATION_EDITOR_EDITOR_H_ */
