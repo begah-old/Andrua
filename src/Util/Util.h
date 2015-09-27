@@ -257,21 +257,17 @@ struct Animation
 /* Particle Engine structures */
 struct Particle
 {
-    float x, y;
-    float xspeed, yspeed;
-    float xacceleration, yacceleration;
-    float angle;
+    struct Vector2f Location;
+    struct Vector2f Velocity;
+    struct Vector2f Acceleration;
 
     float width, height;
     int life;
 };
 
 enum PARTICLE_GRAVITY_TYPE {
-    GRAVITY_TYPE_UP,
-    GRAVITY_TYPE_DOWN,
-    GRAVITY_TYPE_LEFT,
-    GRAVITY_TYPE_RIGHT,
-    GRAVITY_TYPE_OTHER
+    GRAVITY_TYPE_NORMAL,
+    GRAVITY_TYPE_PRECISE
 };
 
 struct Particle_Emitter
@@ -291,7 +287,9 @@ struct Particle_Emitter
 
     struct Vector2f Gravity_Center;
 
-    float Gravity;
+    struct Vector2f Gravity;
+
+    float Gravity_MaxDistance;
 
     float Min_Speed, Max_Speed;
 
@@ -300,6 +298,7 @@ struct Particle_Emitter
 
 struct Particle_System
 {
+    struct Image *Circle;
     struct Particle_Emitter *Emitters;
     int Emitters_Count;
     int ID_Count;
@@ -679,6 +678,8 @@ struct Vector6f Vector6_Createf(float x, float y, float z, float w, float h, flo
 struct Vertex Vertex_Create(struct Vector3f vec3, struct Vector2f vec2);
 struct Quad Quad_Create(float x, float y, float x2, float y2, float x3,
 						float y3, float x4, float y4);
+
+struct Vector2f Vector2_Normalize(struct Vector2f Vector);
 
 struct Animation *Animation_LoadInternal(const char *Name);
 struct Animation *Animation_LoadExternal(const char *Name);

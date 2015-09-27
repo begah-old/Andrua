@@ -8,8 +8,20 @@ struct Particle_System *Particle_System_New()
     System->Emitters_Count = 0;
     System->ID_Count = 0;
 
+    System->Circle = Image_Load("circle.png");
+
     return System;
 };
+
+static float RandoM(float Min, float Max)
+{
+    float d = (rand()/ (float)RAND_MAX) - 0.5f;
+    d *= (Max-Min);
+    if(d < 0)
+        return d - Min;
+    else
+        return d + Min;
+}
 
 static void Particle_Set(struct Particle_Emitter *Emitter, int IDX)
 {
@@ -19,23 +31,14 @@ static void Particle_Set(struct Particle_Emitter *Emitter, int IDX)
         return;
     }
 
-    Emitter->Particles[IDX].x = Emitter->x;
-    Emitter->Particles[IDX].y = Emitter->y;
+    Emitter->Particles[IDX].Location = Vector2_Create(Emitter->x, Emitter->y);
 
     Emitter->Particles[IDX].width = 10;
     Emitter->Particles[IDX].height = 10;
 
-    Emitter->Particles[IDX].angle = 0;
+    Emitter->Particles[IDX].Velocity =  Vector2_Create(RandoM(Emitter->Min_Speed, Emitter->Max_Speed), RandoM(Emitter->Min_Speed, Emitter->Max_Speed));
 
-    float rando = ((rand()/ (float)RAND_MAX) * 2.0f - 1);
-    if(rando < 0) Emitter->Particles[IDX].xspeed =  rando * (Emitter->Max_Speed - Emitter->Min_Speed) - Emitter->Min_Speed;
-    else Emitter->Particles[IDX].xspeed =  rando * (Emitter->Max_Speed - Emitter->Min_Speed) + Emitter->Min_Speed;
-
-    rando = ((rand()/ (float)RAND_MAX) * 2.0f - 1);
-    if(rando < 0) Emitter->Particles[IDX].yspeed = ((rand() / (float)RAND_MAX) * 2.0f - 1) * (Emitter->Max_Speed - Emitter->Min_Speed) - Emitter->Min_Speed;
-    else Emitter->Particles[IDX].yspeed = ((rand() / (float)RAND_MAX) * 2.0f - 1) * (Emitter->Max_Speed - Emitter->Min_Speed) + Emitter->Min_Speed;
-
-    Emitter->Particles[IDX].xacceleration = Emitter->Particles[IDX].yacceleration = 0;
+    Emitter->Particles[IDX].Acceleration = Vector2_Create(0, 0);
 
     Emitter->Particles[IDX].life = Emitter->Min_Life + (Emitter->Max_Life - Emitter->Min_Life) * (rand() / (float)RAND_MAX);
 }
@@ -67,12 +70,14 @@ int Particle_Emitter_New(struct Particle_System *System, float oX, float oY, lon
     System->Emitters[System->Emitters_Count].Color_Start = COLOR_BLUE;
     System->Emitters[System->Emitters_Count].Color_End = COLOR_RED;
 
-    System->Emitters[System->Emitters_Count].Gravity = 0.0f;
-    System->Emitters[System->Emitters_Count].Gravity_Type = GRAVITY_TYPE_DOWN;
+    System->Emitters[System->Emitters_Count].Gravity = Vector2_Create(0.0f, -1.0f);
+    System->Emitters[System->Emitters_Count].Gravity_Type = GRAVITY_TYPE_NORMAL;
     System->Emitters[System->Emitters_Count].Gravity_Center = Vector2_Create(0.0f, 0.0f);
 
     System->Emitters[System->Emitters_Count].Min_Speed = 0.01f;
     System->Emitters[System->Emitters_Count].Max_Speed = 2.0f;
+
+    System->Emitters[System->Emitters_Count].Gravity_MaxDistance = 1000.0f;
 
     System->Emitters[System->Emitters_Count].Continue_Emitting = true;
     System->Emitters[System->Emitters_Count].Finished = false;
@@ -86,27 +91,24 @@ int Particle_Emitter_New(struct Particle_System *System, float oX, float oY, lon
 
 static void Particle_UpdateGravity_Simple(struct Particle_Emitter *Emitter, struct Particle *P)
 {
-    if(Emitter->Gravity_Type == GRAVITY_TYPE_DOWN)
-        P->yacceleration -= Emitter->Gravity;
-    else if(Emitter->Gravity_Type == GRAVITY_TYPE_UP)
-        P->yacceleration += Emitter->Gravity;
+    if(Emitter->Gravity_Type == GRAVITY_TYPE_NORMAL)
+    {
+        P->Acceleration = Vector2_Create(Emitter->Gravity.x, Emitter->Gravity.y);
+    } else {
+        float distX = Emitter->Gravity_Center.x - P->Location.x;
+        float distY = Emitter->Gravity_Center.y - P->Location.y;
 
-    else if(Emitter->Gravity_Type == GRAVITY_TYPE_LEFT)
-        P->xacceleration -= Emitter->Gravity;
-    else if(Emitter->Gravity_Type == GRAVITY_TYPE_RIGHT)
-        P->xacceleration += Emitter->Gravity;
+        if(distX > Emitter->Gravity_MaxDistance || distY > Emitter->Gravity_MaxDistance)
+            return;
+        if(distX >= 0 && distX < 10.0f) distX = 10.0f;
+        if(distY >= 0 && distY < 10.0f) distY = 10.0f;
+        if(distX < 0 && distX > -10.0f) distX = -10.0f;
+        if(distY < 0 && distY > -10.0f) distY = -10.0f;
 
-    else {
-        double x = P->x + (P->width / 2.0), y = P->y + (P->height / 2.0);
-        if(x < Emitter->Gravity_Center.x)
-            P->xacceleration = Emitter->Gravity;
-        else
-            P->xacceleration = -Emitter->Gravity;
+        struct Vector2f Norm = Vector2_Normalize(Vector2_Create(distX, distY));
 
-        if(y < Emitter->Gravity_Center.y)
-            P->yacceleration = Emitter->Gravity;
-        else
-            P->yacceleration = -Emitter->Gravity;
+        P->Acceleration = Vector2_Create(Norm.x * (1.0f - distX / Emitter->Gravity_MaxDistance) * Emitter->Gravity.x,
+                                         Norm.y * (1.0f - distY / Emitter->Gravity_MaxDistance) * Emitter->Gravity.y);
     }
 }
 
@@ -121,7 +123,7 @@ void Particle_EmitParticles(struct Particle_Emitter *Emitter, int Particles)
         Particle_New(Emitter);
 }
 
-static void Particle_Emitter_Render(struct Particle_Emitter *Emitter)
+static void Particle_Emitter_Render(struct Particle_System *System, struct Particle_Emitter *Emitter)
 {
     if(Emitter->Continue_Emitting && Emitter->Particle_Count != Emitter->Particle_Max)
         Particle_New(Emitter);
@@ -133,23 +135,17 @@ static void Particle_Emitter_Render(struct Particle_Emitter *Emitter)
         Finished = false;
         Particle_UpdateGravity_Simple(Emitter, Emitter->Particles + i);
 
-        if(Emitter->Particles[i].xacceleration > 0.5) Emitter->Particles[i].xacceleration = 0.5;
-        else if(Emitter->Particles[i].xacceleration < -0.5) Emitter->Particles[i].xacceleration = -0.5;
+        Emitter->Particles[i].Velocity.x += Emitter->Particles[i].Acceleration.x;
+        Emitter->Particles[i].Velocity.y += Emitter->Particles[i].Acceleration.y;
 
-        if(Emitter->Particles[i].yacceleration > 0.5) Emitter->Particles[i].yacceleration = 0.5;
-        else if(Emitter->Particles[i].yacceleration < -0.5) Emitter->Particles[i].yacceleration = -0.5;
+        if(Emitter->Particles[i].Velocity.x > Emitter->Max_Speed) Emitter->Particles[i].Velocity.x = Emitter->Max_Speed;
+        else if(Emitter->Particles[i].Velocity.x < -Emitter->Max_Speed) Emitter->Particles[i].Velocity.x = -Emitter->Max_Speed;
 
-        Emitter->Particles[i].xspeed += Emitter->Particles[i].xacceleration;
-        Emitter->Particles[i].yspeed += Emitter->Particles[i].yacceleration;
+        if(Emitter->Particles[i].Velocity.y > Emitter->Max_Speed) Emitter->Particles[i].Velocity.y = Emitter->Max_Speed;
+        else if(Emitter->Particles[i].Velocity.y < -Emitter->Max_Speed) Emitter->Particles[i].Velocity.y = -Emitter->Max_Speed;
 
-        if(Emitter->Particles[i].xspeed > Emitter->Max_Speed) Emitter->Particles[i].xspeed = 2;
-        else if(Emitter->Particles[i].xspeed < -Emitter->Max_Speed) Emitter->Particles[i].xspeed = -2;
-
-        if(Emitter->Particles[i].yspeed > Emitter->Max_Speed) Emitter->Particles[i].yspeed = 2;
-        else if(Emitter->Particles[i].yspeed < -Emitter->Max_Speed) Emitter->Particles[i].yspeed = -2;
-
-        Emitter->Particles[i].x += Emitter->Particles[i].xspeed;
-        Emitter->Particles[i].y += Emitter->Particles[i].yspeed;
+        Emitter->Particles[i].Location.x += Emitter->Particles[i].Velocity.x;
+        Emitter->Particles[i].Location.y += Emitter->Particles[i].Velocity.y;
 
         Emitter->Particles[i].life -= Frame_Time_Passed;
 
@@ -159,13 +155,13 @@ static void Particle_Emitter_Render(struct Particle_Emitter *Emitter)
         //printf("%i %f %f\n", i, Emitter->Particles[i].x, Emitter->Particles[i].y);
         //printf("%f %f %f %f %f : %i %i %i\n", Emitter->x, Emitter->y, Emitter->Gravity_Center.x, Emitter->Gravity_Center.y, Emitter->Gravity, Emitter->Min_Life, Emitter->Max_Life, Emitter->Gravity_Type);
 
-        float x = Emitter->Particles[i].x - Emitter->Particles[i].width / 2.0f, y = Emitter->Particles[i].y - Emitter->Particles[i].height / 2.0f,
+        float x = Emitter->Particles[i].Location.x - Emitter->Particles[i].width / 2.0f, y = Emitter->Particles[i].Location.y - Emitter->Particles[i].height / 2.0f,
             x2 = x + Emitter->Particles[i].width, y2 = y + Emitter->Particles[i].height;
 
         float ratio = Emitter->Particles[i].life / (float)Emitter->Max_Life, ratio2 = 1 - ratio;
 
-        Default_Shader.pushQuad(Quad_Create(x,y,x,y2,x2,y2,x2,y), Vector4_Create(ratio * Emitter->Color_Start.x + ratio2 * Emitter->Color_End.x, ratio * Emitter->Color_Start.y + ratio2 * Emitter->Color_End.y,
-                                                                                 ratio * Emitter->Color_Start.z + ratio2 * Emitter->Color_End.z, ratio * Emitter->Color_Start.w + ratio2 * Emitter->Color_End.w));
+        Image_Shader.pushQuad(Quad_Create(x,y,x,y2,x2,y2,x2,y), Quad_Create(System->Circle->x, System->Circle->y2, System->Circle->x, System->Circle->y, System->Circle->x2, System->Circle->y, System->Circle->x2, System->Circle->y2), System->Circle->Image, Vector4_Create(ratio * Emitter->Color_Start.x + ratio2 * Emitter->Color_End.x, ratio * Emitter->Color_Start.y + ratio2 * Emitter->Color_End.y,
+                                                                                 ratio * Emitter->Color_Start.z + ratio2 * Emitter->Color_End.z, 0.0f));
     }
     Emitter->Finished = Finished;
 }
@@ -174,7 +170,7 @@ void Particle_System_Render(struct Particle_System *System)
 {
     for(int i = 0; i < System->Emitters_Count; i++)
     {
-        Particle_Emitter_Render(System->Emitters + i);
+        Particle_Emitter_Render(System, System->Emitters + i);
     }
 }
 
@@ -204,6 +200,8 @@ void Particle_System_Free(struct Particle_System *System)
         free(System->Emitters[i].Particles);
     if(System->Emitters)
         free(System->Emitters);
+
+    Image_Free(System->Circle);
     free(System);
 }
 

@@ -403,6 +403,11 @@ struct Image *Image_LoadExternal(const char *Path)
 	struct Image *Image = malloc(sizeof(struct Image));
 
 	struct F_FileExternal *file = FileExternal_Open(Path);
+	if(!file->File)
+    {
+        log_err("Error : %s failed to load in function Image_Load", Path);
+		Application_Error();
+    }
 
 	int Length = FileExternal_Length(file);
 	unsigned char *buffer = malloc(Length);

@@ -313,16 +313,10 @@ static int Lua_particleSgravityType(lua_State *L)
 
     const char *str = lua_tostring(Lua_State, -1);
 
-    if(!strcmp(str, "down"))
-        Lua_ParticleSystem->Emitters[IDX].Gravity_Type = GRAVITY_TYPE_DOWN;
-    else if(!strcmp(str, "up"))
-        Lua_ParticleSystem->Emitters[IDX].Gravity_Type = GRAVITY_TYPE_UP;
-    else if(!strcmp(str, "right"))
-        Lua_ParticleSystem->Emitters[IDX].Gravity_Type = GRAVITY_TYPE_RIGHT;
-    else if(!strcmp(str, "left"))
-        Lua_ParticleSystem->Emitters[IDX].Gravity_Type = GRAVITY_TYPE_LEFT;
-    else if(!strcmp(str, "other"))
-        Lua_ParticleSystem->Emitters[IDX].Gravity_Type = GRAVITY_TYPE_OTHER;
+    if(!strcmp(str, "normal"))
+        Lua_ParticleSystem->Emitters[IDX].Gravity_Type = GRAVITY_TYPE_NORMAL;
+    else if(!strcmp(str, "precise"))
+        Lua_ParticleSystem->Emitters[IDX].Gravity_Type = GRAVITY_TYPE_PRECISE;
     else
     {
         fprintf(LuaLibrary_Log, "particle.setColor : cannot find type math with argument 2");
@@ -377,6 +371,55 @@ static int Lua_particleSparticles(lua_State *L)
     }
 
     Lua_ParticleSystem->Emitters[IDX].Particle_Count = lua_tonumber(Lua_State, -1);
+
+    return 0;
+}
+
+static int Lua_particleGravityMaxDistance(lua_State *L)
+{
+    if(!Lua_ParcticleS_List)
+        return 0;
+
+    if(!lua_isnumber(Lua_State, -2))
+    {
+        fprintf(LuaLibrary_Log, "particle.gravityMaxDistance needs ID as argument");
+        Lua_requestClose = true;
+        return 0;
+    } else if(!lua_isnumber(Lua_State, -1))
+    {
+        fprintf(LuaLibrary_Log, "particle.gravityMaxDistance needs number as argument 2");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    int ID = lua_tonumber(Lua_State, -2);
+
+    if(ID < 0 || ID >= Lua_ParticleSystem->ID_Count)
+    {
+        fprintf(LuaLibrary_Log, "particle.gravityMaxDistance : argument 1 is an invalid ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    int IDX = -1;
+    struct Particle_Emitter *PS = Lua_ParticleSystem->Emitters;
+    for(int i = 0; i < Lua_ParticleSystem->Emitters_Count; i++)
+    {
+        if(PS[i].ID == ID)
+        {
+            IDX = i;
+            break;
+        }
+    }
+
+    if(IDX == -1)
+    {
+        fprintf(LuaLibrary_Log, "particle.gravityMaxDistance : cannot find particle emitter with that id");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    Lua_ParticleSystem->Emitters[IDX].Gravity_MaxDistance = lua_tonumber(Lua_State, -1);
 
     return 0;
 }
@@ -496,19 +539,24 @@ static int Lua_particleSgravity(lua_State *L)
     if(!Lua_ParcticleS_List)
         return 0;
 
-    if(!lua_isnumber(Lua_State, -2))
+    if(!lua_isnumber(Lua_State, -3))
     {
-        fprintf(LuaLibrary_Log, "particle.setGravity needs ID as argument");
+        fprintf(LuaLibrary_Log, "particle.setGravity needs ID as argument 1");
         Lua_requestClose = true;
         return 0;
-    } else if(!lua_isnumber(Lua_State, -1))
+    } else if(!lua_isnumber(Lua_State, -2))
     {
         fprintf(LuaLibrary_Log, "particle.setGravity needs number as argument 2");
         Lua_requestClose = true;
         return 0;
+    } else if(!lua_isnumber(Lua_State, -1))
+    {
+        fprintf(LuaLibrary_Log, "particle.setGravity needs number as argument 3");
+        Lua_requestClose = true;
+        return 0;
     }
 
-    int ID = lua_tonumber(Lua_State, -2);
+    int ID = lua_tonumber(Lua_State, -3);
 
     if(ID < 0 || ID >= Lua_ParticleSystem->ID_Count)
     {
@@ -535,9 +583,7 @@ static int Lua_particleSgravity(lua_State *L)
         return 0;
     }
 
-    double value = lua_tonumber(Lua_State, -1);
-
-    Lua_ParticleSystem->Emitters[IDX].Gravity = value;
+    Lua_ParticleSystem->Emitters[IDX].Gravity = Vector2_Create(lua_tonumber(Lua_State, -2), lua_tonumber(Lua_State, -1));
 
     return 0;
 }
@@ -775,6 +821,7 @@ void LuaLibrary_Particles_Load()
         {"deleteOnFinish", Lua_particleSetDeleteOnFinish},
         {"toggleEmitting", Lua_particleToggleEmitting},
         {"emit", Lua_particleEmit},
+        {"gravityMaxDistance", Lua_particleGravityMaxDistance},
         {"gravityCenter", Lua_particleSgravityCenter},
         {"setGravity", Lua_particleSgravity},
         {"gravityType", Lua_particleSgravityType},
@@ -805,7 +852,7 @@ void LuaLibrary_Particles_Render()
                 int IDX2 = -1;
                 for(int i = 0; i < Lua_ParticleSystem->Emitters_Count; i++)
                 {
-                    if(Lua_ParticleSystem->Emitters[i].Gravity == PA->Gravity && Lua_ParticleSystem->Emitters[i].Gravity_Center.x == PA->Gravity_Center.x && Lua_ParticleSystem->Emitters[i].Gravity_Center.y == PA->Gravity_Center.y)
+                    if(Lua_ParticleSystem->Emitters[i].Gravity.x == PA->Gravity.x && Lua_ParticleSystem->Emitters[i].Gravity.y == PA->Gravity.y && Lua_ParticleSystem->Emitters[i].Gravity_Center.x == PA->Gravity_Center.x && Lua_ParticleSystem->Emitters[i].Gravity_Center.y == PA->Gravity_Center.y)
                     {
                         IDX2 = i;
                         break;

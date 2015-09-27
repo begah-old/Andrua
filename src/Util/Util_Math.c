@@ -146,6 +146,20 @@ struct Quad Quad_Create(float x, float y, float x2, float y2, float x3,
 	return quad;
 }
 
+struct Vector2f Vector2_Normalize(struct Vector2f Vector)
+{
+    int X = Vector.x < 0 ? -1 : 1, Y = Vector.y < 0 ? -1 : 1;
+    if(Vector.x < 0)
+        Vector.x *= -1;
+    if(Vector.y < 0)
+        Vector.y *= -1;
+
+    if(Vector.x >= Vector.y)
+        return Vector2_Create(X, Vector.y / Vector.x * Y);
+    else
+        return Vector2_Create(Vector.x / Vector.y * X, Y);
+};
+
 // Used to calculate FPS
 long int Time_elapsed(struct timeval Start, struct timeval End)
 {
