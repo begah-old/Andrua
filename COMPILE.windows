@@ -5,7 +5,7 @@ Compiler :
 
 Linker : 
 
-Libraries needed to compile (-l) :
+Link Libraries (-l) :
 	glfw3dll
 	glu32
 	opengl32
@@ -20,6 +20,9 @@ Libraries needed to compile (-l) :
 	comdlg32
 	advapi32
 
-Add GLFW's build to search path (-L)
+Add GLFW's src to linker search path (-L)
 
 Use C99 (-std=c99)
+
+Tested using MingGW gcc version 4.8.1-4.
+Worked using CodeBlocks and Eclipse (CDT).

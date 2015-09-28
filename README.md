@@ -27,7 +27,9 @@ Andrua runs on both Desktop (Linux/Windows and supposibly OSX but not tested)
 
 - Opensource, small and extensible
 
+All Andrua's specific functions are described in LIBRARY.txt
+
 -- Compiling --
 
-See COMPILE.youplatform
+See COMPILE.platform
 
