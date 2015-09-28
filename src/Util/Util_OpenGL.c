@@ -7,10 +7,6 @@
 
 #include "Util.h"
 
-#define EXECUTABLE_NAME 6
-#define DEBUG
-#define CODE_BLOCKS
-
 static void ImageEngine_SetUp();
 
 struct timeval Frame_TimePassed = {-1, -1};
@@ -70,7 +66,8 @@ void Util_Init(struct Window *Window,
 	for(int Index = 0; Index < Length; Index++)
 	Executable_Path[Index] = Path[Index];
 	Executable_Path[Length] = '\0';
-#elseif !defined(CODE_BLOCKS)
+#else // DEBUG
+#ifndef CODE_BLOCKS
 	Length -= 6;
 	Executable_Path = malloc(sizeof(char) * (Length + 1));
 	for (int Index = 0; Index < Length; Index++)
@@ -83,6 +80,7 @@ void Util_Init(struct Window *Window,
 	Executable_Path[Index] = Path[Index];
 	Executable_Path[Length] = '\0';
     printf("%s\n", Executable_Path);
+#endif
 #endif
 #else
 	char Path[101] =

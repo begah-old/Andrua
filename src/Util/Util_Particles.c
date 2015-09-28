@@ -154,9 +154,6 @@ static void Particle_Emitter_Render(struct Particle_System *System, struct Parti
         if(Emitter->Particles[i].life <= 0)
             Particle_Set(Emitter, i);
 
-        //printf("%i %f %f\n", i, Emitter->Particles[i].x, Emitter->Particles[i].y);
-        //printf("%f %f %f %f %f : %i %i %i\n", Emitter->x, Emitter->y, Emitter->Gravity_Center.x, Emitter->Gravity_Center.y, Emitter->Gravity, Emitter->Min_Life, Emitter->Max_Life, Emitter->Gravity_Type);
-
         float x = Emitter->Particles[i].Location.x - Emitter->Particles[i].width / 2.0f, y = Emitter->Particles[i].Location.y - Emitter->Particles[i].height / 2.0f,
             x2 = x + Emitter->Particles[i].width, y2 = y + Emitter->Particles[i].height;
 

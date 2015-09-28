@@ -5,12 +5,17 @@
 #ifndef LUAEDITOR_PLATFORM_H
 #define LUAEDITOR_PLATFORM_H
 
+#define EXECUTABLE_NAME 6
+//#define DEBUG
+
 #ifndef ANDROID
 /* Comment the following line if compiling for Desktop */
-#define ANDROID
+//#define ANDROID
 #endif
 
 #ifndef ANDROID
+
+#define CODE_BLOCKS
 
 // OpenGL/GLFW Includes
 #include "GL/gl3w.h"

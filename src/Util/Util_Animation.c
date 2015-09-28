@@ -99,7 +99,7 @@ struct Animation *Animation_LoadExternal(const char * restrict Name)
 	}
 
 	Animation->Frames = malloc(sizeof(struct Image) * Animation->Frame_Count);
-    struct Image *Image;
+    struct Image *Image = NULL;
 	for (int i = 0; i < Animation->Frame_Count; i++) {
 		char *T = Integer_toString(i);
 		memcpy(Names2 + Names2Length, T, sizeof(char) * (String_length(T) + 1));
@@ -110,7 +110,8 @@ struct Animation *Animation_LoadExternal(const char * restrict Name)
 		Image = Image_LoadExternal(Names2);
 		Animation->Frames[i] = *Image;
 
-	}free(Image);
+	}
+	free(Image);
 
 	Animation->Current_Frame = 0;
 	Animation->Time_perFrame = 20; // 20 ms
