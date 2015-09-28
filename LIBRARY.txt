@@ -1,0 +1,70 @@
+Andrua Lua Library :
+
+1 - Engine :
+	getFPS : Returns current FPS as an integer
+	getPath : Returns string to the project's directory (Where the Lua files are)
+	openKeyboard : Opens onscreen keyboard
+	closeKeyboard : Closes onscreen keyboard
+	close : Closes Lua application as soon as engine regain control of application
+	
+2 - Renderer :
+	rectangle : x, y, width, heigth, r, g, b, a. An optional argument can be passed corresponding to the z value (-10<=Z<=10).
+		Draws a rectangle at the specified position with specified size and color.
+	fixedText :	text, x, y, width, height, r, g, b, a. Draws a string at the position given.
+	
+3 - Image :
+	load : string. Loads an image from given path. Returns the image's ID.
+	drawRectangle : x, y, width, height, ID. Draws the image at the specified position and size.
+	free : ID. Frees the image.
+	
+4 - Animation :
+	load : string. Loads an animation form given path. Returns the animation's ID.
+	setPos : ID, x, y. Put the animation at the specified location.
+	setSize : ID, width, height. Change to the specified size.
+	setAngle : ID, angle. Rotate the animation.
+	setDepth : ID, z. Changes the z component of the animation.
+	setIndex : ID, index. Sets the animation's current frame to index.
+	timePerFrame : ID, timePF. Sets the time per frame to timePF. timePF is in milliseconds.
+	reverseOnFinish : ID. If animation is already set to it, it reverts back. Else it extands animation to make it go 1 -> Frame_Count -> 1.
+	render : ID. Render the animation.
+	free : ID. Free the animation.
+	
+5 - Button :
+	new : text, x, y, width, height. Creates button with specified parameters. Returns the ID to the new button.
+	color : ID, r, g, b, a, hr, hg, hb, ha. Changes the color of the button. "h" Stands for hover.
+	colorText : ID, r, g, b, a. Changes the color of the text.
+	render : ID. Renders the button.
+	resize : ID, x, y, width, heigth. Resizes the button.
+	free : ID. Frees the button.
+	
+6 - TextBox :
+	new : text, x, y, width, height. Creates textbox with specified parameters. Returns the ID of the new textbox.
+	color : ID, r, g, b, a, hr, hg, hb, ha. Changes the color of the textbox. "h" Stands for hover.
+	colorText : ID, r, g, b, a. Changes the color of the text.
+	render : ID. Renders the textbox.
+	resize : ID, x, y, width, heigth. Resizes the textbox.
+	text : ID. Returns the text entered by the user.
+	set : ID, text. Sets the text entered by the user to the specified text.
+	letters : ID, boolean. Make textbox accept letters.
+	numbers : ID, boolean. Make textbox accept numbers.
+	dot : ID, boolean. Make textbox accept dots.
+	symbols : ID, boolean. Make textbox accept symbols.
+	
+7 - Particle :
+	new : x, y, numParticles. Creates are particle emitter at specified location with max number of particle set to numParticles. Returns the ID of the particle emitter.
+	maxParticles : ID, numParticles. Sets the max particles of the particle emitter to maxParticles.
+	setColor : ID, r, g, b, a, r2, g2, b2, a2. Sets the start and fade color to specified colors.
+	getCount : ID. Returns number of particles of emitter or -1 if emitter doesn't exists.
+	setSpawnPosition : ID, x, y. Sets the particle's spawn position to the specified position.
+	setSpawnSize : ID, width, height. Sets the particle's emitter spawn size from the position of the spawn.
+	setDepth : ID, z. Sets the z of the particles to specified z.
+	setSpeed : ID, min, max. Sets the max and min speed of the particles to the specified values.
+	deleteOnFinish : ID. If there are no particles, the engine with free the emitter.
+	toggleEmitting : ID. If emitting is false, it is set to true else it is set to false.
+	emit : ID, numParticles. Emits the number of particles all at once or the maxNumber of particles possible if numParticles is greater than the availabe particles.
+	gravityMaxDistance : ID, distance. Sets the max raduis of influance of the gravity center.
+	gravityCenter : ID, x, y. Sets the center of gravity to specified position.
+	setGravity : ID, xgravity, ygravity. Sets the gravity to the x gravity and y gravity.
+	gravityType : ID, type. Sets the gravity type. Possible values : "normal" and "precise".
+	setLife : ID, min, max. Sets the max and min life of particles.
+	free : ID. Frees the emitter.

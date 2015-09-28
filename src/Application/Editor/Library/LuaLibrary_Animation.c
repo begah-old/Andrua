@@ -154,6 +154,60 @@ static int Lua_setPosAnimation(lua_State *State)
     return 0;
 }
 
+static int Lua_setDepthAnimation(lua_State *State)
+{
+    if(!Lua_Animation_List)
+    {
+        fprintf(LuaLibrary_Log, "animation.setDepth : No animation created");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    if(!lua_isnumber(Lua_State, -2))
+    {
+        fprintf(LuaLibrary_Log, "animation.setDepth : Argument 1 needs to be a number (Animation ID)");
+        Lua_requestClose = true;
+        return 0;
+    } if(!lua_isnumber(Lua_State, -1))
+    {
+        fprintf(LuaLibrary_Log, "animation.setDepth : Argument 2 needs to be a number (Animation ID)");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    double ID = lua_tonumber(Lua_State, -2);
+
+    if(ID < 0 || ID >= Animation_NextID)
+    {
+        fprintf(LuaLibrary_Log, "animation.setDepth : Argument 1 is a invalid animation ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    struct Lua_Animation *LA = Lua_Animation_List->items;
+    struct Animation *Animation = NULL;
+
+	// Search for corresponding texture
+	for(int i = 0; i < Lua_Animation_List->size; i++)
+	{
+		if(LA[i].ID == ID)
+		{
+			Animation = LA[i].Animation;
+			break;
+		}
+	}
+
+	if(!Animation)
+    {
+        fprintf(LuaLibrary_Log, "animation.setDepth : No animation matching that ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    Animation->z = lua_tonumber(Lua_State, -1);
+    return 0;
+}
+
 static int Lua_setAngleAnimation(lua_State *State)
 {
     if(!Lua_Animation_List)
@@ -427,6 +481,7 @@ void LuaLibrary_Animation_Load()
         {"setPos", Lua_setPosAnimation},
         {"setSize", Lua_setSizeAnimation},
         {"setAngle", Lua_setAngleAnimation},
+        {"setDepth", Lua_setDepthAnimation},
         {"timePerFrame", Lua_setFrameTimeAnimation},
         {"reverseOnFinish", Lua_setReverseOnFinish},
         {"render", Lua_renderAnimation},

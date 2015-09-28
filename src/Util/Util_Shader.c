@@ -91,13 +91,13 @@ GLuint Shader_loadCustom(char *VS, char *FS)
 GLuint Shader_LoadDefault() {
 
     return Shader_loadCustom("#version 330 core\n"
-                                     "layout (location = 0) in vec2 Position;\n"
+                                     "layout (location = 0) in vec3 Position;\n"
                                      "layout (location = 1) in vec4 Color;\n"
                                      "uniform vec2 ScreenSize;\n"
                                      "out vec4 oColor;\n"
                                      "void main()\n"
                                      "{\n"
-                                     "gl_Position = vec4(Position.x / ScreenSize.x * 2 - 1, Position.y / ScreenSize.y * 2 - 1, 0.0, 1.0);\n"
+                                     "gl_Position = vec4(Position.x / ScreenSize.x * 2 - 1, Position.y / ScreenSize.y * 2 - 1, Position.z / 10, 1.0);\n"
                                      "oColor = Color;\n"
                                      "} \n",
 							 "#version 330 core\n"
@@ -111,7 +111,7 @@ GLuint Shader_LoadDefault() {
 
 GLuint Shader_LoadImage() {
     return Shader_loadCustom("#version 330 core\n"
-                                     "layout (location = 0) in vec2 Position;\n"
+                                     "layout (location = 0) in vec3 Position;\n"
                                      "layout (location = 1) in vec2 TexCoord;\n"
                                      "uniform vec2 ScreenSize;\n"
                                      "uniform vec4 ColorBlend;\n"
@@ -119,7 +119,7 @@ GLuint Shader_LoadImage() {
                                      "out vec4 ColorBlendOut;\n"
                                      "void main()\n"
                                      "{\n"
-                                     "gl_Position = vec4(Position.x / ScreenSize.x * 2 - 1, Position.y / ScreenSize.y * 2 - 1, 0.0, 1.0);\n"
+                                     "gl_Position = vec4(Position.x / ScreenSize.x * 2 - 1, Position.y / ScreenSize.y * 2 - 1, Position.z / 10, 1.0);\n"
                                      "TexCoord0 = TexCoord;\n"
                                      "ColorBlendOut = ColorBlend;\n"
                                      "} \n",
@@ -136,38 +136,38 @@ GLuint Shader_LoadImage() {
 #else
 GLuint Shader_LoadDefault()
 {
-    return Shader_loadCustom("attribute vec2 vPosition;\n"
-                             "attribute vec4 Color;\n"
-                             "uniform vec2 ScreenSize;\n"
-                             "varying vec4 oColor;\n"
-                             "void main() {\n"
-                             "  gl_Position = vec4(vPosition.x / ScreenSize.x * 2.0 - 1.0, vPosition.y / ScreenSize.y * 2.0 - 1.0, 0.0, 1.0);\n"
-                             "  oColor = Color;"
-                             "}\n",
+    return Shader_loadCustom("attribute vec3 vPosition;\n"
+                                     "attribute vec4 Color;\n"
+                                     "uniform vec2 ScreenSize;\n"
+                                     "varying vec4 oColor;\n"
+                                     "void main() {\n"
+                                     "  gl_Position = vec4(vPosition.x / ScreenSize.x * 2.0 - 1.0, vPosition.y / ScreenSize.y * 2.0 - 1.0, vPosition.z / 10.0, 1.0);\n"
+                                     "  oColor = Color;"
+                                     "}\n",
                              "precision mediump float;\n"
-                             "varying vec4 oColor;\n"
-                             "void main() {\n"
-                             "  gl_FragColor = oColor;\n"
-                             "}\n");
+                                     "varying vec4 oColor;\n"
+                                     "void main() {\n"
+                                     "  gl_FragColor = oColor;\n"
+                                     "}\n");
 }
 
 GLuint Shader_LoadImage() {
-    return Shader_loadCustom("attribute vec2 a_position;\n"
-                             "attribute vec2 a_texCoord;\n"
-                             "uniform vec2 ScreenSize;\n"
-                             "varying vec2 Texture_Coord;\n"
-                             "void main()\n"
-                             "{\n"
-                             "   gl_Position = vec4(a_position.x / ScreenSize.x * 2.0 - 1.0, a_position.y / ScreenSize.y * 2.0 - 1.0, 0.0, 1.0); \n"
-                             "   Texture_Coord = a_texCoord;\n"
-                             "}\n" ,
+    return Shader_loadCustom("attribute vec3 a_position;\n"
+                                     "attribute vec2 a_texCoord;\n"
+                                     "uniform vec2 ScreenSize;\n"
+                                     "varying vec2 Texture_Coord;\n"
+                                     "void main()\n"
+                                     "{\n"
+                                     "   gl_Position = vec4(a_position.x / ScreenSize.x * 2.0 - 1.0, a_position.y / ScreenSize.y * 2.0 - 1.0, a_position.z / 10.0, 1.0); \n"
+                                     "   Texture_Coord = a_texCoord;\n"
+                                     "}\n" ,
                              "precision mediump float;\n"
-                             "varying vec2 Texture_Coord;\n"
-                             "uniform sampler2D s_texture;\n"
-                             "uniform vec4 ColorBlend;\n"
-                             "void main()\n"
-                             "{\n"
-                             "  gl_FragColor = ColorBlend + texture2D( s_texture, Texture_Coord );\n"
-                             "}\n");
+                                     "varying vec2 Texture_Coord;\n"
+                                     "uniform sampler2D s_texture;\n"
+                                     "uniform vec4 ColorBlend;\n"
+                                     "void main()\n"
+                                     "{\n"
+                                     "  gl_FragColor = ColorBlend + texture2D( s_texture, Texture_Coord );\n"
+                                     "}\n");
 }
 #endif

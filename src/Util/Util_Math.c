@@ -102,6 +102,17 @@ struct Vector4f Vector4_Create(float x, float y, float z, float w)
 	return vec;
 }
 
+struct Vector5f Vector5_Create(float x, float y, float z, float w, float h)
+{
+	struct Vector5f vec;
+	vec.x = x;
+	vec.y = y;
+	vec.z = z;
+	vec.w = w;
+	vec.h = h;
+	return vec;
+}
+
 struct Vector6f Vector6_Create(struct Vector2f vec2, struct Vector4f vec4)
 {
 	struct Vector6f vec;
@@ -124,6 +135,19 @@ struct Vector6f Vector6_Createf(float x, float y, float z, float w, float h,
 	vec.w = w;
 	vec.h = h;
 	vec.o = o;
+	return vec;
+}
+
+struct Vector7f Vector7_Createf(float x, float y, float z, float r, float g, float b, float a)
+{
+    struct Vector7f vec;
+	vec.x = x;
+	vec.y = y;
+	vec.z = z;
+	vec.r = r;
+	vec.g = g;
+	vec.b = b;
+	vec.a = a;
 	return vec;
 }
 

@@ -350,7 +350,7 @@ void Font_FixedRender(struct FontManager * restrict Manager, const char * restri
 					Quad_Create(ch.TexturePos.x, ch.TexturePos.w,
 							ch.TexturePos.x, ch.TexturePos.y, ch.TexturePos.z,
 							ch.TexturePos.y, ch.TexturePos.z, ch.TexturePos.w),
-					Color);
+					Color, 0);
 		}
 		// Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
 		x += (Manager->CurrentFont->Characters[(int) *Text].Advance >> 6)
@@ -424,7 +424,7 @@ void Font_CharacterHeightRenderCA(struct FontManager *Manager, char Character, G
 	Font_Shader.pushQuad(Manager->CurrentFont->Texture, Quad_Create(center_x, center_y, center_x, center_y + Height, center_x + h, center_y + Height, center_x + h, center_y),
 						 Quad_Create(Manager->CurrentFont->Characters[(int)Character].TexturePos.x, Manager->CurrentFont->Characters[(int)Character].TexturePos.w,
 									 Manager->CurrentFont->Characters[(int)Character].TexturePos.x, Manager->CurrentFont->Characters[(int)Character].TexturePos.y, Manager->CurrentFont->Characters[(int)Character].TexturePos.z,
-									 Manager->CurrentFont->Characters[(int)Character].TexturePos.y, Manager->CurrentFont->Characters[(int)Character].TexturePos.z, Manager->CurrentFont->Characters[(int)Character].TexturePos.w), Color);
+									 Manager->CurrentFont->Characters[(int)Character].TexturePos.y, Manager->CurrentFont->Characters[(int)Character].TexturePos.z, Manager->CurrentFont->Characters[(int)Character].TexturePos.w), Color, 0);
 }
 
 GLfloat Font_HeightRenderRenderConstraint(struct FontManager * restrict Manager, char * restrict Text,
@@ -524,7 +524,7 @@ void Font_FixedRenderRenderConstraint(struct FontManager * restrict Manager, cha
 				Quad_Create(ch.TexturePos.x, ch.TexturePos.w,
 					ch.TexturePos.x, ch.TexturePos.y, ch.TexturePos.z,
 					ch.TexturePos.y, ch.TexturePos.z, ch.TexturePos.w),
-						Color);
+						Color, 0);
 
 			goto BreakOut;
 
@@ -537,7 +537,7 @@ void Font_FixedRenderRenderConstraint(struct FontManager * restrict Manager, cha
 					Quad_Create(xpos, ypos, xpos, ypos + h, xpos + w, ypos + h,
 							xpos + w, ypos),
 					Quad_Create(textX , textY + textH, textX, textY,
-							textX + textW, textY, textX + textW, textY + textH), Color);
+							textX + textW, textY, textX + textW, textY + textH), Color, 0);
 		}
 		BreakOut:
 		// Now advance cursors for next glyph (note that advance is number of 1/64 pixels)

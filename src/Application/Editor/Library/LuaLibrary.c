@@ -41,6 +41,95 @@ int LuaLibrary_CloseKeyboard(lua_State *L)
 }
 
 /* Draw colored rectangled */
+static int Lua_DrawRectangle2(lua_State *L)
+{
+	if(!App_UsingDisplay)
+	{
+		fprintf(LuaLibrary_Log, "renderer.rectangle : need to call have useDisplay to true to get access to rendering functions\n");
+		Lua_requestClose = true;
+	}
+	if(!lua_isnumber(L, -9))
+	{
+		fprintf(LuaLibrary_Log, "renderer.rectangle : need number for argument 1\n");
+		return 0;
+	}
+	if(!lua_isnumber(L, -8))
+	{
+		fprintf(LuaLibrary_Log, "renderer.rectangle : need number for argument 2\n");
+		return 0;
+	}
+	if(!lua_isnumber(L, -7))
+	{
+		fprintf(LuaLibrary_Log, "renderer.rectangle : need number for argument 3\n");
+		return 0;
+	}
+	if(!lua_isnumber(L, -6))
+	{
+		fprintf(LuaLibrary_Log, "renderer.rectangle : need number for argument 4\n");
+		return 0;
+	}
+	if(!lua_isnumber(L, -5))
+	{
+		fprintf(LuaLibrary_Log, "renderer.rectangle : need number for argument 5\n");
+		return 0;
+	}
+	if(!lua_isnumber(L, -4))
+	{
+		fprintf(LuaLibrary_Log, "renderer.rectangle : need number for argument 6\n");
+		return 0;
+	}
+	if(!lua_isnumber(L, -3))
+	{
+		fprintf(LuaLibrary_Log, "renderer.rectangle : need number for argument 7\n");
+		return 0;
+	}
+	if(!lua_isnumber(L, -2))
+	{
+		fprintf(LuaLibrary_Log, "renderer.rectangle : need number for argument 8\n");
+		return 0;
+	}
+	if(!lua_isnumber(L, -1))
+	{
+		fprintf(LuaLibrary_Log, "renderer.rectangle : need number for argument 9\n");
+		return 0;
+	}
+
+	double x = lua_tonumber(L, -9) + Lua_Window.x, y = lua_tonumber(L, -8) + Lua_Window.y;
+	int z = lua_tonumber(L, -7);
+	printf("%i\n", z);
+	double width = lua_tonumber(L, -6), height = lua_tonumber(L, -5);
+
+	if(x + width < Lua_Window.x || x > Lua_Window.z + Lua_Window.x || y + height < Lua_Window.y || y > Lua_Window.w + Lua_Window.y)
+		return 0;
+
+	if(x < Lua_Window.x)
+	{
+		double delta = Lua_Window.x - x;
+		x = Lua_Window.x;
+		width -= delta;
+	} else if(x + width > Lua_Window.x + Lua_Window.z)
+	{
+		double delta = (x + width) - (Lua_Window.x + Lua_Window.z);
+		width -= delta;
+	}
+
+	if(y < Lua_Window.y)
+	{
+		double delta = Lua_Window.y - y;
+		y = Lua_Window.y;
+		height -= delta;
+	} else if(y + height > Lua_Window.y + Lua_Window.w)
+	{
+		double delta = (y + height) - (Lua_Window.y + Lua_Window.w);
+		height -= delta;
+	}
+
+	struct Vector4f Color = { lua_tonumber(L, -4), lua_tonumber(L, -3), lua_tonumber(L, -2), lua_tonumber(L, -1) };
+
+	Default_Shader.pushQuad(Quad_Create(x, y, x, y + height, x + width, y + height, x + width, y), Color, z);
+	return 0;
+}
+
 static int Lua_DrawRectangle(lua_State *L)
 {
 	if(!App_UsingDisplay)
@@ -48,6 +137,10 @@ static int Lua_DrawRectangle(lua_State *L)
 		fprintf(LuaLibrary_Log, "renderer.rectangle : need to call have useDisplay to true to get access to rendering functions\n");
 		Lua_requestClose = true;
 	}
+	if(lua_isnumber(L, -9))
+    {
+        return Lua_DrawRectangle2(L);
+    }
 	if(!lua_isnumber(L, -8))
 	{
 		fprintf(LuaLibrary_Log, "renderer.rectangle : need number for argument 1\n");
@@ -119,7 +212,7 @@ static int Lua_DrawRectangle(lua_State *L)
 
 	struct Vector4f Color = { lua_tonumber(L, -4), lua_tonumber(L, -3), lua_tonumber(L, -2), lua_tonumber(L, -1) };
 
-	Default_Shader.pushQuad(Quad_Create(x, y, x, y + height, x + width, y + height, x + width, y), Color);
+	Default_Shader.pushQuad(Quad_Create(x, y, x, y + height, x + width, y + height, x + width, y), Color, 0);
 	return 0;
 }
 

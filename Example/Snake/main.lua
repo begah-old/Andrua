@@ -9,8 +9,11 @@ mouse_x = 0
 mouse_y = 0
 
 useDisplay = true
+useFullScreen = true
 
 State = "menu"
+
+closeScreen = nil
 
 init = function()
 	menu.init()
@@ -24,11 +27,11 @@ end
 
 changeScreen = function(nState)
 	if State == "snake" then
-		snake.close()
+		closeScreen = snake.close		
 	elseif State == "gameover" then
-		gameover.close()
+		closeScreen = gameover.close
 	elseif State == "menu" then
-		menu.close()
+		closeScreen = menu.close
 	end
 
 	State = nState
@@ -42,6 +45,11 @@ changeScreen = function(nState)
 end
 
 render = function()
+	if closeScreen then
+		closeScreen()
+		closeScreen = nil
+	end
+
 	if State == "snake" then
 		snake.render()
 	elseif State == "gameover" then
@@ -49,6 +57,9 @@ render = function()
 	elseif State == "menu" then
 		menu.render()
 	end
+
+	renderer.fixedText(engine.getFPS(), 0, Screen_Height - 50, 
+		200, 50, 1, 1, 0, 1)
 end
 
 close = function()

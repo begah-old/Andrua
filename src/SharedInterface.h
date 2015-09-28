@@ -49,24 +49,25 @@ struct Keyboard
 struct OnScreen_Keyboard_Struct *OnScreen_Keyboard;
 
 /* The different shaders structure only contains pointers to function defined in Util_AndroidRenderer.c or Util_DesktopRenderer.c
- * depending if you use OpenGL ES or OpenGL
+ * depending if you use OpenGL ES or OpenGL.
+ * The last int in the functions is the Z value.
  */
 struct Default_Shader_Functions
 {
-	void (*pushVertices)(float, float, float, float, float, float);
-	void (*pushQuad)(struct Quad, struct Vector4f);
+	void (*pushVertices)(float, float, float, float, float, float, int);
+	void (*pushQuad)(struct Quad, struct Vector4f, int);
 } Default_Shader;
 
 struct Image_Shader_Functions
 {
-	void (*pushVertices)(float, float, float, float, GLuint, struct Vector4f);
-	void (*pushQuad)(struct Quad, struct Quad, GLuint, struct Vector4f);
+	void (*pushVertices)(float, float, float, float, GLuint, struct Vector4f, int);
+	void (*pushQuad)(struct Quad, struct Quad, GLuint, struct Vector4f, int);
 } Image_Shader;
 
 struct Font_Shader_Functions
 {
-	void (*pushVertices)(GLuint, float, float, float, float, struct Vector4f);
-	void (*pushQuad)(GLuint, struct Quad, struct Quad, struct Vector4f);
+	void (*pushVertices)(GLuint, float, float, float, float, struct Vector4f, int);
+	void (*pushQuad)(GLuint, struct Quad, struct Quad, struct Vector4f, int);
 } Font_Shader;
 
 /* Global font manager that holds references to every font opened by the engine,

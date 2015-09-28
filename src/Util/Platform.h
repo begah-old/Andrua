@@ -7,7 +7,7 @@
 
 #ifndef ANDROID
 /* Comment the following line if compiling for Desktop */
-//#define ANDROID
+#define ANDROID
 #endif
 
 #ifndef ANDROID

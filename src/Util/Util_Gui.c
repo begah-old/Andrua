@@ -83,7 +83,7 @@ void Gui_TextBox_Render(struct Gui_TextBox *TB) {
 	if (Mouse.justPressed && Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), TB->Quad_takeMouse)) {
 		TB->Writing = TB->Hover;
 	}
-	Default_Shader.pushQuad(Quad, TB->Hover ? TB->HoverColor : TB->Color);
+	Default_Shader.pushQuad(Quad, TB->Hover ? TB->HoverColor : TB->Color, 0);
 
 	if (TB->NotCentered)
 		Font_HeightMaxRender(DefaultFontManager, TB->Text,
@@ -248,7 +248,7 @@ _Bool Gui_Button_Render(struct Gui_Button *TB)
 	TB->Hover = Point_inQuad(Vector2_Create((float) Mouse.x, (float) Mouse.y),
 							 Quad);
 
-	Default_Shader.pushQuad(Quad, TB->Hover ? TB->HoverColor : TB->Color);
+	Default_Shader.pushQuad(Quad, TB->Hover ? TB->HoverColor : TB->Color, 0);
 
 	if(TB->CenterText)
 		Font_HeightMaxRenderCA(DefaultFontManager, TB->Text, TB->X + TB->Width / 2.0f, TB->Y, TB->TextHeight, TB->TextWidth, 1.0f, TB->Font_Color);
@@ -400,7 +400,7 @@ void Gui_Tab_Render(struct Gui_Tab *Tab)
 {
 	Tab->Hover = Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), Tab->Tab);
 	// Drawing Tab
-	Default_Shader.pushQuad(Tab->Tab, Tab->Tab_Color);
+	Default_Shader.pushQuad(Tab->Tab, Tab->Tab_Color, 0);
 
 	// Drawing Items
 	_Bool ItemPressed = false;
@@ -433,9 +433,9 @@ void Gui_Tab_Render(struct Gui_Tab *Tab)
 
 		if (Tab->Item_Selected == i
 			|| Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), Quad))
-			Default_Shader.pushQuad(Quad, Tab->ItemColorHover);
+			Default_Shader.pushQuad(Quad, Tab->ItemColorHover, 0);
 		else
-			Default_Shader.pushQuad(Quad, Tab->ItemColor);
+			Default_Shader.pushQuad(Quad, Tab->ItemColor, 0);
 
 		Font_HeightMaxRender(DefaultFontManager, Names[i].String,
 							 Tab->X + 0.05f, Quad.v4.y, Quad.v3.y - Quad.v4.y, Tab->Width,
@@ -467,7 +467,7 @@ int Gui_Tab_SimpleRender(struct Gui_Tab *Tab)
 {
 	Tab->Hover = Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), Tab->Tab);
 	// Drawing Tab
-	Default_Shader.pushQuad(Tab->Tab, Tab->Tab_Color);
+	Default_Shader.pushQuad(Tab->Tab, Tab->Tab_Color, 0);
 
 	struct String_Struct *Names = (struct String_Struct *) Tab->Items->items;
 	for (int i = 0; i < Tab->Items->size; i++)
@@ -497,9 +497,9 @@ int Gui_Tab_SimpleRender(struct Gui_Tab *Tab)
 
 		if (Tab->Item_Selected == i
 			|| Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), Quad))
-			Default_Shader.pushQuad(Quad, Tab->ItemColorHover);
+			Default_Shader.pushQuad(Quad, Tab->ItemColorHover, 0);
 		else
-			Default_Shader.pushQuad(Quad, Tab->ItemColor);
+			Default_Shader.pushQuad(Quad, Tab->ItemColor, 0);
 
 		Font_HeightMaxRender(DefaultFontManager, Names[i].String,
 							 Tab->X + 0.05f, Quad.v4.y, Quad.v3.y - Quad.v4.y, Tab->Width,
@@ -578,7 +578,7 @@ struct Gui_Horizontal_ScrollBar *Gui_Horizontal_ScrollBar_Create(float x,
 
 void Gui_Horizontal_ScrollBar_Render(struct Gui_Horizontal_ScrollBar *ScrollBar)
 {
-	Default_Shader.pushQuad(ScrollBar->ScrollBar, ScrollBar->Color);
+	Default_Shader.pushQuad(ScrollBar->ScrollBar, ScrollBar->Color, 0);
 
 	// Make sure ScrollBar isn't out of bounds
 	if(ScrollBar->BarX > ScrollBar->TotalValue)
@@ -610,9 +610,9 @@ void Gui_Horizontal_ScrollBar_Render(struct Gui_Horizontal_ScrollBar *ScrollBar)
 			Hover = true;
 
 		if (Hover)
-			Default_Shader.pushQuad(BarQuad, ScrollBar->Bar_Color_Hover);
+			Default_Shader.pushQuad(BarQuad, ScrollBar->Bar_Color_Hover, 0);
 		else
-			Default_Shader.pushQuad(BarQuad, ScrollBar->Bar_Color);
+			Default_Shader.pushQuad(BarQuad, ScrollBar->Bar_Color, 0);
 
 		if (ScrollBar->IsPressed && Mouse.x != Mouse.prevX)
 		{
@@ -652,9 +652,9 @@ void Gui_Horizontal_ScrollBar_Render(struct Gui_Horizontal_ScrollBar *ScrollBar)
 								   ScrollBar->ScrollBar);
 		if (Hover)
 			Default_Shader.pushQuad(ScrollBar->ScrollBar,
-									ScrollBar->Bar_Color_Hover);
+									ScrollBar->Bar_Color_Hover, 0);
 		else
-			Default_Shader.pushQuad(ScrollBar->ScrollBar, ScrollBar->Bar_Color);
+			Default_Shader.pushQuad(ScrollBar->ScrollBar, ScrollBar->Bar_Color, 0);
 	}
 	ScrollBar->BarX = View_TranslateTo(ScrollBar->BarX,
 									   ScrollBar->ScrollBar.v3.x - ScrollBar->ScrollBar.v1.x,
@@ -712,7 +712,7 @@ void Gui_Vertical_ScrollBar_Inverse(struct Gui_Vertical_ScrollBar *ScrollBar)
 
 void Gui_Vertical_ScrollBar_Render(struct Gui_Vertical_ScrollBar *ScrollBar)
 {
-	Default_Shader.pushQuad(ScrollBar->ScrollBar, ScrollBar->Color);
+	Default_Shader.pushQuad(ScrollBar->ScrollBar, ScrollBar->Color, 0);
 
 	if(ScrollBar->Inversed)
 		ScrollBar->BarY = -ScrollBar->BarY;
@@ -763,9 +763,9 @@ void Gui_Vertical_ScrollBar_Render(struct Gui_Vertical_ScrollBar *ScrollBar)
 			Hover = true;
 
 		if (Hover)
-			Default_Shader.pushQuad(BarQuad, ScrollBar->Bar_Color_Hover);
+			Default_Shader.pushQuad(BarQuad, ScrollBar->Bar_Color_Hover, 0);
 		else
-			Default_Shader.pushQuad(BarQuad, ScrollBar->Bar_Color);
+			Default_Shader.pushQuad(BarQuad, ScrollBar->Bar_Color, 0);
 
 		if (ScrollBar->IsPressed && Mouse.y != Mouse.prevY)
 		{
@@ -824,9 +824,9 @@ void Gui_Vertical_ScrollBar_Render(struct Gui_Vertical_ScrollBar *ScrollBar)
 								   ScrollBar->ScrollBar);
 		if (Hover)
 			Default_Shader.pushQuad(ScrollBar->ScrollBar,
-									ScrollBar->Bar_Color_Hover);
+									ScrollBar->Bar_Color_Hover, 0);
 		else
-			Default_Shader.pushQuad(ScrollBar->ScrollBar, ScrollBar->Bar_Color);
+			Default_Shader.pushQuad(ScrollBar->ScrollBar, ScrollBar->Bar_Color, 0);
 	}
 
 	ScrollBar->BarY = View_TranslateTo(ScrollBar->BarY,

@@ -57,6 +57,8 @@ struct Animation *Animation_LoadInternal(const char *Name)
 	gettimeofday(&Animation->Current_FrameStart, NULL);
 
 	Animation->x = Animation->y = 0;
+	Animation->z = 0;
+
 	Animation->width = Animation->height = 50;
 	Animation->Angle = 0;
 
@@ -116,6 +118,8 @@ struct Animation *Animation_LoadExternal(const char * restrict Name)
 	gettimeofday(&Animation->Current_FrameStart, NULL);
 
 	Animation->x = Animation->y = 0;
+	Animation->z = 0;
+
 	Animation->width = Animation->height = 50;
 	Animation->Angle = 0;
 
@@ -218,7 +222,7 @@ void Animation_Render(struct Animation *Animation)
     Image_Shader.pushQuad(Animation->Calculated_Quad,
                           Quad_Create(Animation->Frames[Animation->Current_Frame].x, Animation->Frames[Animation->Current_Frame].y2, Animation->Frames[Animation->Current_Frame].x,
                                       Animation->Frames[Animation->Current_Frame].y, Animation->Frames[Animation->Current_Frame].x2, Animation->Frames[Animation->Current_Frame].y,
-                                      Animation->Frames[Animation->Current_Frame].x2, Animation->Frames[Animation->Current_Frame].y2), Animation->Frames[Animation->Current_Frame].Image, Vector4_Create(0, 0, 0, 0));
+                                      Animation->Frames[Animation->Current_Frame].x2, Animation->Frames[Animation->Current_Frame].y2), Animation->Frames[Animation->Current_Frame].Image, Vector4_Create(0, 0, 0, 0), Animation->z);
 
 }
 

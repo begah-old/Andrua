@@ -18,9 +18,37 @@ init = function()
 		Snake.body[i] = { x = Game_Width / 2, y = Game_Height / 2, lastX = 0, lastY = 0 }
 	end
 
-	Coin.image = image.load("coin.png")
+	Square_Width = Screen_Width / Game_Width
+	Square_Height = Screen_Height / Game_Height
+
+	Coin.image = animation.load("coin.png")
+
+	for i in pairs(animation) do
+		print(i)
+	end
+
+	animation.setSize(Coin.image, Square_Width, Square_Height)
+
 	Coin.x = math.random(Game_Width) - 1
 	Coin.y = math.random(Game_Height) - 1
+
+	animation.setPos(Coin.image, Square_Width * Coin.x, Coin.y * Square_Height)
+	animation.reverseOnFinish(Coin.image)
+end
+
+createExplosion = function()
+	local Explosion = particle.new( Square_Width * Snake.head.x + Square_Width / 2,
+		Square_Height * Snake.head.y + Square_Height / 2, 500)
+
+	particle.setGravity(Explosion, 0, 0)
+	particle.setLife(Explosion, 500, 1000)
+	particle.setSpeed(Explosion, 0.05, 4)
+	particle.setColor(Explosion, 1, 0.9, 0.1, 1, 1, 0, 0, 0)
+
+	particle.emit(Explosion, 500)
+	particle.toggleEmitting(Explosion)
+
+	particle.deleteOnFinish(Explosion, true)
 end
 
 updatePart = function(part)
@@ -33,6 +61,16 @@ updatePart = function(part)
 	elseif part.direction == 4 then
 		part.y = part.y + 1
 	end
+
+	if part.x >= Game_Width then
+		part.x = 0
+	elseif part.x < 0 then
+		part.x = Game_Width - 1
+	elseif part.y < 0 then
+		part.y = Game_Height - 1
+	elseif part.y >= Game_Height then
+		part.y = 0
+	end
 end
 
 update = function()
@@ -43,7 +81,10 @@ update = function()
 	if Snake.head.x == Coin.x and Snake.head.y == Coin.y then
 		Coin.x = math.random(Game_Width) - 1
 		Coin.y = math.random(Game_Height) - 1
-		print(Coin.x, Coin.y)
+
+		animation.setPos(Coin.image, Square_Width * Coin.x, Square_Height * Coin.y)
+
+		createExplosion()
 		Snake.body[#Snake.body + 1] = { x = Snake.body[#Snake.body].x, y = Snake.body[#Snake.body].y,
 			lastX = 0, lastY = 0 }
 	--	Snake.body[#Snake.body].direction = 0
@@ -69,22 +110,25 @@ end
 Counter = 0
 
 render = function()
+	print(engine.getFPS())
 	Counter = Counter + 1
-	if Counter >= engine.getFPS() / 4 then
+	if Counter >= engine.getFPS() / 10 then
 		update()
 		Counter = 0
 	end
 
-	width = Screen_Width / Game_Width
-	height = Screen_Height / Game_Height
+	Square_Width = Screen_Width / Game_Width
+	Square_Height = Screen_Height / Game_Height
 
 	for i,v in ipairs(Snake.body) do
-		renderer.rectangle(width * v.x, height * v.y, width, height, 1, 0, 1, 1)
+		renderer.rectangle(Square_Width * v.x, Square_Height * v.y, Square_Width, 
+			Square_Height, 1, 0, 1, 1)
 	end
 
-	renderer.rectangle(width * Snake.head.x, height * Snake.head.y, width, height, 1, 0, 0, 1)
+	renderer.rectangle(Square_Width * Snake.head.x, Square_Height * Snake.head.y, 
+		Square_Width, Square_Height, 1, 0.2, 0.7, 1)
 
-	image.drawRectangle(width * Coin.x, height * Coin.y, width, height, Coin.image)
+	animation.render(Coin.image)
 end
 
 close = function()
@@ -92,13 +136,13 @@ close = function()
 end
 
 mousePressed = function()
-	if mouse_x < Screen_Width / 4 then
+	if mouse_x < Screen_Width / 4 and Snake.head.direction % 2 == 0 then
 		Snake.head.direction = 1
-	elseif mouse_x > Screen_Width / 4 * 3 then
+	elseif mouse_x > Screen_Width / 4 * 3 and Snake.head.direction % 2 == 0 then
 		Snake.head.direction = 3
-	elseif mouse_y < Screen_Height / 4 then
+	elseif mouse_y < Screen_Height / 4 and Snake.head.direction % 2 ~= 0 then
 		Snake.head.direction = 2
-	elseif mouse_y > Screen_Height / 4 * 3 then
+	elseif mouse_y > Screen_Height / 4 * 3 and Snake.head.direction % 2 ~= 0 then
 		Snake.head.direction = 4
 	end
 end

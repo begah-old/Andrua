@@ -244,9 +244,9 @@ void Engine_renderKeyboard()
         if(Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), OnScreen_Keyboard->Keyboard_Keys[Track].quad))
         {
             if(Mouse.isPressed)
-            	Image_Shader.pushQuad(OnScreen_Keyboard->Keyboard_Keys[Track].quad, TextureAt(455, 0, 500, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0));
+            	Image_Shader.pushQuad(OnScreen_Keyboard->Keyboard_Keys[Track].quad, TextureAt(455, 0, 500, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0), 0);
             else
-                Image_Shader.pushQuad(OnScreen_Keyboard->Keyboard_Keys[Track].quad, TextureAt(405, 0, 450, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0));
+                Image_Shader.pushQuad(OnScreen_Keyboard->Keyboard_Keys[Track].quad, TextureAt(405, 0, 450, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0), 0);
 
             if(!Mouse.justSuper_longReleased)
             {
@@ -274,7 +274,7 @@ void Engine_renderKeyboard()
             }
         }
         else
-            Image_Shader.pushQuad(OnScreen_Keyboard->Keyboard_Keys[Track].quad, TextureAt(405, 0, 450, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0));
+            Image_Shader.pushQuad(OnScreen_Keyboard->Keyboard_Keys[Track].quad, TextureAt(405, 0, 450, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0), 0);
 
         if(OnScreen_Keyboard->Page_On == 0)
         {
@@ -322,11 +322,11 @@ void Engine_renderKeyboard()
 
     // Maj key
     if(OnScreen_Keyboard->Key_Max_pressed || ((Mouse.isPressed)&Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), OnScreen_Keyboard->Key_Maj.quad)))
-        Image_Shader.pushQuad(OnScreen_Keyboard->Key_Maj.quad, TextureAt(455, 0, 500, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0));
+        Image_Shader.pushQuad(OnScreen_Keyboard->Key_Maj.quad, TextureAt(455, 0, 500, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0), 0);
     else
-        Image_Shader.pushQuad(OnScreen_Keyboard->Key_Maj.quad, TextureAt(405, 0, 450, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0));
+        Image_Shader.pushQuad(OnScreen_Keyboard->Key_Maj.quad, TextureAt(405, 0, 450, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0), 0);
 
-    Image_Shader.pushQuad(OnScreen_Keyboard->Key_Maj.quad, TextureAt(605, 0, 653, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0.0f, 0, 0, 0.0f));
+    Image_Shader.pushQuad(OnScreen_Keyboard->Key_Maj.quad, TextureAt(605, 0, 653, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0.0f, 0, 0, 0.0f), 0);
 
     if(Mouse.justPressed && Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), OnScreen_Keyboard->Key_Maj.quad))
     	OnScreen_Keyboard->Key_Max_pressed = !OnScreen_Keyboard->Key_Max_pressed;
@@ -334,11 +334,11 @@ void Engine_renderKeyboard()
     // Delete Key
 
     if(Mouse.isPressed && Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), OnScreen_Keyboard->Key_Delete.quad))
-    	Image_Shader.pushQuad(OnScreen_Keyboard->Key_Delete.quad, TextureAt(455, 0, 500, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0));
+    	Image_Shader.pushQuad(OnScreen_Keyboard->Key_Delete.quad, TextureAt(455, 0, 500, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0), 0);
     else
-        Image_Shader.pushQuad(OnScreen_Keyboard->Key_Delete.quad, TextureAt(405, 0, 450, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0));
+        Image_Shader.pushQuad(OnScreen_Keyboard->Key_Delete.quad, TextureAt(405, 0, 450, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0), 0);
 
-    Image_Shader.pushQuad(OnScreen_Keyboard->Key_Delete.quad, TextureAt(305, 47, 350, 0), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0.0f, 0, 0, 0.0f));
+    Image_Shader.pushQuad(OnScreen_Keyboard->Key_Delete.quad, TextureAt(305, 47, 350, 0), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0.0f, 0, 0, 0.0f), 0);
 
     if(Mouse.isPressed && Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), OnScreen_Keyboard->Key_Delete.quad))
     {
@@ -359,9 +359,9 @@ void Engine_renderKeyboard()
 
     // Return key
     if(Mouse.isPressed && Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), OnScreen_Keyboard->Key_Return.quad))
-    	Image_Shader.pushQuad(OnScreen_Keyboard->Key_Return.quad, TextureAt(455, 0, 500, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0));
+    	Image_Shader.pushQuad(OnScreen_Keyboard->Key_Return.quad, TextureAt(455, 0, 500, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0), 0);
     else
-    	Image_Shader.pushQuad(OnScreen_Keyboard->Key_Return.quad, TextureAt(405, 0, 450, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0));
+    	Image_Shader.pushQuad(OnScreen_Keyboard->Key_Return.quad, TextureAt(405, 0, 450, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0), 0);
 
     Font_FixedRender(DefaultFontManager, "Return", OnScreen_Keyboard->Key_Return.quad.v1.x + (OnScreen_Keyboard->Key_Return.quad.v2.y - OnScreen_Keyboard->Key_Return.quad.v1.y) / 2.0f * 0.5f, OnScreen_Keyboard->Key_Return.quad.v1.y, (OnScreen_Keyboard->Key_Return.quad.v2.y - OnScreen_Keyboard->Key_Return.quad.v1.y) / 2.0f * 1.75f, (OnScreen_Keyboard->Key_Return.quad.v3.x - OnScreen_Keyboard->Key_Return.quad.v1.x) / 2.0f * 1.5f, 1.0f, COLOR_RED );
 
@@ -374,11 +374,11 @@ void Engine_renderKeyboard()
 
     // Change Pag key
     if(Mouse.isPressed && Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), OnScreen_Keyboard->Key_ChangePage.quad))
-    	Image_Shader.pushQuad(OnScreen_Keyboard->Key_ChangePage.quad, TextureAt(455, 0, 500, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0));
+    	Image_Shader.pushQuad(OnScreen_Keyboard->Key_ChangePage.quad, TextureAt(455, 0, 500, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0), 0);
     else
-    	Image_Shader.pushQuad(OnScreen_Keyboard->Key_ChangePage.quad, TextureAt(405, 0, 450, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0));
+    	Image_Shader.pushQuad(OnScreen_Keyboard->Key_ChangePage.quad, TextureAt(405, 0, 450, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0), 0);
 
-    Image_Shader.pushQuad(OnScreen_Keyboard->Key_ChangePage.quad, TextureAt(505, 0, 550, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0));
+    Image_Shader.pushQuad(OnScreen_Keyboard->Key_ChangePage.quad, TextureAt(505, 0, 550, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0), 0);
 
     if(Mouse.justPressed && Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), OnScreen_Keyboard->Key_ChangePage.quad))
     {
@@ -388,9 +388,9 @@ void Engine_renderKeyboard()
 
     // Space key
     if(Mouse.isPressed && Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), OnScreen_Keyboard->Key_Space.quad))
-    	Image_Shader.pushQuad(OnScreen_Keyboard->Key_Space.quad, TextureAt(17, 17, 133, 48), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(-0.7, -0.7, -0.7, 0));
+    	Image_Shader.pushQuad(OnScreen_Keyboard->Key_Space.quad, TextureAt(17, 17, 133, 48), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(-0.7, -0.7, -0.7, 0), 0);
     else
-    	Image_Shader.pushQuad(OnScreen_Keyboard->Key_Space.quad, TextureAt(17, 17, 133, 48), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0));
+    	Image_Shader.pushQuad(OnScreen_Keyboard->Key_Space.quad, TextureAt(17, 17, 133, 48), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0), 0);
 
     if(Mouse.justReleased && Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), OnScreen_Keyboard->Key_Space.quad))
     {
@@ -400,11 +400,11 @@ void Engine_renderKeyboard()
 
     // Key close
     if(Mouse.isPressed && Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), OnScreen_Keyboard->Key_Close.quad))
-        Image_Shader.pushQuad(OnScreen_Keyboard->Key_Close.quad, TextureAt(455, 0, 503, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0));
+        Image_Shader.pushQuad(OnScreen_Keyboard->Key_Close.quad, TextureAt(455, 0, 503, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0), 0);
     else
-        Image_Shader.pushQuad(OnScreen_Keyboard->Key_Close.quad, TextureAt(405, 0, 450, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0));
+        Image_Shader.pushQuad(OnScreen_Keyboard->Key_Close.quad, TextureAt(405, 0, 450, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0), 0);
 
-    Image_Shader.pushQuad(OnScreen_Keyboard->Key_Close.quad, TextureAt(605, 47, 653, 0), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0.0f, 0, 0, 0.0f));
+    Image_Shader.pushQuad(OnScreen_Keyboard->Key_Close.quad, TextureAt(605, 47, 653, 0), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0.0f, 0, 0, 0.0f), 0);
 
     if(Mouse.justReleased && Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), OnScreen_Keyboard->Key_Close.quad))
     {
@@ -414,11 +414,11 @@ void Engine_renderKeyboard()
 
     // Key tab
     if(Mouse.isPressed && Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), OnScreen_Keyboard->Key_Tab.quad))
-    	Image_Shader.pushQuad(OnScreen_Keyboard->Key_Tab.quad, TextureAt(455, 0, 500, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0));
+    	Image_Shader.pushQuad(OnScreen_Keyboard->Key_Tab.quad, TextureAt(455, 0, 500, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0), 0);
     else
-    	Image_Shader.pushQuad(OnScreen_Keyboard->Key_Tab.quad, TextureAt(405, 0, 450, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0));
+    	Image_Shader.pushQuad(OnScreen_Keyboard->Key_Tab.quad, TextureAt(405, 0, 450, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0), 0);
 
-    Image_Shader.pushQuad(OnScreen_Keyboard->Key_Tab.quad, TextureAt2(653, 48, 605, 48, 605, 0, 653, 0), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0.0f, 0, 0, 0.0f));
+    Image_Shader.pushQuad(OnScreen_Keyboard->Key_Tab.quad, TextureAt2(653, 48, 605, 48, 605, 0, 653, 0), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0.0f, 0, 0, 0.0f), 0);
 
     if(Mouse.justReleased && Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), OnScreen_Keyboard->Key_Tab.quad))
     {
@@ -429,11 +429,11 @@ void Engine_renderKeyboard()
 
     // Cursor Right
     if(Mouse.isPressed && Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), OnScreen_Keyboard->Cursor_Right.quad))
-    	Image_Shader.pushQuad(OnScreen_Keyboard->Cursor_Right.quad, TextureAt(455, 0, 500, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0));
+    	Image_Shader.pushQuad(OnScreen_Keyboard->Cursor_Right.quad, TextureAt(455, 0, 500, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0), 0);
     else
-    	Image_Shader.pushQuad(OnScreen_Keyboard->Cursor_Right.quad, TextureAt(405, 0, 450, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0));
+    	Image_Shader.pushQuad(OnScreen_Keyboard->Cursor_Right.quad, TextureAt(405, 0, 450, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0), 0);
 
-    Image_Shader.pushQuad(OnScreen_Keyboard->Cursor_Right.quad, TextureAt2(653, 48, 605, 48, 605, 0, 653, 0), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(-1.0f, -1.0f, -1.0f, 0.0f));
+    Image_Shader.pushQuad(OnScreen_Keyboard->Cursor_Right.quad, TextureAt2(653, 48, 605, 48, 605, 0, 653, 0), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(-1.0f, -1.0f, -1.0f, 0.0f), 0);
 
     if(((Mouse.justReleased) | (Mouse.isLongedPressed)) && Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), OnScreen_Keyboard->Cursor_Right.quad))
     {
@@ -444,11 +444,11 @@ void Engine_renderKeyboard()
 
     // Cursor Left
     if(Mouse.isPressed && Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), OnScreen_Keyboard->Cursor_Left.quad))
-    	Image_Shader.pushQuad(OnScreen_Keyboard->Cursor_Left.quad, TextureAt(455, 0, 500, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0));
+    	Image_Shader.pushQuad(OnScreen_Keyboard->Cursor_Left.quad, TextureAt(455, 0, 500, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0), 0);
     else
-    	Image_Shader.pushQuad(OnScreen_Keyboard->Cursor_Left.quad, TextureAt(405, 0, 450, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0));
+    	Image_Shader.pushQuad(OnScreen_Keyboard->Cursor_Left.quad, TextureAt(405, 0, 450, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0), 0);
 
-    Image_Shader.pushQuad(OnScreen_Keyboard->Cursor_Left.quad, TextureAt2(653, 0, 605, 0, 605, 48, 653, 48), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(-1.0f, -1.0f, -1.0f, 0.0f));
+    Image_Shader.pushQuad(OnScreen_Keyboard->Cursor_Left.quad, TextureAt2(653, 0, 605, 0, 605, 48, 653, 48), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(-1.0f, -1.0f, -1.0f, 0.0f), 0);
 
     if(((Mouse.justReleased) | (Mouse.isLongedPressed)) && Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), OnScreen_Keyboard->Cursor_Left.quad))
     {
@@ -459,11 +459,11 @@ void Engine_renderKeyboard()
 
     // Cursor Up
     if(Mouse.isPressed && Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), OnScreen_Keyboard->Cursor_Up.quad))
-    	Image_Shader.pushQuad(OnScreen_Keyboard->Cursor_Up.quad, TextureAt(455, 0, 500, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0));
+    	Image_Shader.pushQuad(OnScreen_Keyboard->Cursor_Up.quad, TextureAt(455, 0, 500, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0), 0);
     else
-    	Image_Shader.pushQuad(OnScreen_Keyboard->Cursor_Up.quad, TextureAt(405, 0, 450, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0));
+    	Image_Shader.pushQuad(OnScreen_Keyboard->Cursor_Up.quad, TextureAt(405, 0, 450, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0), 0);
 
-    Image_Shader.pushQuad(OnScreen_Keyboard->Cursor_Up.quad, TextureAt(605, 0, 653, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(-1.0f, -1.0f, -1.0f, 0.0f));
+    Image_Shader.pushQuad(OnScreen_Keyboard->Cursor_Up.quad, TextureAt(605, 0, 653, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(-1.0f, -1.0f, -1.0f, 0.0f), 0);
 
     if(((Mouse.justReleased) | (Mouse.isLongedPressed)) && Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), OnScreen_Keyboard->Cursor_Up.quad))
     {
@@ -474,11 +474,11 @@ void Engine_renderKeyboard()
 
     // Cursor Down
     if(Mouse.isPressed && Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), OnScreen_Keyboard->Cursor_Down.quad))
-    	Image_Shader.pushQuad(OnScreen_Keyboard->Cursor_Down.quad, TextureAt(455, 0, 500, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0));
+    	Image_Shader.pushQuad(OnScreen_Keyboard->Cursor_Down.quad, TextureAt(455, 0, 500, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0), 0);
     else
-    	Image_Shader.pushQuad(OnScreen_Keyboard->Cursor_Down.quad, TextureAt(405, 0, 450, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0));
+    	Image_Shader.pushQuad(OnScreen_Keyboard->Cursor_Down.quad, TextureAt(405, 0, 450, 47), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(0, 0, 0, 0), 0);
 
-    Image_Shader.pushQuad(OnScreen_Keyboard->Cursor_Down.quad, TextureAt(605, 47, 653, 0), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(-1.0f, -1.0f, -1.0f, 0.0f));
+    Image_Shader.pushQuad(OnScreen_Keyboard->Cursor_Down.quad, TextureAt(605, 47, 653, 0), OnScreen_Keyboard->Keyboard_Pack->Image, Vector4_Create(-1.0f, -1.0f, -1.0f, 0.0f), 0);
 
     if(((Mouse.justReleased) | (Mouse.isLongedPressed)) && Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), OnScreen_Keyboard->Cursor_Down.quad))
     {

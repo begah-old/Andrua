@@ -967,52 +967,52 @@ void Image_Editor_Header(struct Image_Editor *IE)
 	if (IE->Change_Confirm_Hover)
 		Image_Shader.pushQuad(IE->Change_Confirm,
 				Quad_Create(IE->Change_Confirm_Texture->x, IE->Change_Confirm_Texture->y2, IE->Change_Confirm_Texture->x, IE->Change_Confirm_Texture->y, IE->Change_Confirm_Texture->x2, IE->Change_Confirm_Texture->y, IE->Change_Confirm_Texture->x2, IE->Change_Confirm_Texture->y2), IE->Change_Confirm_Texture->Image,
-				IE->Hover_addColor);
+				IE->Hover_addColor, 0);
 	else
 		Image_Shader.pushQuad(IE->Change_Confirm,
 				Quad_Create(IE->Change_Confirm_Texture->x, IE->Change_Confirm_Texture->y2, IE->Change_Confirm_Texture->x, IE->Change_Confirm_Texture->y, IE->Change_Confirm_Texture->x2, IE->Change_Confirm_Texture->y, IE->Change_Confirm_Texture->x2, IE->Change_Confirm_Texture->y2), IE->Change_Confirm_Texture->Image,
-				Vector4_Create(0, 0, 0, 0));
+				Vector4_Create(0, 0, 0, 0), 0);
 
 	if (IE->Close_Hover)
 		Image_Shader.pushQuad(IE->Close, Quad_Create(IE->Close_Texture->x, IE->Close_Texture->y2, IE->Close_Texture->x, IE->Close_Texture->y, IE->Close_Texture->x2, IE->Close_Texture->y, IE->Close_Texture->x2, IE->Close_Texture->y2),
-				IE->Close_Texture->Image, IE->Hover_addColor);
+				IE->Close_Texture->Image, IE->Hover_addColor, 0);
 	else
 		Image_Shader.pushQuad(IE->Close, Quad_Create(IE->Close_Texture->x, IE->Close_Texture->y2, IE->Close_Texture->x, IE->Close_Texture->y, IE->Close_Texture->x2, IE->Close_Texture->y, IE->Close_Texture->x2, IE->Close_Texture->y2),
-				IE->Close_Texture->Image, Vector4_Create(0, 0, 0, 0));
+				IE->Close_Texture->Image, Vector4_Create(0, 0, 0, 0), 0);
 
 	if (IE->Delete_Hover)
 		Image_Shader.pushQuad(IE->Delete, Quad_Create(IE->Delete_Texture->x, IE->Delete_Texture->y2, IE->Delete_Texture->x, IE->Delete_Texture->y, IE->Delete_Texture->x2, IE->Delete_Texture->y, IE->Delete_Texture->x2, IE->Delete_Texture->y2),
-				IE->Delete_Texture->Image, IE->Hover_addColor);
+				IE->Delete_Texture->Image, IE->Hover_addColor, 0);
 	else
 		Image_Shader.pushQuad(IE->Delete, Quad_Create(IE->Delete_Texture->x, IE->Delete_Texture->y2, IE->Delete_Texture->x, IE->Delete_Texture->y, IE->Delete_Texture->x2, IE->Delete_Texture->y, IE->Delete_Texture->x2, IE->Delete_Texture->y2),
-				IE->Delete_Texture->Image, Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
+				IE->Delete_Texture->Image, Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f), 0);
 
 	if (IE->Button_SaveHover)
 		Image_Shader.pushQuad(IE->Button_Save,
 				Quad_Create(IE->Button_SaveTexture->x, IE->Button_SaveTexture->y2, IE->Button_SaveTexture->x, IE->Button_SaveTexture->y, IE->Button_SaveTexture->x2, IE->Button_SaveTexture->y, IE->Button_SaveTexture->x2, IE->Button_SaveTexture->y2), IE->Button_SaveTexture->Image,
-				IE->Hover_addColor);
+				IE->Hover_addColor, 0);
 	else
 		Image_Shader.pushQuad(IE->Button_Save,
 				Quad_Create(IE->Button_SaveTexture->x, IE->Button_SaveTexture->y2, IE->Button_SaveTexture->x, IE->Button_SaveTexture->y, IE->Button_SaveTexture->x2, IE->Button_SaveTexture->y, IE->Button_SaveTexture->x2, IE->Button_SaveTexture->y2), IE->Button_SaveTexture->Image,
-				Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
+				Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f), 0);
 
 	if (IE->Button_LoadHover)
 		Image_Shader.pushQuad(IE->Button_Load,
 				Quad_Create(IE->Button_LoadTexture->x, IE->Button_LoadTexture->y2, IE->Button_LoadTexture->x, IE->Button_LoadTexture->y, IE->Button_LoadTexture->x2, IE->Button_LoadTexture->y, IE->Button_LoadTexture->x2, IE->Button_LoadTexture->y2), IE->Button_LoadTexture->Image,
-				IE->Hover_addColor);
+				IE->Hover_addColor, 0);
 	else
 		Image_Shader.pushQuad(IE->Button_Load,
 				Quad_Create(IE->Button_LoadTexture->x, IE->Button_LoadTexture->y2, IE->Button_LoadTexture->x, IE->Button_LoadTexture->y, IE->Button_LoadTexture->x2, IE->Button_LoadTexture->y, IE->Button_LoadTexture->x2, IE->Button_LoadTexture->y2), IE->Button_LoadTexture->Image,
-				Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
+				Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f), 0);
 
 	if (IE->New_Hover)
 		Image_Shader.pushQuad(IE->New, Quad_Create(IE->New_Texture->x, IE->New_Texture->y2, IE->New_Texture->x, IE->New_Texture->y, IE->New_Texture->x2, IE->New_Texture->y, IE->New_Texture->x2, IE->New_Texture->y2),
-				IE->New_Texture->Image, IE->Hover_addColor);
+				IE->New_Texture->Image, IE->Hover_addColor, 0);
 	else
 		Image_Shader.pushQuad(IE->New, Quad_Create(IE->New_Texture->x, IE->New_Texture->y2, IE->New_Texture->x, IE->New_Texture->y, IE->New_Texture->x2, IE->New_Texture->y, IE->New_Texture->x2, IE->New_Texture->y2),
-				IE->New_Texture->Image, Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
+				IE->New_Texture->Image, Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f), 0);
 
-	Default_Shader.pushQuad(IE->Image_Tab, Vector4_Create(0.4f, 0.4f, 0.4f, 1.0f));
+	Default_Shader.pushQuad(IE->Image_Tab, Vector4_Create(0.4f, 0.4f, 0.4f, 1.0f), 0);
 
 	float FileTab_Width[IE->Image_Tab_List->size];
 	float AllWidth = 0;
@@ -1054,7 +1054,7 @@ void Image_Editor_Header(struct Image_Editor *IE)
 		_Bool Hover = Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), Quad);
 
 		if(IE->Image_Tab_Index == i || Hover)
-			Default_Shader.pushQuad(Quad, Vector4_Create(0.90f, 0.90f, 0.90f, 1.0f));
+			Default_Shader.pushQuad(Quad, Vector4_Create(0.90f, 0.90f, 0.90f, 1.0f), 0);
 
 		struct Image_Tab *Image = ((struct Image_Tab *)IE->Image_Tab_List->items) + i;
 		Font_HeightRenderRenderConstraint(DefaultFontManager, Image->Name_Edit, Quad.v1.x + FileTab_Width[i] / 10.0f, Quad.v1.y, Quad.v2.y - Quad.v1.y, 1.0f, COLOR_RED, Vector2_Create(Quad.v1.x, Quad.v3.x));
@@ -1073,7 +1073,7 @@ void Image_Editor_Header(struct Image_Editor *IE)
 	// Render Keyboard show
 	if(Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), IE->Keyboard_Show))
 	{
-		Default_Shader.pushQuad(IE->Keyboard_Show, Vector4_Create(0.50f, 0.50f, 0.50f, 1.0f));
+		Default_Shader.pushQuad(IE->Keyboard_Show, Vector4_Create(0.50f, 0.50f, 0.50f, 1.0f), 0);
 
 		if(Mouse.justReleased)
 		{
@@ -1081,7 +1081,7 @@ void Image_Editor_Header(struct Image_Editor *IE)
 			else Engine_requestCloseKeyboard();
 		}
 	} else
-		Default_Shader.pushQuad(IE->Keyboard_Show, Vector4_Create(1.0f, 1.0f, 1.0f, 1.0f));
+		Default_Shader.pushQuad(IE->Keyboard_Show, Vector4_Create(1.0f, 1.0f, 1.0f, 1.0f), 0);
 
 	Font_FixedRender(DefaultFontManager, "Keyboard", IE->Keyboard_Show.v1.x, IE->Keyboard_Show.v1.y, IE->Keyboard_Show.v2.y - IE->Keyboard_Show.v1.y, IE->Keyboard_Show.v3.x - IE->Keyboard_Show.v1.x, 1.0f, Vector4_Create(1.0f, 0.0f, 0.0f, 1.0f));
 
@@ -1547,9 +1547,9 @@ static void Image_Editor_RenderFrames(struct Image_Editor *IE, struct Image_Tab 
 		struct Quad Quad = Quad_Create(xx, yy, xx, yy + height, xx + width, yy + height, xx + width, yy);
 		_Bool Hover = Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), Quad);
 		if(Hover || IT->Frame_Selected == x)
-			Image_Shader.pushQuad(Quad, Quad_Create(0, 0, 0, 1, 1, 1, 1, 0), IT->Frames[x].Texture, IE->Hover_addColor);
+			Image_Shader.pushQuad(Quad, Quad_Create(0, 0, 0, 1, 1, 1, 1, 0), IT->Frames[x].Texture, IE->Hover_addColor, 0);
 		else
-			Image_Shader.pushQuad(Quad, Quad_Create(0, 0, 0, 1, 1, 1, 1, 0), IT->Frames[x].Texture, Vector4_Create(0,0,0,0));
+			Image_Shader.pushQuad(Quad, Quad_Create(0, 0, 0, 1, 1, 1, 1, 0), IT->Frames[x].Texture, Vector4_Create(0,0,0,0), 0);
 
 		if(Hover && Mouse.justPressed) {
 			IT->Frame_Selected = x;
@@ -1649,31 +1649,33 @@ static void Image_Editor_RenderFrames(struct Image_Editor *IE, struct Image_Tab 
 
 	if(Hover_Add)
 		Image_Shader.pushQuad(IE->Button_FrameConfirm, Quad_Create(IE->Add_Texture->x, IE->Add_Texture->y2, IE->Add_Texture->x, IE->Add_Texture->y, IE->Add_Texture->x2, IE->Add_Texture->y, IE->Add_Texture->x2, // This texture is very dark by default
-                                                             IE->Add_Texture->y2), IE->Add_Texture->Image, Vector4_Create(0.5f + IE->Hover_addColor.x, 0.5f + IE->Hover_addColor.y, 0.5f + IE->Hover_addColor.z, 0));
+                                                             IE->Add_Texture->y2), IE->Add_Texture->Image, Vector4_Create(0.5f + IE->Hover_addColor.x, 0.5f + IE->Hover_addColor.y, 0.5f + IE->Hover_addColor.z, 0), 0);
 	else
 		Image_Shader.pushQuad(IE->Button_FrameConfirm, Quad_Create(IE->Add_Texture->x, IE->Add_Texture->y2, IE->Add_Texture->x, IE->Add_Texture->y, IE->Add_Texture->x2, IE->Add_Texture->y, IE->Add_Texture->x2,
-                                                             IE->Add_Texture->y2), IE->Add_Texture->Image, Vector4_Create(0.5f, 0.5f, 0.5f, 0));
+                                                             IE->Add_Texture->y2), IE->Add_Texture->Image, Vector4_Create(0.5f, 0.5f, 0.5f, 0), 0);
 
 	if(Hover_Delete)
 		Image_Shader.pushQuad(IE->Button_FrameCancel, Quad_Create(IE->Delete_Texture->x, IE->Delete_Texture->y2, IE->Delete_Texture->x, IE->Delete_Texture->y, IE->Delete_Texture->x2, IE->Delete_Texture->y, IE->Delete_Texture->x2,
-                                                            IE->Delete_Texture->y2), IE->Delete_Texture->Image, IE->Hover_addColor);
+                                                            IE->Delete_Texture->y2), IE->Delete_Texture->Image, IE->Hover_addColor, 0);
 	else
 		Image_Shader.pushQuad(IE->Button_FrameCancel, Quad_Create(IE->Delete_Texture->x, IE->Delete_Texture->y2, IE->Delete_Texture->x, IE->Delete_Texture->y, IE->Delete_Texture->x2, IE->Delete_Texture->y, IE->Delete_Texture->x2,
-                                                            IE->Delete_Texture->y2), IE->Delete_Texture->Image, Vector4_Create(0.0f, 0.0f, 0.0f, 0));
+                                                            IE->Delete_Texture->y2), IE->Delete_Texture->Image, Vector4_Create(0.0f, 0.0f, 0.0f, 0), 0);
 
     if(Hover_Left)
         Image_Shader.pushQuad(IE->Button_FrameMoveLeft, Quad_Create(IE->Arrow_Texture->x2, IE->Arrow_Texture->y, IE->Arrow_Texture->x, IE->Arrow_Texture->y, // This texture is very dark by default
-                                                             IE->Arrow_Texture->x, IE->Arrow_Texture->y2, IE->Arrow_Texture->x2, IE->Arrow_Texture->y2), IE->Arrow_Texture->Image, Vector4_Create(0.5f + IE->Hover_addColor.x, 0.5f + IE->Hover_addColor.y, 0.5f + IE->Hover_addColor.z, 0));
+                                                             IE->Arrow_Texture->x, IE->Arrow_Texture->y2, IE->Arrow_Texture->x2, IE->Arrow_Texture->y2), IE->Arrow_Texture->Image,
+                              Vector4_Create(0.5f + IE->Hover_addColor.x, 0.5f + IE->Hover_addColor.y, 0.5f + IE->Hover_addColor.z, 0), 0);
 	else
 		Image_Shader.pushQuad(IE->Button_FrameMoveLeft, Quad_Create(IE->Arrow_Texture->x2, IE->Arrow_Texture->y, IE->Arrow_Texture->x, IE->Arrow_Texture->y,
-                                                              IE->Arrow_Texture->x, IE->Arrow_Texture->y2, IE->Arrow_Texture->x2, IE->Arrow_Texture->y2), IE->Arrow_Texture->Image, Vector4_Create(-0.5f, 0.0f, -0.5f, 0.0f));
+                                                              IE->Arrow_Texture->x, IE->Arrow_Texture->y2, IE->Arrow_Texture->x2, IE->Arrow_Texture->y2), IE->Arrow_Texture->Image,
+                            Vector4_Create(-0.5f, 0.0f, -0.5f, 0.0f), 0);
 
     if(Hover_Right)
         Image_Shader.pushQuad(IE->Button_FrameMoveRight, Quad_Create(IE->Arrow_Texture->x2, IE->Arrow_Texture->y2, IE->Arrow_Texture->x, IE->Arrow_Texture->y2, IE->Arrow_Texture->x, IE->Arrow_Texture->y, // This texture is very dark by default
-                                                             IE->Arrow_Texture->x2, IE->Arrow_Texture->y), IE->Arrow_Texture->Image, Vector4_Create(0.5f + IE->Hover_addColor.x, 0.5f + IE->Hover_addColor.y, 0.5f + IE->Hover_addColor.z, 0));
+                                                             IE->Arrow_Texture->x2, IE->Arrow_Texture->y), IE->Arrow_Texture->Image, Vector4_Create(0.5f + IE->Hover_addColor.x, 0.5f + IE->Hover_addColor.y, 0.5f + IE->Hover_addColor.z, 0), 0);
 	else
 		Image_Shader.pushQuad(IE->Button_FrameMoveRight, Quad_Create(IE->Arrow_Texture->x2, IE->Arrow_Texture->y2, IE->Arrow_Texture->x, IE->Arrow_Texture->y2, IE->Arrow_Texture->x, IE->Arrow_Texture->y,
-                                                             IE->Arrow_Texture->x2, IE->Arrow_Texture->y), IE->Arrow_Texture->Image, Vector4_Create(-0.5f, 0.0f, -0.5f, 0.0f));
+                                                             IE->Arrow_Texture->x2, IE->Arrow_Texture->y), IE->Arrow_Texture->Image, Vector4_Create(-0.5f, 0.0f, -0.5f, 0.0f), 0);
 }
 
 void Image_Editor_Render(struct Image_Editor *IE)
@@ -1742,7 +1744,7 @@ void Image_Editor_Render(struct Image_Editor *IE)
 							+ IE->Image_View.z / IF->Image_Edit->Width,
 							IE->Image_View.y / IF->Image_Edit->Height
 						+ IE->Image_View.w / IF->Image_Edit->Height), IE->Image_Texture,
-			Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
+			Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f), 0);
 
 	// Drawing Pencil and PickColor Buttons
 	IE->Button_PencilHover = Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), IE->Button_Pencil);
@@ -1800,58 +1802,58 @@ void Image_Editor_Render(struct Image_Editor *IE)
 	if(Frame_Confirm)
 		Image_Shader.pushQuad(IE->Button_FrameConfirm,
 				Quad_Create(IE->Change_Confirm_Texture->x, IE->Change_Confirm_Texture->y2, IE->Change_Confirm_Texture->x, IE->Change_Confirm_Texture->y, IE->Change_Confirm_Texture->x2, IE->Change_Confirm_Texture->y, IE->Change_Confirm_Texture->x2, IE->Change_Confirm_Texture->y2), IE->Change_Confirm_Texture->Image,
-				Vector4_Create(-0.20f, -0.20f, -0.20f, 0.0f));
+				Vector4_Create(-0.20f, -0.20f, -0.20f, 0.0f), 0);
 	else
 		Image_Shader.pushQuad(IE->Button_FrameConfirm,
 				Quad_Create(IE->Change_Confirm_Texture->x, IE->Change_Confirm_Texture->y2, IE->Change_Confirm_Texture->x, IE->Change_Confirm_Texture->y, IE->Change_Confirm_Texture->x2, IE->Change_Confirm_Texture->y, IE->Change_Confirm_Texture->x2, IE->Change_Confirm_Texture->y2), IE->Change_Confirm_Texture->Image,
-				Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
+				Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f), 0);
 
 	if(Frame_Close)
 		Image_Shader.pushQuad(IE->Button_FrameCancel,
 				Quad_Create(IE->Close_Texture->x, IE->Close_Texture->y2, IE->Close_Texture->x, IE->Close_Texture->y, IE->Close_Texture->x2, IE->Close_Texture->y, IE->Close_Texture->x2, IE->Close_Texture->y2), IE->Close_Texture->Image,
-				Vector4_Create(-0.20f, -0.20f, -0.20f, 0.0f));
+				Vector4_Create(-0.20f, -0.20f, -0.20f, 0.0f), 0);
 	else
 		Image_Shader.pushQuad(IE->Button_FrameCancel,
 				Quad_Create(IE->Close_Texture->x, IE->Close_Texture->y2, IE->Close_Texture->x, IE->Close_Texture->y, IE->Close_Texture->x2, IE->Close_Texture->y, IE->Close_Texture->x2, IE->Close_Texture->y2), IE->Close_Texture->Image,
-				Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
+				Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f), 0);
 
 	if (IE->Button_PencilHover || IE->Button_PencilOn)
 		Image_Shader.pushQuad(IE->Button_Pencil,
 				Quad_Create(IE->Button_PencilTexture->x, IE->Button_PencilTexture->y2, IE->Button_PencilTexture->x, IE->Button_PencilTexture->y, IE->Button_PencilTexture->x2, IE->Button_PencilTexture->y, IE->Button_PencilTexture->x2, IE->Button_PencilTexture->y2), IE->Button_PencilTexture->Image,
-				Vector4_Create(-0.20f, -0.20f, -0.20f, 0.0f));
+				Vector4_Create(-0.20f, -0.20f, -0.20f, 0.0f), 0);
 	else
 		Image_Shader.pushQuad(IE->Button_Pencil,
 				Quad_Create(IE->Button_PencilTexture->x, IE->Button_PencilTexture->y2, IE->Button_PencilTexture->x, IE->Button_PencilTexture->y, IE->Button_PencilTexture->x2, IE->Button_PencilTexture->y, IE->Button_PencilTexture->x2, IE->Button_PencilTexture->y2), IE->Button_PencilTexture->Image,
-				Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
+				Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f), 0);
 
 	if (IE->Button_PickColorHover || IE->Button_PickColorOn)
 		Image_Shader.pushQuad(IE->Button_PickColor,
 				Quad_Create(IE->Button_PickColorTexture->x, IE->Button_PickColorTexture->y2, IE->Button_PickColorTexture->x, IE->Button_PickColorTexture->y, IE->Button_PickColorTexture->x2, IE->Button_PickColorTexture->y, IE->Button_PickColorTexture->x2, IE->Button_PickColorTexture->y2),
 				IE->Button_PickColorTexture->Image,
-				Vector4_Create(-0.20f, -0.20f, -0.20f, 0.0f));
+				Vector4_Create(-0.20f, -0.20f, -0.20f, 0.0f), 0);
 	else
 		Image_Shader.pushQuad(IE->Button_PickColor,
 				Quad_Create(IE->Button_PickColorTexture->x, IE->Button_PickColorTexture->y2, IE->Button_PickColorTexture->x, IE->Button_PickColorTexture->y, IE->Button_PickColorTexture->x2, IE->Button_PickColorTexture->y, IE->Button_PickColorTexture->x2, IE->Button_PickColorTexture->y2),
 				IE->Button_PickColorTexture->Image,
-				Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
+				Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f), 0);
 
 	if (IE->Button_FillHover || IE->Button_FillOn)
 		Image_Shader.pushQuad(IE->Button_Fill,
 				Quad_Create(IE->Button_FillTexture->x, IE->Button_FillTexture->y2, IE->Button_FillTexture->x, IE->Button_FillTexture->y, IE->Button_FillTexture->x2, IE->Button_FillTexture->y, IE->Button_FillTexture->x2, IE->Button_FillTexture->y2), IE->Button_FillTexture->Image,
-				Vector4_Create(-0.20f, -0.20f, -0.20f, 0.0f));
+				Vector4_Create(-0.20f, -0.20f, -0.20f, 0.0f), 0);
 	else
 		Image_Shader.pushQuad(IE->Button_Fill,
 				Quad_Create(IE->Button_FillTexture->x, IE->Button_FillTexture->y2, IE->Button_FillTexture->x, IE->Button_FillTexture->y, IE->Button_FillTexture->x2, IE->Button_FillTexture->y, IE->Button_FillTexture->x2, IE->Button_FillTexture->y2), IE->Button_FillTexture->Image,
-				Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
+				Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f), 0);
 
 	if (IE->Button_PanViewHover || IE->Button_PanViewOn)
 		Image_Shader.pushQuad(IE->Button_PanView,
 				Quad_Create(IE->Button_PanViewTexture->x, IE->Button_PanViewTexture->y2, IE->Button_PanViewTexture->x, IE->Button_PanViewTexture->y, IE->Button_PanViewTexture->x2, IE->Button_PanViewTexture->y, IE->Button_PanViewTexture->x2, IE->Button_PanViewTexture->y2), IE->Button_PanViewTexture->Image,
-				Vector4_Create(-0.20f, -0.20f, -0.20f, 0.0f));
+				Vector4_Create(-0.20f, -0.20f, -0.20f, 0.0f), 0);
 	else
 		Image_Shader.pushQuad(IE->Button_PanView,
 				Quad_Create(IE->Button_PanViewTexture->x, IE->Button_PanViewTexture->y2, IE->Button_PanViewTexture->x, IE->Button_PanViewTexture->y, IE->Button_PanViewTexture->x2, IE->Button_PanViewTexture->y, IE->Button_PanViewTexture->x2, IE->Button_PanViewTexture->y2), IE->Button_PanViewTexture->Image,
-				Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f));
+				Vector4_Create(0.0f, 0.0f, 0.0f, 0.0f), 0);
 
 	int ColorR, ColorB, ColorG, ColorA;
 	ColorR = String_toInt(IE->Color_Red->Value);

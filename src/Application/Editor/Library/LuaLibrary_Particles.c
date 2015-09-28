@@ -33,8 +33,8 @@ static int Lua_particleSnew(lua_State *L)
         Lua_ParticleSystem = Particle_System_New();
     }
 
-    int numParticle = lua_tonumber(Lua_State, -3);
-    int x = lua_tonumber(Lua_State, -2), y = lua_tonumber(Lua_State, -1);
+    int numParticle = lua_tonumber(Lua_State, -1);
+    int x = lua_tonumber(Lua_State, -3), y = lua_tonumber(Lua_State, -2);
 
     struct Lua_ParcticleS PP = { Particle_Emitter_New(Lua_ParticleSystem, x, y, numParticle), false};
     vector_push_back(Lua_ParcticleS_List, &PP);
@@ -424,6 +424,55 @@ static int Lua_particleGravityMaxDistance(lua_State *L)
     return 0;
 }
 
+static int Lua_particleDepth(lua_State *L)
+{
+    if(!Lua_ParcticleS_List)
+        return 0;
+
+    if(!lua_isnumber(Lua_State, -2))
+    {
+        fprintf(LuaLibrary_Log, "particle.setDepth needs ID as argument");
+        Lua_requestClose = true;
+        return 0;
+    } else if(!lua_isnumber(Lua_State, -1))
+    {
+        fprintf(LuaLibrary_Log, "particle.setDepth needs number as argument 2");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    int ID = lua_tonumber(Lua_State, -2);
+
+    if(ID < 0 || ID >= Lua_ParticleSystem->ID_Count)
+    {
+        fprintf(LuaLibrary_Log, "particle.setDepth : argument 1 is an invalid ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    int IDX = -1;
+    struct Particle_Emitter *PS = Lua_ParticleSystem->Emitters;
+    for(int i = 0; i < Lua_ParticleSystem->Emitters_Count; i++)
+    {
+        if(PS[i].ID == ID)
+        {
+            IDX = i;
+            break;
+        }
+    }
+
+    if(IDX == -1)
+    {
+        fprintf(LuaLibrary_Log, "particle.setDepth : cannot find particle emitter with that id");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    Lua_ParticleSystem->Emitters[IDX].z = lua_tonumber(Lua_State, -1);
+
+    return 0;
+}
+
 static int Lua_particleSlife(lua_State *L)
 {
     if(!Lua_ParcticleS_List)
@@ -595,17 +644,17 @@ static int Lua_particleSposition(lua_State *L)
 
     if(!lua_isnumber(Lua_State, -3))
     {
-        fprintf(LuaLibrary_Log, "particle.setPosition needs ID as argument 1");
+        fprintf(LuaLibrary_Log, "particle.setSpawnPosition needs ID as argument 1");
         Lua_requestClose = true;
         return 0;
     } else if(!lua_isnumber(Lua_State, -2))
     {
-        fprintf(LuaLibrary_Log, "particle.setPosition needs number as argument 2");
+        fprintf(LuaLibrary_Log, "particle.setSpawnPosition needs number as argument 2");
         Lua_requestClose = true;
         return 0;
     } else if(!lua_isnumber(Lua_State, -1))
     {
-        fprintf(LuaLibrary_Log, "particle.setPosition needs number as argument 3");
+        fprintf(LuaLibrary_Log, "particle.setSpawnPosition needs number as argument 3");
         Lua_requestClose = true;
         return 0;
     }
@@ -614,7 +663,7 @@ static int Lua_particleSposition(lua_State *L)
 
     if(ID < 0 || ID >= Lua_ParticleSystem->ID_Count)
     {
-        fprintf(LuaLibrary_Log, "particle.setPosition : argument 1 is an invalid ID");
+        fprintf(LuaLibrary_Log, "particle.setSpawnPosition : argument 1 is an invalid ID");
         Lua_requestClose = true;
         return 0;
     }
@@ -632,13 +681,68 @@ static int Lua_particleSposition(lua_State *L)
 
     if(IDX == -1)
     {
-        fprintf(LuaLibrary_Log, "particle.setPosition : cannot find particle emitter with that id");
+        fprintf(LuaLibrary_Log, "particle.setSpawnPosition : cannot find particle emitter with that id");
         Lua_requestClose = true;
         return 0;
     }
 
-    PS[IDX].x = lua_tonumber(Lua_State, -2);
-    PS[IDX].y = lua_tonumber(Lua_State, -1);
+    PS[IDX].Spawn_Rectangle.x = lua_tonumber(Lua_State, -2);
+    PS[IDX].Spawn_Rectangle.y = lua_tonumber(Lua_State, -1);
+
+    return 0;
+}
+
+static int Lua_particleSsize(lua_State *L)
+{
+    if(!Lua_ParcticleS_List)
+        return 0;
+
+    if(!lua_isnumber(Lua_State, -3))
+    {
+        fprintf(LuaLibrary_Log, "particle.setSpawnSize needs ID as argument 1");
+        Lua_requestClose = true;
+        return 0;
+    } else if(!lua_isnumber(Lua_State, -2))
+    {
+        fprintf(LuaLibrary_Log, "particle.setSpawnSize needs number as argument 2");
+        Lua_requestClose = true;
+        return 0;
+    } else if(!lua_isnumber(Lua_State, -1))
+    {
+        fprintf(LuaLibrary_Log, "particle.setSpawnSize needs number as argument 3");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    int ID = lua_tonumber(Lua_State, -3);
+
+    if(ID < 0 || ID >= Lua_ParticleSystem->ID_Count)
+    {
+        fprintf(LuaLibrary_Log, "particle.setSpawnSize : argument 1 is an invalid ID");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    int IDX = -1;
+    struct Particle_Emitter *PS = Lua_ParticleSystem->Emitters;
+    for(int i = 0; i < Lua_ParticleSystem->Emitters_Count; i++)
+    {
+        if(PS[i].ID == ID)
+        {
+            IDX = i;
+            break;
+        }
+    }
+
+    if(IDX == -1)
+    {
+        fprintf(LuaLibrary_Log, "particle.setSpawnSize : cannot find particle emitter with that id");
+        Lua_requestClose = true;
+        return 0;
+    }
+
+    PS[IDX].Spawn_Rectangle.z = lua_tonumber(Lua_State, -2);
+    PS[IDX].Spawn_Rectangle.w = lua_tonumber(Lua_State, -1);
 
     return 0;
 }
@@ -816,7 +920,9 @@ void LuaLibrary_Particles_Load()
         {"maxParticles", Lua_particleSparticles},
         {"setColor", Lua_particleScolor},
         {"getCount", Lua_particleGetCount},
-        {"setPosition", Lua_particleSposition},
+        {"setSpawnPosition", Lua_particleSposition},
+        {"setSpawnSize", Lua_particleSsize},
+        {"setDepth", Lua_particleDepth},
         {"setSpeed", Lua_particleSspeed},
         {"deleteOnFinish", Lua_particleSetDeleteOnFinish},
         {"toggleEmitting", Lua_particleToggleEmitting},
@@ -845,10 +951,10 @@ void LuaLibrary_Particles_Render()
         int j = 0;
         while(j < Lua_ParcticleS_List->size)
         {
-            //printf("%i:%s %s\n",j, PS[j].DeleteOnFinish ? "true":"false", PS[j].Emitter->Finished ? "true":"false");
             struct Particle_Emitter *PA = Particle_getEmitter(Lua_ParticleSystem, PS[j].ID);
             if(PS[j].DeleteOnFinish && PA->Finished)
             {
+                log_info("Deleting particle system");
                 int IDX2 = -1;
                 for(int i = 0; i < Lua_ParticleSystem->Emitters_Count; i++)
                 {

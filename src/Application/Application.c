@@ -234,7 +234,7 @@ void Application_Render()
 		// Render Keyboard show
 		if(Point_inQuad(Vector2_Create(Mouse.x, Mouse.y), Keyboard_Show))
 		{
-			Default_Shader.pushQuad(Keyboard_Show, Vector4_Create(0.50f, 0.50f, 0.50f, 1.0f));
+			Default_Shader.pushQuad(Keyboard_Show, Vector4_Create(0.50f, 0.50f, 0.50f, 1.0f), 0);
 
 			if(Mouse.justReleased)
 			{
@@ -242,9 +242,11 @@ void Application_Render()
 				else Engine_requestCloseKeyboard();
 			}
 		} else
-			Default_Shader.pushQuad(Keyboard_Show, Vector4_Create(1.0f, 1.0f, 1.0f, 1.0f));
+			Default_Shader.pushQuad(Keyboard_Show, Vector4_Create(1.0f, 1.0f, 1.0f, 1.0f), 0);
 
 		Font_FixedRender(DefaultFontManager, "Keyboard", Keyboard_Show.v1.x, Keyboard_Show.v1.y, Keyboard_Show.v2.y - Keyboard_Show.v1.y, Keyboard_Show.v3.x - Keyboard_Show.v1.x, 1.0f, Vector4_Create(1.0f, 0.0f, 0.0f, 1.0f));
+
+        Default_Shader.pushQuad(Quad_Create(0, 0, 0, 480, 640, 480, 640, 0), COLOR_BLUE, 1);
 	}
 	else if(STATE == STATE_EDITOR)
 	{ // Render Code Editor

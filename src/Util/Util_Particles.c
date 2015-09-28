@@ -31,7 +31,8 @@ static void Particle_Set(struct Particle_Emitter *Emitter, int IDX)
         return;
     }
 
-    Emitter->Particles[IDX].Location = Vector2_Create(Emitter->x, Emitter->y);
+    Emitter->Particles[IDX].Location = Vector2_Create((rand()/ (float)RAND_MAX) * Emitter->Spawn_Rectangle.z + Emitter->Spawn_Rectangle.x,
+                                                      (rand()/ (float)RAND_MAX) * Emitter->Spawn_Rectangle.w + Emitter->Spawn_Rectangle.y);
 
     Emitter->Particles[IDX].width = 10;
     Emitter->Particles[IDX].height = 10;
@@ -56,8 +57,7 @@ int Particle_Emitter_New(struct Particle_System *System, float oX, float oY, lon
 {
     System->Emitters = realloc(System->Emitters, sizeof(struct Particle_Emitter) * (System->Emitters_Count + 1));
 
-    System->Emitters[System->Emitters_Count].x = oX;
-    System->Emitters[System->Emitters_Count].y = oY;
+    System->Emitters[System->Emitters_Count].z = 0;
 
     System->Emitters[System->Emitters_Count].Particle_Max = Max_Particle;
 
@@ -78,6 +78,8 @@ int Particle_Emitter_New(struct Particle_System *System, float oX, float oY, lon
     System->Emitters[System->Emitters_Count].Max_Speed = 2.0f;
 
     System->Emitters[System->Emitters_Count].Gravity_MaxDistance = 1000.0f;
+
+    System->Emitters[System->Emitters_Count].Spawn_Rectangle = Vector4_Create(oX, oY, 0, 0);
 
     System->Emitters[System->Emitters_Count].Continue_Emitting = true;
     System->Emitters[System->Emitters_Count].Finished = false;
@@ -160,8 +162,9 @@ static void Particle_Emitter_Render(struct Particle_System *System, struct Parti
 
         float ratio = Emitter->Particles[i].life / (float)Emitter->Max_Life, ratio2 = 1 - ratio;
 
-        Image_Shader.pushQuad(Quad_Create(x,y,x,y2,x2,y2,x2,y), Quad_Create(System->Circle->x, System->Circle->y2, System->Circle->x, System->Circle->y, System->Circle->x2, System->Circle->y, System->Circle->x2, System->Circle->y2), System->Circle->Image, Vector4_Create(ratio * Emitter->Color_Start.x + ratio2 * Emitter->Color_End.x, ratio * Emitter->Color_Start.y + ratio2 * Emitter->Color_End.y,
-                                                                                 ratio * Emitter->Color_Start.z + ratio2 * Emitter->Color_End.z, 0.0f));
+        Image_Shader.pushQuad(Quad_Create(x,y,x,y2,x2,y2,x2,y), Quad_Create(System->Circle->x, System->Circle->y2, System->Circle->x, System->Circle->y, System->Circle->x2, System->Circle->y, System->Circle->x2, System->Circle->y2),
+                              System->Circle->Image, Vector4_Create(ratio * Emitter->Color_Start.x + ratio2 * Emitter->Color_End.x, ratio * Emitter->Color_Start.y + ratio2 * Emitter->Color_End.y,
+                                                                                 ratio * Emitter->Color_Start.z + ratio2 * Emitter->Color_End.z,(ratio * Emitter->Color_Start.w + ratio2 * Emitter->Color_End.w) - 1.0f), Emitter->z);
     }
     Emitter->Finished = Finished;
 }

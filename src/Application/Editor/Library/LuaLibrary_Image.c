@@ -115,7 +115,8 @@ static int Lua_drawImage(lua_State *L)
 		height -= delta;
 	}
 
-	Image_Shader.pushQuad(Quad_Create(x, y, x, y + height, x + width, y + height, x + width, y), Quad_Create(Texture->x, Texture->y, Texture->x, Texture->y2, Texture->x2, Texture->y2, Texture->x2, Texture->y), Texture->Image, Vector4_Create(0.0, 0.0, 0.0, 0.0));
+	Image_Shader.pushQuad(Quad_Create(x, y, x, y + height, x + width, y + height, x + width, y), Quad_Create(Texture->x, Texture->y, Texture->x, Texture->y2, Texture->x2, Texture->y2, Texture->x2, Texture->y), Texture->Image,
+                       Vector4_Create(0.0, 0.0, 0.0, 0.0), 0);
 
 	return 0;
 }

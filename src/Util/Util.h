@@ -210,6 +210,11 @@ struct Vector6f
 	float x, y, z, w, h, o;
 };
 
+struct Vector7f
+{
+	float x, y, z, r, g, b, a;
+};
+
 struct Vertex
 {
 	struct Vector3f m_pos;
@@ -250,6 +255,8 @@ struct Animation
 	struct Quad Calculated_Quad;
 
 	float x, y;
+	short z;
+
 	float width, height;
 	double Angle;
 };
@@ -272,11 +279,14 @@ enum PARTICLE_GRAVITY_TYPE {
 
 struct Particle_Emitter
 {
-    float x, y;
+    short z;
+
     int ID;
 
     struct Particle *Particles;
     long int Particle_Max, Particle_Count;
+
+    struct Vector4f Spawn_Rectangle;
 
     struct Vector4f Color_Start;
     struct Vector4f Color_End;
@@ -673,8 +683,10 @@ _Bool Point_inQuad(struct Vector2f point, struct Quad quad); // Call's Point_inT
 struct Vector2f Vector2_Create(float x, float y);
 struct Vector3f Vector3_Create(float x, float y, float z);
 struct Vector4f Vector4_Create(float x, float y, float z, float w);
+struct Vector5f Vector5_Create(float x, float y, float z, float w, float h);
 struct Vector6f Vector6_Create(struct Vector2f vec2, struct Vector4f vec4);
 struct Vector6f Vector6_Createf(float x, float y, float z, float w, float h, float o);
+struct Vector7f Vector7_Createf(float x, float y, float z, float r, float g, float b, float a);
 struct Vertex Vertex_Create(struct Vector3f vec3, struct Vector2f vec2);
 struct Quad Quad_Create(float x, float y, float x2, float y2, float x3,
 						float y3, float x4, float y4);

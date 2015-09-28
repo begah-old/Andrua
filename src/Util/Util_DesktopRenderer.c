@@ -10,14 +10,14 @@
 
 #define VERTICES_MAX 1080
 #define FONT_VERTICES_MAX 6000
-#define TEXTURE_MAX 15
+#define TEXTURE_MAX 30
 
 // Default Shader (color and blending)
 GLuint DS_Shader, DS_Shader_VBO;
 GLint DS_Shader_uni;
 int DS_Vertices_Count = 0;
 
-struct Vector6f DS_Vertices[VERTICES_MAX];
+struct Vector7f DS_Vertices[VERTICES_MAX];
 
 static void DS_Flush()
 {
@@ -31,12 +31,11 @@ static void DS_Flush()
 
 		glBindBuffer(GL_ARRAY_BUFFER, DS_Shader_VBO);
 		glBufferSubData(GL_ARRAY_BUFFER, 0,
-				sizeof(struct Vector6f) * DS_Vertices_Count, DS_Vertices);
+				sizeof(struct Vector7f) * DS_Vertices_Count, DS_Vertices);
 
 		glBindBuffer(GL_ARRAY_BUFFER, DS_Shader_VBO);
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(struct Vector6f), 0);
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(struct Vector6f),
-				(const GLvoid*) 8);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(struct Vector7f), 0);
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(struct Vector7f), (GLvoid *)(sizeof(float) * 3));
 		glDrawArrays(GL_TRIANGLES, 0, DS_Vertices_Count);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
@@ -52,28 +51,29 @@ static void DS_Flush()
 }
 
 static void DS_Push_Vertice(float x, float y, float r, float g, float b,
-		float a)
+		float a, int z)
 {
 	if (DS_Vertices_Count == VERTICES_MAX)
 		DS_Flush();
 	DS_Vertices[DS_Vertices_Count].x = x;
 	DS_Vertices[DS_Vertices_Count].y = y;
-	DS_Vertices[DS_Vertices_Count].z = r;
-	DS_Vertices[DS_Vertices_Count].w = g;
-	DS_Vertices[DS_Vertices_Count].h = b;
-	DS_Vertices[DS_Vertices_Count].o = a;
+	DS_Vertices[DS_Vertices_Count].z = z;
+	DS_Vertices[DS_Vertices_Count].r = r;
+	DS_Vertices[DS_Vertices_Count].g = g;
+	DS_Vertices[DS_Vertices_Count].b = b;
+	DS_Vertices[DS_Vertices_Count].a = a;
 	DS_Vertices_Count++;
 }
 
-static void DS_Push_Quad(struct Quad Quad, struct Vector4f Color)
+static void DS_Push_Quad(struct Quad Quad, struct Vector4f Color, int z)
 {
-	DS_Push_Vertice(Quad.v1.x, Quad.v1.y, Color.x, Color.y, Color.z, Color.w);
-	DS_Push_Vertice(Quad.v3.x, Quad.v3.y, Color.x, Color.y, Color.z, Color.w);
-	DS_Push_Vertice(Quad.v2.x, Quad.v2.y, Color.x, Color.y, Color.z, Color.w);
+	DS_Push_Vertice(Quad.v1.x, Quad.v1.y, Color.x, Color.y, Color.z, Color.w, z);
+	DS_Push_Vertice(Quad.v3.x, Quad.v3.y, Color.x, Color.y, Color.z, Color.w, z);
+	DS_Push_Vertice(Quad.v2.x, Quad.v2.y, Color.x, Color.y, Color.z, Color.w, z);
 
-	DS_Push_Vertice(Quad.v1.x, Quad.v1.y, Color.x, Color.y, Color.z, Color.w);
-	DS_Push_Vertice(Quad.v4.x, Quad.v4.y, Color.x, Color.y, Color.z, Color.w);
-	DS_Push_Vertice(Quad.v3.x, Quad.v3.y, Color.x, Color.y, Color.z, Color.w);
+	DS_Push_Vertice(Quad.v1.x, Quad.v1.y, Color.x, Color.y, Color.z, Color.w, z);
+	DS_Push_Vertice(Quad.v4.x, Quad.v4.y, Color.x, Color.y, Color.z, Color.w, z);
+	DS_Push_Vertice(Quad.v3.x, Quad.v3.y, Color.x, Color.y, Color.z, Color.w, z);
 }
 
 // Image Shader (texture and blending)
@@ -81,11 +81,11 @@ GLuint IS_Shader, IS_Shader_VBO, IS_Shader_IBO;
 GLint IS_Shader_uni, IS_Shader_uni2;
 
 int IS_Texture_Count = 0;
-struct Vector4f IS_Vector[4];
+struct Vector5f IS_Vector[4];
 
 GLuint IS_Texture[TEXTURE_MAX];
-struct Vector4f IS_Vertices[TEXTURE_MAX][VERTICES_MAX / TEXTURE_MAX];
-struct Vector4f IS_Blending[TEXTURE_MAX][VERTICES_MAX / TEXTURE_MAX];
+struct Vector5f IS_Vertices[TEXTURE_MAX][VERTICES_MAX];
+struct Vector4f IS_Blending[TEXTURE_MAX][VERTICES_MAX];
 int IS_Vertices_Count[TEXTURE_MAX];
 
 static void IS_Flush()
@@ -98,9 +98,9 @@ static void IS_Flush()
 
 	glBindBuffer(GL_ARRAY_BUFFER, IS_Shader_VBO);
 
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(struct Vector4f), 0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(struct Vector4f),
-			(const GLvoid*) 8);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(struct Vector5f), 0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(struct Vector5f),
+			(const GLvoid*) 12);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IS_Shader_IBO);
 
@@ -115,6 +115,7 @@ static void IS_Flush()
 			IS_Vector[1] = IS_Vertices[TextureID][i + 1];
 			IS_Vector[2] = IS_Vertices[TextureID][i + 2];
 			IS_Vector[3] = IS_Vertices[TextureID][i + 3];
+
 			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(IS_Vector), IS_Vector);
 
 			if (Blend.x != IS_Blending[TextureID][i].x
@@ -144,13 +145,13 @@ static void IS_Flush()
 }
 
 static void IS_Push_Vertice(float x, float y, float textx, float texty,
-		GLuint Texture, struct Vector4f Blending)
+		GLuint Texture, struct Vector4f Blending, int z)
 {
 	int ID = -1;
 	for (int i = 0; i < IS_Texture_Count; i++)
 	{
 
-		if (IS_Texture[i] == Texture && IS_Vertices_Count[i] < VERTICES_MAX / TEXTURE_MAX)
+		if (IS_Texture[i] == Texture && IS_Vertices_Count[i] < VERTICES_MAX)
 		{
 			ID = i;
 			break;
@@ -159,33 +160,35 @@ static void IS_Push_Vertice(float x, float y, float textx, float texty,
 	if (ID == -1)
 	{
 		if (IS_Texture_Count == TEXTURE_MAX)
+        {
 			IS_Flush();
+        }
 		IS_Texture[IS_Texture_Count] = Texture;
 		ID = IS_Texture_Count;
 		IS_Vertices_Count[IS_Texture_Count] = 0;
 		IS_Texture_Count++;
 	}
-	if (IS_Vertices_Count[ID] == VERTICES_MAX / TEXTURE_MAX)
+	if (IS_Vertices_Count[ID] == VERTICES_MAX)
 	{
 		IS_Flush();
 	}
 
-	IS_Vertices[ID][IS_Vertices_Count[ID]] = Vector4_Create(x, y, textx, texty);
+	IS_Vertices[ID][IS_Vertices_Count[ID]] = Vector5_Create(x, y, z, textx, texty);
 	IS_Blending[ID][IS_Vertices_Count[ID]] = Blending;
 	IS_Vertices_Count[ID]++;
 }
 
 void IS_Push_Quad(struct Quad Quad, struct Quad TextQuad, GLuint Text,
-		struct Vector4f Blend)
+		struct Vector4f Blend, int z)
 {
 	IS_Push_Vertice(Quad.v1.x, Quad.v1.y, TextQuad.v1.x, TextQuad.v1.y, Text,
-			Blend);
+			Blend, z);
 	IS_Push_Vertice(Quad.v2.x, Quad.v2.y, TextQuad.v2.x, TextQuad.v2.y, Text,
-			Blend);
+			Blend, z);
 	IS_Push_Vertice(Quad.v3.x, Quad.v3.y, TextQuad.v3.x, TextQuad.v3.y, Text,
-			Blend);
+			Blend, z);
 	IS_Push_Vertice(Quad.v4.x, Quad.v4.y, TextQuad.v4.x, TextQuad.v4.y, Text,
-			Blend);
+			Blend, z);
 }
 
 // Font Shader
@@ -193,7 +196,7 @@ GLuint FS_Shader, FS_Shader_VBO;
 GLint FS_Shader_uni, FS_Shader_uni2;
 int FS_Texture_Count = 0;
 
-struct Vector4f FS_Vertices[TEXTURE_MAX][FONT_VERTICES_MAX];
+struct Vector5f FS_Vertices[TEXTURE_MAX][FONT_VERTICES_MAX];
 struct Vector4f FS_Color[TEXTURE_MAX][FONT_VERTICES_MAX];
 int FS_Vertices_Count[TEXTURE_MAX];
 GLuint FS_Font_Image[TEXTURE_MAX];
@@ -204,11 +207,15 @@ static void FS_Flush()
 
 	glUseProgram(FS_Shader);
 	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+
 	glUniform2f(FS_Shader_uni, Game_Width, Game_Height);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindBuffer(GL_ARRAY_BUFFER, FS_Shader_VBO);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(struct Vector5f), 0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(struct Vector5f),
+			(const GLvoid*) 12);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IS_Shader_IBO);
 
@@ -238,13 +245,17 @@ static void FS_Flush()
 		}
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+
 	glUseProgram(0);
 	FS_Texture_Count = 0;
 	printOpenGLError();
 }
 
 static void FS_Push_Vertice(GLuint FontImage, float x, float y, float textx,
-		float texty, struct Vector4f Color)
+		float texty, struct Vector4f Color, int z)
 {
 	int ID = -1;
 	for (int i = 0; i < FS_Texture_Count; i++)
@@ -270,22 +281,22 @@ static void FS_Push_Vertice(GLuint FontImage, float x, float y, float textx,
 
 		FS_Flush();
 	}
-	FS_Vertices[ID][FS_Vertices_Count[ID]] = Vector4_Create(x, y, textx, texty);
+	FS_Vertices[ID][FS_Vertices_Count[ID]] = Vector5_Create(x, y, z, textx, texty);
 	FS_Color[ID][FS_Vertices_Count[ID]] = Color;
 	FS_Vertices_Count[ID]++;
 }
 
 static void FS_Push_Quad(GLuint FontImage, struct Quad Quad,
-		struct Quad TextQuad, struct Vector4f Color)
+		struct Quad TextQuad, struct Vector4f Color, int z)
 {
 	FS_Push_Vertice(FontImage, Quad.v1.x, Quad.v1.y, TextQuad.v1.x,
-			TextQuad.v1.y, Color);
+			TextQuad.v1.y, Color, z);
 	FS_Push_Vertice(FontImage, Quad.v2.x, Quad.v2.y, TextQuad.v2.x,
-			TextQuad.v2.y, Color);
+			TextQuad.v2.y, Color, z);
 	FS_Push_Vertice(FontImage, Quad.v3.x, Quad.v3.y, TextQuad.v3.x,
-			TextQuad.v3.y, Color);
+			TextQuad.v3.y, Color, z);
 	FS_Push_Vertice(FontImage, Quad.v4.x, Quad.v4.y, TextQuad.v4.x,
-			TextQuad.v4.y, Color);
+			TextQuad.v4.y, Color, z);
 
 }
 
@@ -308,10 +319,10 @@ static void LoadShaders()
 
 	struct Quad Quad = Quad_Create(0, 0, 0, 480, 640, 480, 640, 0);
 
-	IS_Vector[0] = Vector4_Create(Quad.v1.x, Quad.v1.y, 0.0f, 0.0f);
-	IS_Vector[1] = Vector4_Create(Quad.v2.x, Quad.v2.y, 0.0f, 1.0f);
-	IS_Vector[2] = Vector4_Create(Quad.v3.x, Quad.v3.y, 1.0f, 1.0f);
-	IS_Vector[3] = Vector4_Create(Quad.v4.x, Quad.v4.y, 1.0f, 0.0f);
+	IS_Vector[0] = Vector5_Create(Quad.v1.x, Quad.v1.y, 0, 0.0f, 0.0f);
+	IS_Vector[1] = Vector5_Create(Quad.v2.x, Quad.v2.y, 0, 0.0f, 1.0f);
+	IS_Vector[2] = Vector5_Create(Quad.v3.x, Quad.v3.y, 0, 1.0f, 1.0f);
+	IS_Vector[3] = Vector5_Create(Quad.v4.x, Quad.v4.y, 0, 1.0f, 0.0f);
 
 	glGenBuffers(1, &IS_Shader_VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, IS_Shader_VBO);
@@ -320,7 +331,7 @@ static void LoadShaders()
 
 	glGenBuffers(1, &DS_Shader_VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, DS_Shader_VBO);
-	glBufferData(GL_ARRAY_BUFFER, VERTICES_MAX * sizeof(struct Vector6f),
+	glBufferData(GL_ARRAY_BUFFER, VERTICES_MAX * sizeof(struct Vector7f),
 	NULL, GL_DYNAMIC_DRAW);
 
 	glGenBuffers(1, &FS_Shader_VBO);
@@ -333,13 +344,14 @@ static void LoadShaders()
 
 	const char * vs =
 			"#version 330 core\n"
-					"layout (location = 0) in vec4 vertex; // <vec2 pos, vec2 tex>\n"
+					"layout (location = 0) in vec3 vertex;\n"
+					"layout (location = 1) in vec2 texture;\n"
 					"uniform vec2 ScreenSize;\n"
 					"out vec2 TexCoords;\n"
 					"void main()\n"
 					"{\n"
-					"gl_Position = vec4(vertex.x/ScreenSize.x*2-1, vertex.y/ScreenSize.y*2-1, 0.0, 1.0);\n"
-					"TexCoords = vertex.zw;\n"
+					"gl_Position = vec4(vertex.x/ScreenSize.x*2-1, vertex.y/ScreenSize.y*2-1, vertex.z, 1.0);\n"
+					"TexCoords = texture;\n"
 					"}\n "
 					"\n ";
 	GLuint vso = glCreateShader(GL_VERTEX_SHADER);

@@ -32,7 +32,7 @@ int printOglError(char *file, int line)
             isAttached = 1;
         }
 
-        jclass clazz = (*env)->FindClass(env, "begah/editor/lua/Native");
+        jclass clazz = (*env)->FindClass(env, "com/andrua/Native");
         jmethodID mid = (*env)->GetStaticMethodID(env, clazz, "PrintOpenglError", "(I)V");
         (*env)->CallStaticVoidMethod(env, clazz, mid, glErr);
 
